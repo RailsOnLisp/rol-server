@@ -44,7 +44,10 @@ ${CORE}: Makefile ${SRCS}
 	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_LOAD} --eval '(build "${CORE}")'
 
 run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
-	sed -e 's/%CORE%/${CORE}/g' < ${LOWH_TRIANGLE_SERVER}/run.in > run.tmp
+	sed < ${LOWH_TRIANGLE_SERVER}/run.in > run.tmp \
+		-e 's/%APP%/${APP}/g' \
+		-e 's/%CORE%/${CORE}/g'
+
 	chmod 755 run.tmp
 	mv run.tmp run
 
@@ -82,6 +85,7 @@ install: install-app install-web
 
 install-app: build
 	ls -1 ${CORE} run ${VIEWS} ${DATA} | ${SUDO} cpio -pdmu ${APP_DIR}
+	mkdir ${APP_DIR}/log
 	${SUDO} chmod -R u=rwX,g=rX,o= ${APP_DIR}
 	${SUDO} chown -R ${APP_USER} ${APP_DIR}
 

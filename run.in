@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
 exec env -i LC_ALL=en_US.UTF-8 \
-	/usr/local/bin/sbcl --core %CORE% --script /dev/null < /dev/null > /dev/null 2>&1
+	/usr/local/bin/sbcl --core %CORE% --script /dev/null < /dev/null >> log/%APP%.log 2>&1
