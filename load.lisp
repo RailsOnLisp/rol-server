@@ -26,7 +26,8 @@
   (require :lowh-triangle-server)
   (load (compile-file "config/app"))
   (dolist (x (directory "app/controllers/*.lisp"))
-    (load (compile-file (enough-namestring x)))))
+    (when (alphanumericp (char (pathname-name x) 0))
+      (load (compile-file (enough-namestring x))))))
 
 (reload)
 
