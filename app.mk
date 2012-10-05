@@ -85,7 +85,7 @@ install: install-app install-web
 
 install-app: build
 	ls -1 ${CORE} run ${VIEWS} ${DATA} | ${SUDO} cpio -pdmu ${APP_DIR}
-	${SUDO} mkdir ${APP_DIR}/log
+	${SUDO} mkdir -p ${APP_DIR}/log
 	${SUDO} chmod -R u=rwX,g=rX,o= ${APP_DIR}
 	${SUDO} chown -R ${APP_USER} ${APP_DIR}
 
