@@ -18,6 +18,10 @@
 
 (in-package :lowh-triangle-server)
 
-(defun load-facts (&key (path #P"data/app.facts"))
-  (log-msg :info "loading facts from ~S" path)
-  (facts:load-db path))
+(defun load-facts ()
+  (facts:clear-db)
+  (dolist (file (directory "data/*.facts") t)
+    (when (alphanumericp (char (pathname-name file) 0))
+      (log-msg :info "loading facts from ~S" file)
+      (let ((*package* (find-package :cl-user)))
+	(facts:load-db file)))))

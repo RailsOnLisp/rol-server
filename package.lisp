@@ -22,6 +22,8 @@
   (:export #:*debug*
 	   #:*port*
 	   #:*layout*
+	   #:load-facts
 	   #:odd/even
 	   #:render-view
-	   #:run))
+	   #:run
+	   #:to-url))
