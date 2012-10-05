@@ -24,10 +24,11 @@
 (defun reload ()
   (load (compile-file "lib/lowh-triangle-server/lowh-triangle-server.asd"))
   (require :lowh-triangle-server)
-  (load (compile-file "config/app"))
-  (dolist (x (directory "app/controllers/*.lisp"))
-    (when (alphanumericp (char (pathname-name x) 0))
-      (load (compile-file (enough-namestring x))))))
+  (dolist (dir '("app/models/*.lisp" "app/controllers/*.lisp"))
+    (dolist (file (directory dir))
+      (when (alphanumericp (char (pathname-name file) 0))
+	(load (compile-file (enough-namestring file))))))
+  (load (compile-file "config/app")))
 
 (reload)
 
