@@ -4,7 +4,7 @@ APP ?= app
 
 CORE = ${APP}.sbcl-core
 
-SRCS !=	find * ( -name '.*' -prune ) -or -name '[a-z]*.lisp'
+SRCS !=	find * \( -name '.*' -prune \) -or -name '[a-z]*.lisp'
 
 VIEWS =	app/views/*/*.html \
 	app/views/*/*.js
@@ -95,3 +95,7 @@ install-web:
 	${SUDO} chown -R ${WEB_USER} ${WEB_DIR}
 
 .PHONY: clean distclean install load show
+
+.if exists("config/local.mk")
+.  include "config/local.mk"
+.endif
