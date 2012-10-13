@@ -18,14 +18,8 @@
 
 (in-package :lowh-triangle-server)
 
-;; public
-
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-
-;; private
-
-(defvar *reply* nil)
-(defvar *req* nil)
-(defvar *uri* nil)
+(defstruct reply
+  (headers-stream (make-string-output-stream :element-type 'base-char)
+		  :type output-stream)
+  (content-stream (make-string-output-stream :element-type 'character)
+		  :type output-stream))

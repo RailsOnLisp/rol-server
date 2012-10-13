@@ -18,16 +18,36 @@
 
 (in-package :lowh-triangle-server)
 
-(defun reply-header (name)
-  (declare (type symbol name))
-  (cdr (assoc name *headers*)))
+(defun header (line)
+  (write-sequence line (reply-headers-stream *reply*)))
 
-(defun reply-header-set (name value)
-  (declare (type symbol name))
-  (let ((a (assoc name *headers*)))
-    (if a
-	(setf (cdr a) value)
-	(setf *headers* (acons name value *headers*))))
-  value)
+;;  Cookies
 
-(defsetf reply-header reply-header-set)
+(define-constant +rfc822-day+
+    (coerce '("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")
+	    '(simple-array (simple-array base-char (3)) (7)))
+  :test 'equalp)
+
+(define-constant +rfc822-month+
+    (coerce '("Jan" "Feb" "Mar" "Apr"
+	      "May" "Jun" "Jul" "Aug"
+	      "Sep" "Oct" "Nov" "Dec")
+	    '(simple-array (simple-array base-char (3)) (12)))
+  :test 'equalp)
+
+(defun rfc1123-date-time (universal-time)
+  (multiple-value-bind (second minute hour day month year dow)
+      (decode-universal-time universal-time 0)
+    (format nil "~A, ~2,'0D ~A ~4,'0D ~2,'0D:~2,'0D:~2,'0D GMT"
+	    (aref +rfc822-day+ dow) day (aref +rfc822-month+ month) year
+	    hour minute second)))
+
+(defun set-cookie (name value expires domain path &key secure (http-only t))
+  (push
+   (format
+    nil
+    "Set-Cookie: ~A=~A; Expires=~A; Domain=~A; Path=~A~:[~;; Secure~]~:[~;; HttpOnly~]"
+    name value (rfc1123-date-time expires) domain path secure http-only)
+   (reply-header :set-cookie)))
+
+(cookie :ltsess "abc" (+ 3600 (get-universal-time)) "lowh.net" "/")

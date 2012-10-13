@@ -46,10 +46,11 @@
   (time
    (let* ((*req* req)
 	  (*uri* (cgi-env :DOCUMENT_URI))
-	  (*headers* nil)
+	  (*reply* (make-reply))
 	  (route (routed-by *uri*)))
      (log-msg :info "~A ~S -> ~S" (cgi-env :REQUEST_METHOD) *uri* route)
-     (let ((content (render route))
+     (render route)
+     (let ((content (cl-unicode: (render route))
 	   (headers (render-headers))) ;; XXX headers must be rendered last
        (log-msg :debug "FULL REPLY: ~S~%~S" headers content)
        (sb-fastcgi:fcgx-puts req headers)
