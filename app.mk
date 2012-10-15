@@ -4,7 +4,7 @@ APP ?= app
 
 CORE = ${APP}.sbcl-core
 
-SRCS !=	find * \( -name '.*' -prune \) -or -name '[a-z]*.lisp'
+SRCS !=	find * \( -name '.*' -prune \) -or -name '[a-z]*.lisp' -print
 
 VIEWS =	app/views/*/*.html \
 	app/views/*/*.js
