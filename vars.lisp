@@ -26,6 +26,7 @@
 
 ;; private
 
-(defvar *reply* nil)
+(defvar *headers-output* nil)
 (defvar *req* nil)
 (defvar *uri* nil)
+(defvar *host* nil)

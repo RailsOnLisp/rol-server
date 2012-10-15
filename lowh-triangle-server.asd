@@ -29,7 +29,8 @@
   :depends-on ("alexandria"
 	       "html-template"
 	       "lowh-facts"
-	       "sb-fastcgi")
+	       "sb-fastcgi"
+	       "trivial-utf-8")
   :components
   ((:file "package")
    (:file "config" :depends-on ("package"))

@@ -19,12 +19,14 @@
 (defpackage :lowh-triangle-server
   (:nicknames :/s)
   (:use :cl :alexandria)
-  (:export #:*debug*
-	   #:*port*
-	   #:*layout*
-	   #:load-facts
-	   #:odd/even
-	   #:render-view
-	   #:reply-header
-	   #:run
-	   #:to-url))
+  (:export
+   ;; Vars
+   #:*debug* #:*domain* #:*port* #:*layout* #:load-facts
+   ;; Headers
+   #:header #:status #:content-type #:content-length #:set-cookie
+   ;; Helpers
+   #:odd/even #:to-url
+   ;; Views
+   #:render-view
+   ;; Run
+   #:run))

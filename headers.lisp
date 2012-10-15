@@ -18,8 +18,29 @@
 
 (in-package :lowh-triangle-server)
 
-(defun header (line)
-  (write-sequence line (reply-headers-stream *reply*)))
+;;  Headers
+
+(defun crlf (&optional (stream *standard-output*))
+  (write-char #\CR stream)
+  (write-char #\LF stream))
+
+(defun header (&rest parts)
+  (dolist (part parts)
+    (write-string part *headers-output*))
+  (crlf *headers-output*))
+
+(defmacro define-header-function (name)
+  `(defun ,name (&rest parts)
+     (apply #'header
+	    ,(concatenate 'string (string-capitalize name) ": ")
+	    parts)))
+
+(define-header-function status)
+(define-header-function content-type)
+
+(defun content-length (bytes)
+  (format *headers-output* "Content-Length: ~D" bytes)
+  (crlf *headers-output*))
 
 ;;  Cookies
 
@@ -42,12 +63,9 @@
 	    (aref +rfc822-day+ dow) day (aref +rfc822-month+ month) year
 	    hour minute second)))
 
-(defun set-cookie (name value expires domain path &key secure (http-only t))
-  (push
-   (format
-    nil
-    "Set-Cookie: ~A=~A; Expires=~A; Domain=~A; Path=~A~:[~;; Secure~]~:[~;; HttpOnly~]"
-    name value (rfc1123-date-time expires) domain path secure http-only)
-   (reply-header :set-cookie)))
-
-(cookie :ltsess "abc" (+ 3600 (get-universal-time)) "lowh.net" "/")
+(defun set-cookie (name value expires &optional (domain *host*) (path "/")
+		   secure (http-only t))
+  (format
+   *headers-output*
+   "Set-Cookie: ~A=~A; Expires=~A; Domain=~A; Path=~A~:[~;; Secure~]~:[~;; HttpOnly~]"
+   name value (rfc1123-date-time expires) domain path secure http-only))

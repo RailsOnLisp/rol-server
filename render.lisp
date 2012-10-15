@@ -18,22 +18,18 @@
 
 (in-package :lowh-triangle-server)
 
-(defun render-headers (&optional (headers *headers*))
-  (with-output-to-string (str)
-    (dolist (h headers)
-      (format str "~A: ~A~%"
-	      (string-capitalize (car h))
-	      (cdr h)))
-    (format str "~%")))
-
 (defun render-text (text)
-  (setf (reply-header :content-type) "text/plain")
-  text)
+  (content-type "text/plain")
+  (write-string text))
 
-(defun render-error (status &optional (msg ""))
-  (setf (reply-header :status) status)
-  (let ((body (when *debug*
-		(format nil "~A~%~%~A" msg
-			(sb-fastcgi:fcgx-getenv *req*)))))
-    (render-text (format nil "~A~%~@[~%~A~%~]"
-			 status body))))
+(defun render-error (status-string &optional (msg ""))
+  (status status-string)
+  (content-type "text/plain")
+  (write-string status-string)
+  (when *debug*
+    (fresh-line)
+    (write-string msg)
+    (fresh-line)
+    (terpri)
+    (prin1 (sb-fastcgi:fcgx-getenv *req*))
+    (fresh-line)))

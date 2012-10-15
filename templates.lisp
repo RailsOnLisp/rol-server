@@ -26,8 +26,10 @@
 			     :type (string-downcase type))))
     (html-template:create-template-printer path)))
 
-(defun render-template (stream template params)
-  (html-template:fill-and-print-template template params :stream stream))
+(defun render-template (template params)
+  (html-template:fill-and-print-template template
+					 params
+					 :stream *standard-output*))
 
 (defun type-mime (type)
   (case type
@@ -38,10 +40,9 @@
 (defun render-view (controller action type params)
   (let* ((template (find-template type action controller))
 	 (layout (find-template type *layout* "_layouts")))
-    (setf (reply-header :content-type) (type-mime type))
-    (with-output-to-string (str)
-		    (render-template str layout
-				     `(:controller ,(string-downcase controller)
-				       :action (string-downcase action)
-				       :parts ((,template ,@params))
-				       ,@params)))))
+    (content-type (type-mime type))
+    (render-template layout
+		     `(:controller ,(string-downcase controller)
+				   :action (string-downcase action)
+				   :parts ((,template ,@params))
+				   ,@params))))

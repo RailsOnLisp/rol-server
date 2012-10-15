@@ -45,13 +45,20 @@
 (defun route (req)
   (time
    (let* ((*req* req)
-	  (*uri* (cgi-env :DOCUMENT_URI))
-	  (*reply* (make-reply))
+	  (*host* (cgi-env :host))
+	  (*uri* (cgi-env :document_uri))
+	  (*headers-output* (make-string-output-stream
+			     :element-type 'base-char))
+	  (*standard-output* (make-string-output-stream
+			     :element-type 'character))
 	  (route (routed-by *uri*)))
-     (log-msg :info "~A ~S -> ~S" (cgi-env :REQUEST_METHOD) *uri* route)
+     (log-msg :info "~A ~S -> ~S" (cgi-env :request_method) *uri* route)
      (render route)
-     (let ((content (cl-unicode: (render route))
-	   (headers (render-headers))) ;; XXX headers must be rendered last
-       (log-msg :debug "FULL REPLY: ~S~%~S" headers content)
-       (sb-fastcgi:fcgx-puts req headers)
-       (sb-fastcgi:fcgx-puts req content)))))
+     (let ((content (get-output-stream-string *standard-output*)))
+       (content-length (trivial-utf-8:utf-8-byte-length content))
+       (crlf *headers-output*)
+       (let ((headers (get-output-stream-string *headers-output*)))
+	 (when *debug*
+	   (log-msg :debug "FULL REPLY: ~S~%~S" headers content))
+	 (sb-fastcgi:fcgx-puts req headers)
+	 (sb-fastcgi:fcgx-puts-utf-8 req content))))))
