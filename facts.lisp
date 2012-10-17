@@ -22,6 +22,6 @@
   (facts:clear-db)
   (dolist (file (directory "data/*.facts") t)
     (when (alphanumericp (char (pathname-name file) 0))
-      (log-msg :info "loading facts from ~S" file)
+      (log-msg :info "loading facts from ~S" (enough-namestring file))
       (let ((*package* (find-package :cl-user)))
 	(facts:load-db file)))))
