@@ -45,6 +45,7 @@
 (defun route (req)
   (time
    (let* ((*req* req)
+	  (*method* (intern (cgi-env :request_method) :keyword))
 	  (*host* (cgi-env :host))
 	  (*uri* (cgi-env :document_uri))
 	  (*headers-output* (make-string-output-stream

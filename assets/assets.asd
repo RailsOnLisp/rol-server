@@ -1,5 +1,5 @@
 ;;
-;;  LowH Triangle Server
+;;  Assets  -  Asset pipeline
 ;;
 ;;  Copyright 2012 Thomas de Grivel <billitch@gmail.com>
 ;;
@@ -16,18 +16,19 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(defpackage :assets.system
+  (:use :cl :asdf))
 
-;; public
+(in-package :assets.system)
 
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-
-;; private
-
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
+(asdf:defsystem :assets
+  :name "assets"
+  :author "Thomas de Grivel <billitch@gmail.com>"
+  :version "0.1"
+  :description "Asset pipeline"
+  :depends-on ("alexandria"
+	       "cl-fad"
+	       "triangle.files")
+  :components
+  ((:file "package")
+   (:file "assets" :depends-on ("package"))))

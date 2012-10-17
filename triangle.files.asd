@@ -16,18 +16,18 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(defpackage :triangle.files.system
+  (:use :cl :asdf))
 
-;; public
+(in-package :triangle.files.system)
 
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-
-;; private
-
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
+(asdf:defsystem :triangle.files
+  :name "triangle.files"
+  :author "Thomas de Grivel <billitch@gmail.com>"
+  :version "0.1"
+  :description "LowH Triangle Server"
+  :depends-on ("alexandria"
+	       "cl-fad"
+	       "cl-json")
+  :components
+  ((:file "files")))

@@ -16,18 +16,22 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(in-package :cl-user)
 
-;; public
-
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-
-;; private
-
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
+(defpackage :triangle.assets
+  (:nicknames :assets)
+  (:use :cl :alexandria :triangle.files)
+  (:export
+   ;;  Config
+   #:*assets-dirs* #:assets-dir
+   #:*precompiled-assets* #:precompiled-asset
+   ;;  Observers
+   #:asset-path
+   #:assets-dirs
+   ;;  Precompile
+   #:debug-msg
+   #:msg
+   #:with-msg-indent
+   #:precompile
+   #:generator
+   #:generate))

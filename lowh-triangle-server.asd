@@ -27,13 +27,18 @@
   :version "0.1"
   :description "LowH Triangle Server"
   :depends-on ("alexandria"
+	       "assets"
+	       "cl-base64"
 	       "html-template"
+	       "ironclad"
 	       "lowh-facts"
 	       "sb-fastcgi"
+	       "triangle.files"
 	       "trivial-utf-8")
   :components
   ((:file "package")
    (:file "config" :depends-on ("package"))
+   (:file "secret" :depends-on ("package"))
    (:file "vars" :depends-on ("package"))
    (:file "logging" :depends-on ("package"))
    (:file "conditions" :depends-on ("package"))

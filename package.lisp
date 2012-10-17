@@ -18,15 +18,36 @@
 
 (defpackage :lowh-triangle-server
   (:nicknames :/s)
-  (:use :cl :alexandria)
+  (:use :cl :alexandria :assets :triangle.files)
   (:export
-   ;; Vars
-   #:*debug* #:*domain* #:*port* #:*layout* #:load-facts
-   ;; Headers
-   #:header #:status #:content-type #:content-length #:set-cookie
-   ;; Helpers
-   #:odd/even #:to-url
-   ;; Views
+   ;;  Config
+   #:*debug*
+   #:*port*
+   ;;  Crypto
+   #:load-secret
+   #:hmac
+   ;;  Data
+   #:load-facts
+   ;;  Routing
+   #:*method*
+   ;;  HTTP Headers
+   #:header
+   #:status
+   #:content-type
+   #:content-length
+   #:set-cookie
+   ;;  Helpers
+   #:odd/even
+   #:to-url
+   ;;  Views
+   #:*layout*
    #:render-view
-   ;; Run
-   #:run))
+   ;;  Run
+   #:run
+   ;;  Assets
+   . #.(let (list)
+	 (dolist (pkg '(:assets :triangle.files))
+	   (do-external-symbols (sym pkg)
+	     (push (symbol-name sym) list)))
+	 list)
+   ))

@@ -2,18 +2,20 @@
 
 APP ?= app
 
-CORE = ${APP}.sbcl-core
+CORE = ${APP}.sbcl
 
-SRCS !=	find * \( -name '.*' -prune \) -or -name '[a-z]*.lisp' -print
+SRCS !=	find * \( -name '.*' -prune \) \
+	-or -name '[a-z]*.lisp' -print \
+	-or -name '[a-z]*.asd' -print
 
 VIEWS =	app/views/*/*.html \
 	app/views/*/*.js
 
 DATA =	data/*.facts
 
-FIND_PUBLIC = find public \
-	\( -name \*~ -or -name *\#* -prune \) -or \
-	-type f -print
+FIND_PUBLIC = cd public && find . \
+ \( -name \*~ -or -name *\#* -prune \) \
+ -or -print
 
 LOWH_TRIANGLE_SERVER = lib/lowh-triangle-server
 
@@ -32,29 +34,42 @@ SBCL_BUILD_OPTS = \
 	--disable-ldb \
 	--lose-on-corruption \
 	${SBCL_OPTS} \
-	--eval '(declaim (optimize (debug 0) (safety 2) (speed 3) (space 1)))' \
+	--eval '(declaim (optimize (debug 2) (safety 2) (speed 3) (space 2) (compilation-speed 0)))' \
 	--disable-debugger
 
-LOAD_LOAD = --load ${LOWH_TRIANGLE_SERVER}/load
+LOAD_ASD = \
+	--eval "(mapc \#'load (directory \"${LOWH_TRIANGLE_SERVER}/**/*.asd\"))"
+
+LOAD_APP = \
+	${LOAD_ASD} \
+	--load ${LOWH_TRIANGLE_SERVER}/load/app
+
+LOAD_ASSETS = \
+	${LOAD_ASD} \
+	--load ${LOWH_TRIANGLE_SERVER}/load/assets
 
 build: ${CORE} run
 
 ${CORE}: Makefile ${SRCS}
 	${MAKE} clean
-	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_LOAD} --eval '(build "${CORE}")'
+	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_APP} --eval '(build "${CORE}")'
 
 run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
 	sed < ${LOWH_TRIANGLE_SERVER}/run.in > run.tmp \
 		-e 's/%APP%/${APP}/g' \
 		-e 's/%CORE%/${CORE}/g'
-
 	chmod 755 run.tmp
 	mv run.tmp run
+
+##  Assets
+
+assets:
+	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS}
 
 ##  Clean
 
 clean:
-	rm -f ${CORE} run run.tmp
+	rm -rf ${CORE} run run.tmp public/assets
 	find * -name '*.fasl' -print0 | xargs -0 rm -f
 
 distclean:
@@ -63,7 +78,7 @@ distclean:
 ##  Debug
 
 load:
-	${SBCL} ${SBCL_DEBUG_OPTS} ${LOAD_LOAD} --eval '(run)'
+	${SBCL} ${SBCL_DEBUG_OPTS} ${LOAD_APP} --eval '(run)'
 
 show:
 	@echo APP = "${APP}"
@@ -77,9 +92,9 @@ fetch:
 ##  Install
 
 APP_USER ?= www:www
-APP_DIR  ?= /var/lib/service/${APP}
+APP_DIR  ?= /var/lib/service/${APP}/
 WEB_USER ?= ${APP_USER}
-WEB_DIR  ?= /sites/${APP}
+WEB_DIR  ?= /sites/${APP}/public/
 
 install: install-app install-web
 
@@ -89,13 +104,13 @@ install-app: build
 	${SUDO} chmod -R u=rwX,g=rX,o= ${APP_DIR}
 	${SUDO} chown -R ${APP_USER} ${APP_DIR}
 
-install-web:
-	${FIND_PUBLIC} | ${SUDO} cpio -pdmu ${WEB_DIR}
+install-web: assets
+	${FIND_PUBLIC} | ${SUDO} rsync -lstv --files-from=/dev/stdin . ${WEB_DIR}
 	${SUDO} chmod -R u=rwX,g=rX,o= ${WEB_DIR}
 	${SUDO} chown -R ${WEB_USER} ${WEB_DIR}
 
-.PHONY: clean distclean install load show
+.PHONY: build assets clean distclean install load show
 
-.if exists("config/local.mk")
+.if exists(config/local.mk)
 .  include "config/local.mk"
 .endif

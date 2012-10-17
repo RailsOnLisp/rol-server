@@ -16,18 +16,25 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(require :lowh-triangle-server)
 
-;; public
+(use-package :alexandria)
+(use-package :lowh-triangle-server)
 
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
+(load-secret)
 
-;; private
+(dolist (dir '("app/models/*.lisp"
+	       "app/controllers/*.lisp"
+	       "config/*.lisp"))
+  (dolist (file (directory dir))
+    (when (alphanumericp (char (pathname-name file) 0))
+      (load (enough-namestring file)))))
 
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
+(defun reload ()
+  (load "lib/lowh-triangle-server/load/app"))
+
+(defun build (core)
+  (sb-ext:save-lisp-and-die core
+			    :toplevel #'run
+			    #+sb-core-compression :compression
+			    #+sb-core-compression t))

@@ -16,24 +16,15 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(load (compile-file "lib/lowh-triangle-server/lowh-triangle-server.asd"))
-(require :lowh-triangle-server)
-(use-package :alexandria)
-(use-package :lowh-triangle-server)
+(mapc #'load (mapcar #'enough-namestring
+		     (directory "lib/lowh-triangle-server/**/*.asd")))
 
-(defun reload ()
-  (load (compile-file "lib/lowh-triangle-server/lowh-triangle-server.asd"))
-  (require :lowh-triangle-server)
-  (dolist (dir '("app/models/*.lisp" "app/controllers/*.lisp"))
-    (dolist (file (directory dir))
-      (when (alphanumericp (char (pathname-name file) 0))
-	(load (compile-file (enough-namestring file))))))
-  (load (compile-file "config/app")))
+(require :assets.precompile)
 
-(reload)
-
-(defun build (core)
-  (sb-ext:save-lisp-and-die core
-			    :toplevel #'run
-			    #+sb-core-compression :compression
-			    #+sb-core-compression t))
+(use-package :assets)
+(load "config/assets")
+(fresh-line)
+(fresh-line *error-output*)
+(assets:generate)
+(assets:precompile)
+(exit)

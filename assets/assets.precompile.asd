@@ -1,5 +1,5 @@
 ;;
-;;  LowH Triangle Server
+;;  Assets  -  Asset pipeline
 ;;
 ;;  Copyright 2012 Thomas de Grivel <billitch@gmail.com>
 ;;
@@ -16,18 +16,20 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(defpackage :assets.precompile.system
+  (:use :cl :asdf))
 
-;; public
+(in-package :assets.precompile.system)
 
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-
-;; private
-
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
+(asdf:defsystem :assets.precompile
+  :name "assets.precompile"
+  :author "Thomas de Grivel <billitch@gmail.com>"
+  :version "0.1"
+  :description "Precompile assets"
+  :depends-on ("alexandria"
+	       "assets"
+	       "cl-uglify-js"
+	       "exec-js"
+	       "triangle.files")
+  :components
+  ((:file "precompile")))
