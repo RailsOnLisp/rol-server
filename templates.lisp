@@ -43,6 +43,6 @@
     (content-type (type-mime type))
     (render-template layout
 		     `(:controller ,(string-downcase controller)
-				   :action (string-downcase action)
+				   :action ,(string-downcase action)
 				   :parts ((,template ,@params))
 				   ,@params))))
