@@ -76,7 +76,11 @@
 			      *asset-types*
 			      :key #'asset-type-extensions))))
 
-;;  Finding assets
+;;  Misc
+
+(defun empty-p (string)
+  (or (null string)
+      (not (cl-ppcre:scan "\\S" string))))
 
 (defun cache-fn (fn args &key clear)
   (let ((cache (load-time-value (make-hash-table :test 'equal))))
@@ -91,13 +95,15 @@
   (declare (type list list))
   (mapcar #'enough-namestring (mapcan #'directory list)))
 
-(defun assets-dirs ()
-  (cache-fn (compose #'directories #'reverse)
-	    `(,*assets-dirs*) :clear t))
-
 (defun file-exists-p (path)
   (when (cl-fad:file-exists-p path)
     (enough-namestring path)))
+
+;;  Finding assets
+
+(defun assets-dirs ()
+  (cache-fn (compose #'directories #'reverse)
+	    `(,*assets-dirs*) :clear t))
 
 (defun asset-path (name &optional type (error-p t))
   (labels ((search-types (dir types)

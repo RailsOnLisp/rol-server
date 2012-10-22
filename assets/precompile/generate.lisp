@@ -16,20 +16,26 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(defpackage :assets.precompile.system
-  (:use :cl :asdf))
+(in-package :assets)
 
-(in-package :assets.precompile.system)
+;;  Asset generators
 
-(asdf:defsystem :assets.precompile
-  :name "assets.precompile"
-  :author "Thomas de Grivel <billitch@gmail.com>"
-  :version "0.1"
-  :description "Precompile assets"
-  :depends-on ("alexandria"
-	       "assets"
-	       "cl-uglify-js"
-	       "exec-js"
-	       "triangle.files")
-  :components
-  ((:file "precompile")))
+(defvar *generator* nil)
+
+(defun generator (name)
+  (declare (type symbol name))
+  (setf *generator* name))
+
+(defun generate/file (path)
+  (let (*generator*
+	(dir (enough-namestring
+	      (truename
+	       (merge-pathnames "../" (make-pathname :name nil :type nil
+						     :defaults path))))))
+    (debug-msg "Loading ~A" (enough-namestring path))
+    (load path)
+    (funcall *generator* dir)))
+
+(defun generate ()
+  (msg "Generating assets...")
+  (mapc #'generate/file (directory "lib/*/triangle/assets.lisp")))
