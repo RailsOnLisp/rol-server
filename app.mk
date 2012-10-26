@@ -43,10 +43,9 @@ LOAD_APP = \
 LOAD_ASSETS = \
 	--load ${LOWH_TRIANGLE_SERVER}/load/assets
 
-build: ${CORE} run
+build: clean-build ${CORE} run
 
 ${CORE}: Makefile ${SRCS}
-	${MAKE} clean
 	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_APP} --eval '(build "${CORE}")'
 
 run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
@@ -58,16 +57,21 @@ run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
 
 ##  Assets
 
-assets:
+assets: clean-assets
 	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS}
 
 ##  Clean
 
-clean:
-	rm -rf ${CORE} run run.tmp public/assets
+clean-assets:
+	rm -rf public/assets
+
+clean-build:
+	rm -rf ${CORE} run run.tmp
 	find * -name '*.fasl' -print0 | xargs -0 rm -f
 
-distclean:
+clean: clean-build clean-assets
+
+distclean: clean
 	find * \( -name \*~ -or -name *#* \) -print0 | xargs -0 rm -f
 
 ##  Debug
@@ -104,7 +108,7 @@ install-web: assets
 	${SUDO} chmod -R u=rwX,g=rX,o= ${WEB_DIR}
 	${SUDO} chown -R ${WEB_USER} ${WEB_DIR}
 
-.PHONY: build assets clean distclean install load show
+.PHONY: build assets clean-assets clean-build clean distclean install load show
 
 .if exists(config/local.mk)
 .  include "config/local.mk"
