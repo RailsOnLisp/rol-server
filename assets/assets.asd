@@ -31,4 +31,6 @@
 	       "triangle.files")
   :components
   ((:file "package")
-   (:file "assets" :depends-on ("package"))))
+   (:file "extensions" :depends-on ("package"))
+   (:file "assets" :depends-on ("extensions"))
+   (:file "find" :depends-on ("assets"))))

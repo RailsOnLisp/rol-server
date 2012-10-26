@@ -18,41 +18,18 @@
 
 (in-package :assets)
 
-;;  Process assets
+(defgeneric process-asset (asset output included-p))
 
-(defun process-js (input)
-  (write-string
-   (cl-uglify-js:ast-gen-code (cl-uglify-js:ast-mangle
-			       (cl-uglify-js:ast-squeeze
-				(parse-js:parse-js input)))
-			      :beautify nil))
-  (values))
+;;  CSS
 
-#+nil(defun recess (path* &rest options)
-  (let* ((path* (mapcar (lambda (p) (format nil "~A" p))
-		       (if (listp path*) path* `(,path*))))
-	 (fmt "~
-var recess = require('recess')
-  , src = ~A
-  , opt = ~A
-recess(src, opt, function (err, obj) {
-  if (err) throw err
-  process.stdout.write(JSON.stringify(obj))
-})
-")
-	 (js (format nil fmt
-		     (json:encode-json-to-string path*)
-		     (json:encode-json-plist-to-string options))))
-    (exec-js:from-string js :safely nil)))
-
-(defun less (src parser-options css-options)
+(defun less (src-path parser-options css-options &optional out)
   (let* ((fmt "~
 var path = require('path'),
     fs = require('fs'),
     sys = require('util'),
     os = require('os');
 var less = require('less');
-var src = path.resolve(process.cwd(), ~A);
+var src = ~A;
 var parser_opts = ~A;
 var css_opts = ~A;
 
@@ -80,32 +57,39 @@ var parse_data = function (e, data) {
   }
 }
 try {
-  fs.readFile(src, 'utf8', parse_data);
+  fs.readFile(path.resolve(process.cwd(), src), 'utf8', parse_data);
 } catch (e) {
   print_error(e);
 }
 ")
 	 (js (format nil fmt
-		     (json:encode-json-to-string src)
+		     (json:encode-json-to-string src-path)
 		     (json:encode-json-plist-to-string parser-options)
 		     (json:encode-json-plist-to-string css-options))))
     #+nil(format *error-output* "~%~A~%" js)
-    (exec-js:from-string js :safely nil)))
+    (exec-js:from-string js :safely nil :out out)))
 
-(defun process-css (input)
-  (with-temporary-file (tmp (format nil "tmp/~A.~A"
-				    (pathname-name input)
-				    (pathname-type input)))
-    (cl-fad:copy-stream input tmp)
-    (force-output tmp)
-    (close tmp)
-    (write-string (less (pathname tmp)
-			(list :paths (mapcar #'truename (assets-dirs))
-			      :filename (enough-namestring (pathname input)))
-			(list :yuicompress t))))
+(defmethod process-asset ((asset css-asset)
+			  (output stream)
+			  included-p)
+  (let ((true-assets-dirs (cache-1 (eq *assets-dirs*)
+			    (mapcar #'truename (assets-dirs))))
+	(path (asset-source-path asset)))
+    (less path
+	  (list :paths true-assets-dirs	:filename path)
+	  (list :yuicompress t)
+	  output))
   (values))
 
-(defun process (type input)
-  (ecase type
-    (:js  (process-js  input))
-    (:css (process-css input))))
+;;  JS
+
+(defmethod process-asset ((asset js-asset)
+			  (output stream)
+			  included-p)
+  (write-string (cl-uglify-js:ast-gen-code (cl-uglify-js:ast-mangle
+					    (cl-uglify-js:ast-squeeze
+					     (parse-js:parse-js
+					      (asset-source-path asset))))
+					   :beautify nil)
+		output)
+  (values))

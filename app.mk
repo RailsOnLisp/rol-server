@@ -37,15 +37,10 @@ SBCL_BUILD_OPTS = \
 	--eval '(declaim (optimize (debug 2) (safety 2) (speed 3) (space 2) (compilation-speed 0)))' \
 	--disable-debugger
 
-LOAD_ASD = \
-	--eval "(mapc \#'load (directory \"${LOWH_TRIANGLE_SERVER}/**/*.asd\"))"
-
 LOAD_APP = \
-	${LOAD_ASD} \
 	--load ${LOWH_TRIANGLE_SERVER}/load/app
 
 LOAD_ASSETS = \
-	${LOAD_ASD} \
 	--load ${LOWH_TRIANGLE_SERVER}/load/assets
 
 build: ${CORE} run

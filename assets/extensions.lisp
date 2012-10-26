@@ -1,5 +1,5 @@
 ;;
-;;  LowH Triangle Server
+;;  Assets  -  Asset pipeline
 ;;
 ;;  Copyright 2012 Thomas de Grivel <billitch@gmail.com>
 ;;
@@ -16,16 +16,19 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(mapc #'load (mapcar #'enough-namestring
-		     (directory "**/*.asd")))
+(in-package :assets)
 
-(require :assets)
-(require :assets.precompile)
+;;  Extensions package
 
-(use-package :assets)
-(load "config/assets")
-(fresh-line)
-(fresh-line *error-output*)
-(assets:generate)
-(assets:precompile)
-(exit)
+(defpackage :assets.extensions)
+
+(let ((*package* (find-package :assets.extensions)))
+  (do-all-symbols (sym)
+    (unintern sym)))
+
+(defun extension (thing)
+  (when thing
+    (intern (string-upcase thing) :assets.extensions)))
+
+(defmacro extensions (&rest things)
+  `',(mapcar #'extension things))

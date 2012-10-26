@@ -26,7 +26,9 @@
    #:with-input-from-file/utf-8
    #:open-temporary-file
    #:with-temporary-file
+   #:file-exists-p
    #:file-more-recent-p
+   #:directories
    #:copy-files
    #:regex-stream-lines
    #:regex-lines))
@@ -88,11 +90,19 @@
 
 ;;  Stat
 
+(defun file-exists-p (path)
+  (when (cl-fad:file-exists-p path)
+    (enough-namestring path)))
+
 (defun file-more-recent-p (a b)
   "Return T if A is more recent than B according to FILE-WRITE-DATE.
 Return NIL otherwise."
   (when (cl-fad:file-exists-p a)
     (> (file-write-date a) (file-write-date b))))
+
+(defun directories (list)
+  (declare (type list list))
+  (mapcar #'enough-namestring (mapcan #'directory list)))
 
 ;;  Copying
 

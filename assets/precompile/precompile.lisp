@@ -20,40 +20,32 @@
 
 ;;  Pipelines
 
-(defun copy (output-path asset-path type)
-  (declare (ignore type))
-  (msg "Copying from ~A" asset-path)
-  (cl-fad:copy-file asset-path output-path :overwrite t))
+(defgeneric compile-asset (asset output))
 
-(defun preprocess (output-path asset-path type)
-  (with-output-to-file/utf-8 (*standard-output* output-path)
-    (preprocess/path type asset-path)))
+(defmethod compile-asset ((asset asset) (output pathname))
+  (ensure-directories-exist output)
+  (let ((path (asset-source-path asset)))
+    (msg "~A" path)
+    (copy-files path output :replace t :update t)
+    nil))
+
+(defmethod compile-asset ((asset preprocessed-asset) (output pathname))
+  (ensure-directories-exist output)
+  (let ((assets (preprocess-asset asset)))
+    (with-output-to-file/utf-8 (out output)
+      (dolist (a assets)
+	(process-asset a out (not (eq asset a)))))))
 
 ;;  Precompile
 
-(defun precompile-asset (output-path asset-path)
-  (ensure-directories-exist output-path)
-  (let ((type (asset-type asset-path)))
-    (dolist (pipeline-op (asset-type-pipeline type))
-      (funcall pipeline-op output-path asset-path type))))
-
 (defun locate-precompiled-assets ()
-  (let (assets)
-    (dolist (asset-spec (reverse *precompiled-assets*))
-      (dolist (assets-dir (assets-dirs))
-	(let ((wild (merge-pathnames asset-spec assets-dir)))
-	  (msg "Search ~A" wild)
-	  (dolist (path (directory wild :resolve-symlinks nil))
-	    (msg "Found ~A" (enough-namestring path))
-	    (pushnew (enough-namestring path (truename assets-dir))
-		     assets
-		     :test #'equal)))))
-    assets))
+  (find-assets-from-specs (reverse *precompiled-assets*)))
 
 (defun precompile ()
-  (dolist (asset (locate-precompiled-assets))
-    (let ((output-path (merge-pathnames asset #P"public/assets/")))
-      (msg "Precompiling ~A" asset)
-      (with-msg-indent (3)
-	(precompile-asset output-path (asset-path asset)))
-      (msg "Done precompiling ~A" asset))))
+  (msg "Precompile")
+  (with-msg-indent (1)
+    (dolist (asset (locate-precompiled-assets))
+      (let ((output-path (asset-path asset)))
+	(msg "~A" output-path)
+	(with-msg-indent (1)
+	  (compile-asset asset (pathname output-path)))))))

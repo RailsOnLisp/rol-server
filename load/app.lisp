@@ -16,6 +16,9 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
+(mapc #'load (mapcar #'enough-namestring
+		     (directory "**/*.asd")))
+
 (require :lowh-triangle-server)
 
 (use-package :alexandria)

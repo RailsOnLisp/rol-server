@@ -29,11 +29,13 @@
   :depends-on ("alexandria"
 	       "assets"
 	       "cl-uglify-js"
+	       "closer-mop"
 	       "exec-js"
 	       "triangle.files")
   :components
-  ((:file "msg")
+  ((:file "assets")
+   (:file "msg")
    (:file "process" :depends-on ("msg"))
    (:file "preprocess" :depends-on ("process"))
-   (:file "precompile" :depends-on ("preprocess"))
+   (:file "precompile" :depends-on ("assets" "preprocess"))
    (:file "generate" :depends-on ("msg"))))

@@ -1,5 +1,5 @@
 ;;
-;;  LowH Triangle Server
+;;  Assets  -  Asset pipeline
 ;;
 ;;  Copyright 2012 Thomas de Grivel <billitch@gmail.com>
 ;;
@@ -16,16 +16,19 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(mapc #'load (mapcar #'enough-namestring
-		     (directory "**/*.asd")))
+(in-package :assets)
 
-(require :assets)
-(require :assets.precompile)
+;;  Extension -> asset class
 
-(use-package :assets)
-(load "config/assets")
-(fresh-line)
-(fresh-line *error-output*)
-(assets:generate)
-(assets:precompile)
-(exit)
+(defun extension-asset-class (extension
+			      &optional (class (find-class 'asset)))
+  (declare (type symbol extension)
+	   (type class class))
+  (when extension
+    (labels ((matching-asset-class (c)
+	       (or (when (find extension (asset-class-extensions c))
+		     c)
+		   (some #'matching-asset-class
+			 (closer-mop:class-direct-subclasses c)))))
+      (or (matching-asset-class class)
+	  class))))

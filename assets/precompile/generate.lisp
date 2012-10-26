@@ -32,10 +32,12 @@
 	      (truename
 	       (merge-pathnames "../" (make-pathname :name nil :type nil
 						     :defaults path))))))
-    (debug-msg "Loading ~A" (enough-namestring path))
-    (load path)
-    (funcall *generator* dir)))
+    (msg "~A" dir)
+    (with-msg-indent (1)
+      (load path)
+      (funcall *generator* dir))))
 
 (defun generate ()
-  (msg "Generating assets...")
-  (mapc #'generate/file (directory "lib/*/triangle/assets.lisp")))
+  (msg "Generate")
+  (with-msg-indent (1)
+    (mapc #'generate/file (directory "lib/*/triangle/assets.lisp"))))

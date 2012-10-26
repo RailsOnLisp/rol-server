@@ -18,6 +18,38 @@
 
 (in-package :assets)
 
+;;  Misc
+
+(defun empty-p (string)
+  (or (null string)
+      (not (cl-ppcre:scan "\\S" string))))
+
+(eval-when (:compile-toplevel :load-toplevel)
+  (let ((cache-nil (gensym "CACHE-NIL-")))
+
+    (defmacro cache-1 ((test key) &body body)
+      "Cache one value of BODY. TEST identifies KEY is cached."
+      (let ((cache (gensym "CACHE-")))
+	`(let ((,cache (load-time-value (cons ',cache-nil nil))))
+	   (if (,test (car ,cache) ,key)
+	       (cdr ,cache)
+	       (setf (car ,cache) ,key
+		     (cdr ,cache) (progn ,@body))))))))
+
+(defun str (&rest objects)
+  (cond ((endp objects)
+	 (str ""))
+	((= 1 (length objects))
+	 (let ((obj (first objects)))
+	   (typecase obj
+	     (null "")
+	     (symbol (str (string-downcase (symbol-name obj))))
+	     (string obj)
+	     (t (string obj)))))
+	(t
+	 (apply #'concatenate 'string
+		(mapcar 'str objects)))))
+
 ;;  Config
 
 (defvar *debug* nil)
@@ -38,88 +70,98 @@
     "**/*.woff"))
 
 (defun assets-dir (pathspec)
-  (pushnew (pathname pathspec) *assets-dirs* :test #'equal))
+  (let* ((namestring (enough-namestring pathspec))
+	 (path (if (char= #\/ (last-elt namestring))
+		   namestring
+		   (str namestring "/"))))
+    (pushnew path *assets-dirs* :test #'string=)))
 
 (defun precompiled-asset (asset-name)
   (pushnew asset-name *precompiled-assets* :test #'string=))
 
-;;  Asset types
-
-(defvar *asset-types*
-  '((:css   (preprocess) (:css :less))
-    (:js    (preprocess) (:js))
-    (:image (copy) (:gif :ico :jpeg :jpg :png :svg :svgz))
-    (:font  (copy) (:eot :ttf :woff))
-    (:other (copy) nil)))
-
-(defun asset-type-name (asset-type)
-  (first asset-type))
-
-(defun asset-type/name (name)
-  (find name *asset-types* :key #'asset-type-name))
-
-(defun asset-type-pipeline (asset-type)
-  (second (if (symbolp asset-type)
-	      (asset-type/name asset-type)
-	      asset-type)))
-
-(defun asset-type-extensions (asset-type)
-  (third (if (symbolp asset-type)
-	     (asset-type/name asset-type)
-	     asset-type)))
-
-(defun asset-type (asset)
-  (let ((path-type (string-upcase (pathname-type (pathname asset)))))
-    (asset-type-name (find-if (lambda (types)
-				(or (null types)
-				    (find path-type types :test #'string=)))
-			      *asset-types*
-			      :key #'asset-type-extensions))))
-
-;;  Misc
-
-(defun empty-p (string)
-  (or (null string)
-      (not (cl-ppcre:scan "\\S" string))))
-
-(defun cache-fn (fn args &key clear)
-  (let ((cache (load-time-value (make-hash-table :test 'equal))))
-    (or (gethash args cache)
-	(when clear
-	  (clrhash cache)
-	  (format t "clear ~S~%" args)
-	  nil)
-	(setf (gethash args cache) (apply fn args)))))
-
-(defun directories (list)
-  (declare (type list list))
-  (mapcar #'enough-namestring (mapcan #'directory list)))
-
-(defun file-exists-p (path)
-  (when (cl-fad:file-exists-p path)
-    (enough-namestring path)))
-
-;;  Finding assets
-
 (defun assets-dirs ()
-  (cache-fn (compose #'directories #'reverse)
-	    `(,*assets-dirs*) :clear t))
+  (cache-1 (eq *assets-dirs*)
+    (directories (reverse *assets-dirs*))))
 
-(defun asset-path (name &optional type (error-p t))
-  (labels ((search-types (dir types)
-	     (unless (endp types)
-	       (or (file-exists-p (merge-pathnames
-				   (make-pathname :type (string-downcase
-							 (first types)))
-				   (merge-pathnames name dir)))
-		   (search-types dir (rest types)))))
-	   (search-dirs (dirs)
-	     (unless (endp dirs)
-	       (or (if type
-		       (search-types (first dirs)
-				     (asset-type-extensions type))
-		       (file-exists-p (merge-pathnames name (first dirs))))
-		   (search-dirs (rest dirs))))))
-    (or (search-dirs (assets-dirs))
-	(when error-p
-	  (error "Asset not found ~S ~A" type name)))))
+;;  Asset class
+
+(defclass asset ()
+  ((dir :initarg :dir
+	:accessor asset-dir
+	:type string)
+   (name :initarg :name
+	 :reader asset-name
+	 :type string)
+   (ext :initarg :ext
+	:reader asset-ext
+	:type keyword)))
+
+(defun asset-url (asset)
+  (declare (type asset asset))
+  (with-slots (name ext) asset
+    (str "/assets/" name (when ext ".") ext)))
+
+(defun asset-path (asset)
+  (declare (type asset asset))
+  (with-slots (name ext) asset
+    (str "public/assets/" name (when ext ".") ext)))
+
+(defun asset-source-path (asset)
+  (declare (type asset asset))
+  (with-slots (dir name ext) asset
+    (str dir name (when ext ".") ext)))
+
+(defmethod print-object ((asset asset) stream)
+  (print-unreadable-object (asset stream :type t)
+    (with-slots (dir name ext) asset
+      (format stream "~A ~A .~A" dir name (string-downcase ext)))))
+
+;;  Asset class -> extensions
+
+(eval-when (:compile-toplevel)
+  (fmakunbound 'asset-class-extensions))
+
+(defgeneric asset-class-extensions (asset-class))
+
+(defmethod asset-class-extensions ((any symbol))
+  nil)
+
+(defmethod asset-class-extensions ((class class))
+  (asset-class-extensions (class-name class)))
+
+(defmethod asset-class-extensions ((asset asset))
+  (asset-class-extensions (class-of asset)))
+
+;;  Asset classes
+
+;;    Image
+
+(defclass image-asset (asset) ())
+
+(defmethod asset-class-extensions ((class (eql 'image-asset)))
+  (extensions #:gif #:ico #:jpeg #:jpg #:png #:svg #:svgz))
+
+;;    Font
+
+(defclass font-asset (asset) ())
+
+(defmethod asset-class-extensions ((class (eql 'font-asset)))
+  (extensions #:eot #:ttf #:woff))
+
+;;    Preprocessed assets
+
+(defclass preprocessed-asset (asset) ())
+
+;;    CSS
+
+(defclass css-asset (preprocessed-asset) ())
+
+(defmethod asset-class-extensions ((class (eql 'css-asset)))
+  (extensions #:css #:less))
+
+;;    JS
+
+(defclass js-asset (preprocessed-asset) ())
+
+(defmethod asset-class-extensions ((class (eql 'js-asset)))
+  (extensions #:js))
