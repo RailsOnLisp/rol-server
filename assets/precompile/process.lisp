@@ -86,10 +86,10 @@ try {
 (defmethod process-asset ((asset js-asset)
 			  (output stream)
 			  included-p)
-  (write-string (cl-uglify-js:ast-gen-code (cl-uglify-js:ast-mangle
-					    (cl-uglify-js:ast-squeeze
-					     (parse-js:parse-js
-					      (asset-source-path asset))))
-					   :beautify nil)
+  (write-string (with-input-from-file/utf-8 (js (asset-source-path asset))
+		  (cl-uglify-js:ast-gen-code (cl-uglify-js:ast-mangle
+					      (cl-uglify-js:ast-squeeze
+					       (parse-js:parse-js js)))
+					     :beautify nil))
 		output)
   (values))

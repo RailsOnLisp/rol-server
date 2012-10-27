@@ -18,8 +18,6 @@
 
 (in-package :assets)
 
-;;  Extension -> asset class
-
 (defun extension-asset-class (extension
 			      &optional (class (find-class 'asset)))
   (declare (type symbol extension)

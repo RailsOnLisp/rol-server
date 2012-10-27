@@ -86,40 +86,47 @@
 ;;  Asset class
 
 (defclass asset ()
-  ((dir :initarg :dir
-	:accessor asset-dir
-	:type string)
-   (name :initarg :name
+  ((name :initarg :name
 	 :reader asset-name
 	 :type string)
-   (ext :initarg :ext
-	:reader asset-ext
-	:type keyword)))
+   (source-dir :initarg :source-dir
+	       :accessor asset-source-dir
+	       :type string)
+   (source-ext :initarg :source-ext
+	       :reader asset-source-ext
+	       :type keyword)))
+
+(defgeneric asset-ext (asset))
+
+(defmethod asset-ext ((asset asset))
+  (asset-source-ext asset))
 
 (defun asset-url (asset)
   (declare (type asset asset))
-  (with-slots (name ext) asset
+  (let ((name (asset-name asset))
+	(ext (asset-ext asset)))
     (str "/assets/" name (when ext ".") ext)))
 
 (defun asset-path (asset)
   (declare (type asset asset))
-  (with-slots (name ext) asset
+  (let ((name (asset-name asset))
+	(ext (asset-ext asset)))
     (str "public/assets/" name (when ext ".") ext)))
 
 (defun asset-source-path (asset)
   (declare (type asset asset))
-  (with-slots (dir name ext) asset
-    (str dir name (when ext ".") ext)))
+  (with-slots (name source-dir source-ext) asset
+    (str source-dir name (when source-ext ".") source-ext)))
 
 (defmethod print-object ((asset asset) stream)
   (print-unreadable-object (asset stream :type t)
-    (with-slots (dir name ext) asset
-      (format stream "~A ~A .~A" dir name (string-downcase ext)))))
+    (ignore-errors (format stream "~S" (asset-path asset)))
+    (ignore-errors (format stream " ~S" (asset-source-path asset)))))
 
 ;;  Asset class -> extensions
 
-(eval-when (:compile-toplevel)
-  (fmakunbound 'asset-class-extensions))
+#+nil
+(fmakunbound 'asset-class-extensions)
 
 (defgeneric asset-class-extensions (asset-class))
 
@@ -156,12 +163,18 @@
 
 (defclass css-asset (preprocessed-asset) ())
 
+(defmethod asset-ext ((asset css-asset))
+  (extension #:css))
+
 (defmethod asset-class-extensions ((class (eql 'css-asset)))
   (extensions #:css #:less))
 
 ;;    JS
 
 (defclass js-asset (preprocessed-asset) ())
+
+(defmethod asset-ext ((asset js-asset))
+  (extension #:js))
 
 (defmethod asset-class-extensions ((class (eql 'js-asset)))
   (extensions #:js))

@@ -32,14 +32,19 @@
 (defmethod compile-asset ((asset preprocessed-asset) (output pathname))
   (ensure-directories-exist output)
   (let ((assets (preprocess-asset asset)))
-    (with-output-to-file/utf-8 (out output)
-      (dolist (a assets)
-	(process-asset a out (not (eq asset a)))))))
+    (when (or (not (file-exists-p output))
+	      (some (lambda (asset)
+		      (file-more-recent-p (asset-source-path asset)
+					  output))
+		    assets))
+      (with-output-to-file/utf-8 (out output)
+	(dolist (a assets)
+	  (process-asset a out (not (eq asset a))))))))
 
 ;;  Precompile
 
 (defun locate-precompiled-assets ()
-  (find-assets-from-specs (reverse *precompiled-assets*)))
+  (find-assets-from-specs *precompiled-assets*))
 
 (defun precompile ()
   (msg "Precompile")

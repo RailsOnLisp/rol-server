@@ -47,7 +47,8 @@
     t))
 
 (defun preprocess/stream (asset stream assets &optional stack)
-  (let ((line (read-line stream nil))
+  (let ((assets assets)
+	(line (read-line stream nil))
 	start comment end)
     (or (when line
 	  (cl-ppcre:register-groups-bind (s c e)

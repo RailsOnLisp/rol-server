@@ -23,17 +23,19 @@
 ;;  FIXME: This could be improved by listing all files in assets
 ;;  FIXME: directories to work the paths in memory.
 
-(defun find-in-assets (type name assets)
-  (find-if (lambda (a)
-	     (declare (type asset a))
-	     (and (typep a type)
-		  (string= name (asset-name a))))
+(defun find-in-assets (type dir name ext assets)
+  (find-if (lambda (asset)
+	     (declare (type asset asset))
+	     (and (typep asset type)
+		  (string= name (asset-name asset))
+		  (or (not (string= dir (asset-source-dir asset)))
+		      (string= ext (asset-source-ext asset)))))
 	   assets))
 
-(eval-when (:compile-toplevel)
-  (fmakunbound 'find-assets))
+#+nil
+(fmakunbound 'find-assets)
 
-(defgeneric find-assets (type dir name ext &optional assets))
+(defgeneric find-assets (type dir name ext assets))
 
 ;;  Resolve name, possibly wild
 
@@ -41,16 +43,20 @@
 			(dir string)
 			(name string)
 			(ext symbol)
-			&optional assets)
-  (let ((absolute-dir (merge-pathnames dir)))
+			assets)
+  (let ((absolute-dir (merge-pathnames dir))
+	(assets assets))
     (dolist (path (directory (str dir name (when ext ".") ext)
 			     :resolve-symlinks nil))
       (let ((name (enough-namestring (make-pathname :type nil :defaults path)
 				     absolute-dir)))
-	(unless (find-in-assets type name assets)
-	  (push (make-instance type :dir dir :name name :ext ext)
-		assets)))))
-  assets)
+	(unless (find-in-assets type dir name ext assets)
+	  (push (make-instance type
+			       :name name
+			       :source-dir dir
+			       :source-ext ext)
+		assets))))
+    assets))
 
 ;;    Loop through extensions
 
@@ -58,7 +64,6 @@
 			(dir string)
 			(name string)
 			(extensions cons)
-			&optional
 			assets)
   (reduce (lambda (assets ext)
 	    (declare (type symbol ext))
@@ -70,7 +75,7 @@
 			(dir string)
 			(name string)
 			(ext null)
-			&optional assets)
+			assets)
   (find-assets type dir name (asset-class-extensions type) assets))
 
 ;;    Loop through dirs
@@ -79,19 +84,19 @@
 			(directories cons)
 			(name string)
 			ext
-			&optional assets)
+			assets)
   (reduce (lambda (assets dir)
 	    (declare (type string dir))
 	    (find-assets type dir name ext assets))
 	  directories
 	  :initial-value assets))
 
-(defmethod find-assets (type (dir null) name ext &optional assets)
+(defmethod find-assets (type (dir null) name ext assets)
   (find-assets type (assets-dirs) name ext assets))
 
 ;;    Resolve class
 
-(defmethod find-assets ((type symbol) dir name ext &optional assets)
+(defmethod find-assets ((type symbol) dir name ext assets)
   (let ((class (if (keywordp type)
 		   (find-class (find-symbol (str type "-ASSET")))
 		   (find-class type))))
@@ -105,17 +110,17 @@
   `(let (,name ,ext)
      (cl-ppcre:register-groups-bind (n e)
 	 ("^\\s*(.*?)(?:\\.([^./]+))?\\s*$" ,spec)
-       (setf name n ext (extension e)))
+       (setf ,name n ,ext (intern-extension e)))
      (let ((,name ,name) (,ext ,ext))
        ,@body)))
 
 (defun find-assets-from-spec (spec &optional class assets)
   (with-asset-spec spec (name ext)
     (find-assets (or class (extension-asset-class ext))
-		 nil name ext assets)))
+		 nil name nil assets)))
 
 (defun find-assets-from-specs (specs &optional class assets)
-  (reduce (lambda (result spec)
-	    (find-assets-from-spec spec class result))
+  (reduce (lambda (assets spec)
+	    (find-assets-from-spec spec class assets))
 	  specs
 	  :initial-value assets))

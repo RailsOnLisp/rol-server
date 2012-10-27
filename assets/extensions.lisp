@@ -26,9 +26,15 @@
   (do-all-symbols (sym)
     (unintern sym)))
 
-(defun extension (thing)
+(defun intern-extension (thing)
   (when thing
     (intern (string-upcase thing) :assets.extensions)))
 
+(defmacro extension (thing)
+  (or `',(intern-extension thing)
+      `(intern-extension ,thing)))
+
 (defmacro extensions (&rest things)
-  `',(mapcar #'extension things))
+  `(list ,@(mapcar (lambda (thing)
+		     `(extension ,thing))
+		   things)))
