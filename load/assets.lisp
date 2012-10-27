@@ -16,6 +16,8 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
+(declaim (optimize (debug 2) (safety 2) (space 1) (speed 3)))
+
 (mapc #'load (mapcar #'enough-namestring
 		     (directory "**/*.asd")))
 
@@ -23,9 +25,11 @@
 (require :assets.precompile)
 
 (use-package :assets)
+
 (load "config/assets")
-(fresh-line)
-(fresh-line *error-output*)
-(assets:generate)
-(assets:precompile)
-(exit)
+
+(do ((line t (read-line *standard-input* nil)))
+    ((null line))
+  (fresh-line)
+  (fresh-line *error-output*)(time (assets:generate))
+  (time (assets:precompile)))

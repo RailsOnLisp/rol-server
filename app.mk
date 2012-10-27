@@ -41,7 +41,7 @@ LOAD_APP = \
 	--load ${LOWH_TRIANGLE_SERVER}/load/app
 
 LOAD_ASSETS = \
-	--load ${LOWH_TRIANGLE_SERVER}/load/assets
+	--load ${LOWH_TRIANGLE_SERVER}/load/assets \
 
 build: clean-build ${CORE} run
 
@@ -58,6 +58,9 @@ run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
 ##  Assets
 
 assets: clean-assets
+	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS} --quit
+
+assets-:
 	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS}
 
 ##  Clean
