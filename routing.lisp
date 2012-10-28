@@ -22,30 +22,35 @@
   (sb-fastcgi:fcgx-getparam *req* (string name)))
 
 (defun render (route)
-  (handler-bind ((warning
-		  (lambda (w)
-		    (log-msg :warn "~A" w)
-		    (muffle-warning w)))
-		 (condition
-		  (lambda (c)
-		    (let ((status (http-error-status c)))
-		      (log-msg (if (char= #\5 (char status 0)) :error :info)
-			       "~A" c)
-		      (return-from render
-			(render-error status (http-error-message c)))))))
-    (let ((controller (first route)))
-      (if (fboundp controller)
-	  (apply controller (rest route))
-	  (render-error "404 Not found" "controller function not found")))))
+  (let ((controller (first route)))
+    (if (fboundp controller)
+	(apply controller (rest route))
+	(render-error "404 Not found" "controller function not found"))))
 
 (defun routed-by (uri)
   (or (facts:first-bound ((uri :routed-by ?)))
       '(render-error "404 Not found" "no route")))
 
+(define-constant +http-verbs+ #(:GET :POST :PUT :DELETE)
+  :test 'equalp)
+
+(defun http-verb (object)
+  (find (string-upcase object)
+	+http-verbs+
+	:key #'symbol-name
+	:test #'string=))
+
+(defun request-method ()
+  (let ((method (http-verb (cgi-env :request_method))))
+    (or (and (eq :POST method)
+	     (http-verb (with-form-data (_method) _method)))
+	method)))
+
 (defun route (req)
   (time
    (let* ((*req* req)
-	  (*method* (intern (cgi-env :request_method) :keyword))
+	  (*form-data* nil)
+	  (*method* (request-method))
 	  (*host* (cgi-env :host))
 	  (*uri* (cgi-env :document_uri))
 	  (*headers-output* (make-string-output-stream

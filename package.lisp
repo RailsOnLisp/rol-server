@@ -30,11 +30,14 @@
    #:load-facts
    ;;  Routing
    #:*method*
+   ;;  Forms
+   #:with-form-data
    ;;  HTTP Headers
    #:header
    #:status
    #:content-type
    #:content-length
+   #:redirect-to
    #:set-cookie
    ;;  Helpers
    #:odd/even
@@ -42,6 +45,7 @@
    ;;  Views
    #:*layout*
    #:render-view
+   #:render-error
    ;;  Run
    #:run
    ;;  Assets

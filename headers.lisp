@@ -42,6 +42,14 @@
   (format *headers-output* "Content-Length: ~D" bytes)
   (crlf *headers-output*))
 
+;;  Redirections
+
+(defun redirect-to (target)
+  (etypecase target
+    (string (header "Status: 303 See Other")
+	    (header "Location: " target))
+    (cons (redirect-to (facts:first-bound ((?url :routed-by target)))))))
+
 ;;  Cookies
 
 (define-constant +rfc822-day+

@@ -31,3 +31,4 @@
 (defvar *method* nil)
 (defvar *uri* nil)
 (defvar *host* nil)
+(defvar *form-data* nil)

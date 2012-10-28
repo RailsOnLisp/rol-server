@@ -19,4 +19,5 @@
 (in-package :lowh-triangle-server)
 
 (defun log-msg (level fmt &rest args)
-  (format *error-output* "~&~A ~?~%" level fmt args))
+  (format *error-output* "~&~A ~?~%" level fmt args)
+  (force-output *error-output*))

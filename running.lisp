@@ -32,13 +32,20 @@
 		    (declare (ignore c))
 		    (log-msg :emerg "caught interrupt")
 		    (return-from run-protected 0)))
+		 (warning
+		  (lambda (w)
+		    (log-msg :warn "~A" w)
+		    (muffle-warning w)))
 		 (condition
 		  (lambda (c)
-		    (format t "~&caught condition ~S~%" c))))
+		    (let ((status (http-error-status c)))
+		      (log-msg (if (char= #\5 (char status 0)) :error :info)
+			       "~A" c)
+		      (render-error status (http-error-message c))))))
     (run-handled)))
 
 (defun run ()
   (let ((status 1))
     (unwind-protect (setf status (run-protected))
-      (log-msg :info "quit")
-      (sb-ext:quit :unix-status status))))
+      (log-msg :info "exit")
+      (sb-ext:exit :code status))))
