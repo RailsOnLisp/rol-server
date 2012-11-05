@@ -58,10 +58,10 @@ run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
 ##  Assets
 
 assets: clean-assets
-	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS} --quit
+	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS} --quit < /dev/null
 
 assets-:
-	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS}
+	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_ASSETS} --quit
 
 ##  Clean
 
