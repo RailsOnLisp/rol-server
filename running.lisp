@@ -45,7 +45,5 @@
     (run-handled)))
 
 (defun run ()
-  (let ((status 1))
-    (unwind-protect (setf status (run-protected))
-      (log-msg :info "exit")
-      (sb-ext:exit :code status))))
+  (unwind-protect (run-protected)
+    (log-msg :info "exit")))
