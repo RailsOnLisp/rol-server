@@ -23,7 +23,7 @@
     (sb-fastcgi:load-libfcgi "/usr/local/lib/libfcgi.so.0.0")
   (error (e)
     (format t "~%~%~A~%~%Could not load libfcgi, 'pkg_add fcgi' maybe ?~%~%" e)
-    (quit :unix-status 1)))
+    (sb-ext:exit :code 1)))
 
 (setf html-template:*template-start-marker* "«")
 (setf html-template:*template-end-marker* "»")
