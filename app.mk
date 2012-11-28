@@ -8,14 +8,13 @@ SRCS !=	find * \( -name '.*' -prune \) \
 	-or -name '[a-z]*.lisp' -print \
 	-or -name '[a-z]*.asd' -print
 
-VIEWS =	app/views/*/*.html \
-	app/views/*/*.js
+VIEWS != find app/views -type f -name '*[0-9a-z]'
 
-DATA =	data/*.facts
+DATA !=	find data -type f -name '*.facts'
 
 FIND_PUBLIC = cd public && find . \
  \( -name \*~ -or -name *\#* -prune \) \
- -or -print
+ -or -type f -print
 
 LOWH_TRIANGLE_SERVER = lib/lowh-triangle-server
 
