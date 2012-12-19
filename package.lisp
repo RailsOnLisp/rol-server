@@ -39,6 +39,11 @@
    #:content-length
    #:redirect-to
    #:set-cookie
+   ;;  Session
+   #:*session*
+   #:*session-cookie*
+   #:*session-timeout*
+   #:session-create
    ;;  Helpers
    #:odd/even
    #:to-url

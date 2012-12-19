@@ -26,7 +26,8 @@
 
 (defun header (&rest parts)
   (dolist (part parts)
-    (write-string part *headers-output*))
+    (when part
+      (write-string (string part) *headers-output*)))
   (crlf *headers-output*))
 
 (defmacro define-header-function (name)
@@ -73,7 +74,9 @@
 
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
 		   secure (http-only t))
-  (format
-   *headers-output*
-   "Set-Cookie: ~A=~A; Expires=~A; Domain=~A; Path=~A~:[~;; Secure~]~:[~;; HttpOnly~]"
-   name value (rfc1123-date-time expires) domain path secure http-only))
+  (header "Set-Cookie: " name "=" value
+	  "; Expires=" (rfc1123-date-time expires)
+	  "; Domain=" domain
+	  "; Path=" path
+	  (when secure "; Secure")
+	  (when http-only "; HttpOnly")))

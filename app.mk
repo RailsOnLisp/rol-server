@@ -79,7 +79,10 @@ distclean: clean
 ##  Debug
 
 load:
-	${SBCL} ${SBCL_DEBUG_OPTS} ${LOAD_APP} --eval '(run)'
+	${SBCL} ${SBCL_DEBUG_OPTS} ${LOAD_APP} \
+		--eval '(setf *debug* t)' \
+		--eval '(run)' \
+		--quit
 
 show:
 	@echo APP = "${APP}"

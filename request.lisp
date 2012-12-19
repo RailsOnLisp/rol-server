@@ -18,20 +18,35 @@
 
 (in-package :lowh-triangle-server)
 
-;; public
+(defun cgi-env (name)
+  (sb-fastcgi:fcgx-getparam *req* (string name)))
 
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-(defvar *session* nil)
-(defvar *session-timeout* (* 8 3600))
-(defvar *session-cookie* :triangle_sid)
+(define-constant +http-verbs+ #(:GET :POST :PUT :DELETE)
+  :test 'equalp)
 
-;; private
+(defun http-verb (object)
+  (find (string-upcase object)
+	+http-verbs+
+	:key #'symbol-name
+	:test #'string=))
 
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
-(defvar *form-data* nil)
+(defun request-method ()
+  (let ((method (http-verb (cgi-env :request_method))))
+    (or (and (eq :POST method)
+	     (http-verb (with-form-data (_method) _method)))
+	method)))
+
+(defun cookie-value (name)
+  (when-let ((cookie (cgi-env :http_cookie)))
+    (cl-ppcre:do-register-groups (n value) ("([^=]+)=([^;]+)" cookie)
+      (when (string= name n)
+	value))))
+
+(defmacro with-request (req &body body)
+  `(let* ((*req* ,req)
+	  (*form-data* nil)
+	  (*method* (request-method))
+	  (*host* (cgi-env :http_host))
+	  (*uri* (cgi-env :document_uri))
+	  (*session* (session-attach)))
+     ,@body))

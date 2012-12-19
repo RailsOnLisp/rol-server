@@ -18,9 +18,6 @@
 
 (in-package :lowh-triangle-server)
 
-(defun cgi-env (name)
-  (sb-fastcgi:fcgx-getparam *req* (string name)))
-
 (defun render (route)
   (let ((controller (first route)))
     (if (fboundp controller)
@@ -31,40 +28,21 @@
   (or (facts:first-bound ((uri :routed-by ?)))
       '(render-error "404 Not found" "no route")))
 
-(define-constant +http-verbs+ #(:GET :POST :PUT :DELETE)
-  :test 'equalp)
-
-(defun http-verb (object)
-  (find (string-upcase object)
-	+http-verbs+
-	:key #'symbol-name
-	:test #'string=))
-
-(defun request-method ()
-  (let ((method (http-verb (cgi-env :request_method))))
-    (or (and (eq :POST method)
-	     (http-verb (with-form-data (_method) _method)))
-	method)))
-
 (defun route (req)
   (time
-   (let* ((*req* req)
-	  (*form-data* nil)
-	  (*method* (request-method))
-	  (*host* (cgi-env :host))
-	  (*uri* (cgi-env :document_uri))
-	  (*headers-output* (make-string-output-stream
-			     :element-type 'base-char))
-	  (*standard-output* (make-string-output-stream
-			     :element-type 'character))
-	  (route (routed-by *uri*)))
-     (log-msg :info "~A ~S -> ~S" (cgi-env :request_method) *uri* route)
-     (render route)
-     (let ((content (get-output-stream-string *standard-output*)))
-       (content-length (trivial-utf-8:utf-8-byte-length content))
-       (crlf *headers-output*)
-       (let ((headers (get-output-stream-string *headers-output*)))
-	 (when *debug*
-	   (log-msg :debug "FULL REPLY: ~S~%~S" headers content))
-	 (sb-fastcgi:fcgx-puts req headers)
-	 (sb-fastcgi:fcgx-puts-utf-8 req content))))))
+   (with-request req
+     (let* ((*headers-output* (make-string-output-stream
+			       :element-type 'base-char))
+	    (*standard-output* (make-string-output-stream
+				:element-type 'character))
+	    (route (routed-by *uri*)))
+       (log-msg :info "~A ~S -> ~S" (cgi-env :request_method) *uri* route)
+       (render route)
+       (let ((content (get-output-stream-string *standard-output*)))
+	 (content-length (trivial-utf-8:utf-8-byte-length content))
+	 (crlf *headers-output*)
+	 (let ((headers (get-output-stream-string *headers-output*)))
+	   (when *debug*
+	     (log-msg :debug "FULL REPLY: ~S~%~S" headers content))
+	   (sb-fastcgi:fcgx-puts req headers)
+	   (sb-fastcgi:fcgx-puts-utf-8 req content)))))))
