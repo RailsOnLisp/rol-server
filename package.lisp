@@ -17,8 +17,8 @@
 ;;
 
 (defpackage :lowh-triangle-server
-  (:nicknames :/s)
-  (:use :cl :alexandria :assets :triangle.files)
+  (:nicknames :L.>.server)
+  (:use :cl :alexandria :L.>.sassets :L.>.files)
   (:export
    ;;  Config
    #:*debug*

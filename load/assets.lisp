@@ -16,20 +16,15 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(declaim (optimize (debug 2) (safety 2) (space 1) (speed 3)))
+(require :lowh.triangle.assets.precompile)
 
-(mapc #'load (mapcar #'enough-namestring
-		     (directory "**/*.asd")))
-
-(require :assets)
-(require :assets.precompile)
-
-(use-package :assets)
+(use-package :L.>.assets)
 
 (load "config/assets")
 
 (do ((line t (read-line *standard-input* nil)))
     ((null line))
   (fresh-line)
-  (fresh-line *error-output*)(time (assets:generate))
-  (time (assets:precompile)))
+  (fresh-line *error-output*)
+  (time (generate))
+  (time (precompile)))
