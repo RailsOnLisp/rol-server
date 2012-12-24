@@ -18,7 +18,7 @@
 
 (require :lowh.triangle.assets.precompile)
 
-(use-package :L.>.assets)
+(use-package :L>assets)
 
 (load "config/assets")
 
@@ -26,5 +26,5 @@
     ((null line))
   (fresh-line)
   (fresh-line *error-output*)
-  (time (generate))
-  (time (precompile)))
+  (time (L>assets:generate))
+  (time (L>assets:precompile)))

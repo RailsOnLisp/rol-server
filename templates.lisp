@@ -16,7 +16,7 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(in-package :lowh.triangle.server)
 
 (defun find-template (type name &rest directories)
   (let ((path (make-pathname :directory (cons :relative

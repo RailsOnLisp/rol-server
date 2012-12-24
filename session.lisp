@@ -16,17 +16,21 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(in-package :lowh.triangle.server)
 
 (defun session-is-valid (session)
-  (facts:with ((session :is-a :session)
-	       (session :atime ?atime))
-    (return (< (get-universal-time) (+ *session-timeout* ?atime)))))
+  (facts:let-with ((atime (session :atime ?)))
+    (and atime
+	 (< (get-universal-time)
+	    (+ *session-timeout* atime)))))
 
+(defun session-is-secure (session)
+  (facts:bound-p ((session :client-address (cgi-env "REMOTE_ADDR"))
+		  (session :user-agent (cgi-env "HTTP_USER_AGENT")))))
+		 
 (defun session-gc ()
   (facts:with-transaction
-    (facts:with ((?session :is-a :session)
-		 (?session :atime ?atime))
+    (facts:with ((?session :is-a :session))
       (unless (session-is-valid ?session)
 	(facts:rm ((?session ?p ?o)))))))
 
@@ -50,3 +54,4 @@
 (defun session-attach ()
   (when-let ((session (cookie-value *session-cookie*)))
     (facts:bound-p ((session :is-a :session))
+		   

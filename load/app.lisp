@@ -19,10 +19,10 @@
 (mapc #'load (mapcar #'enough-namestring
 		     (directory "**/*.asd")))
 
-(require :lowh-triangle-server)
+(require :lowh.triangle.server)
 
 (use-package :alexandria)
-(use-package :lowh-triangle-server)
+(use-package :L>server)
 
 (load-secret)
 
@@ -34,7 +34,7 @@
       (load (enough-namestring file)))))
 
 (defun reload ()
-  (load "lib/lowh-triangle-server/load/app"))
+  (load "lib/lowh.triangle.server/load/app"))
 
 (defun build (core)
   (sb-ext:save-lisp-and-die core

@@ -16,7 +16,7 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh-triangle-server)
+(in-package :lowh.triangle.server)
 
 (defun log-msg (level fmt &rest args)
   (format *error-output* "~&~A ~?~%" level fmt args)

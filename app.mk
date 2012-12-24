@@ -16,7 +16,7 @@ FIND_PUBLIC = cd public && find . \
  \( -name \*~ -or -name *\#* -prune \) \
  -or -type f -print
 
-LOWH_TRIANGLE_SERVER = lib/lowh-triangle-server
+LOWH_TRIANGLE_SERVER = lib/lowh.triangle.server
 
 SBCL = env LC_ALL=en_US.UTF-8 sbcl
 

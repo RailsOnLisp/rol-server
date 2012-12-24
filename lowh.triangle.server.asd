@@ -16,13 +16,13 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(defpackage :lowh-triangle-server.system
+(defpackage :lowh.triangle.server.system
   (:use :cl :asdf))
 
-(in-package :lowh-triangle-server.system)
+(in-package :lowh.triangle.server.system)
 
-(asdf:defsystem :lowh-triangle-server
-  :name "lowh-triangle-server"
+(asdf:defsystem :lowh.triangle.server
+  :name "lowh.triangle.server"
   :author "Thomas de Grivel <billitch@gmail.com>"
   :version "0.1"
   :description "LowH Triangle Server"

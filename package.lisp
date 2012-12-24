@@ -16,9 +16,11 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(defpackage :lowh-triangle-server
-  (:nicknames :L.>.server)
-  (:use :cl :alexandria :L.>.sassets :L.>.files)
+(in-package :cl-user)
+
+(defpackage :lowh.triangle.server
+  (:nicknames :L>server)
+  (:use :cl :alexandria :L>assets :L>files)
   (:export
    ;;  Config
    #:*debug*
@@ -55,7 +57,7 @@
    #:run
    ;;  Assets
    . #.(let (list)
-	 (dolist (pkg '(:assets :triangle.files))
+	 (dolist (pkg '(:L>assets :L>files))
 	   (do-external-symbols (sym pkg)
 	     (push (symbol-name sym) list)))
 	 list)
