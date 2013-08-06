@@ -18,31 +18,87 @@
 
 (in-package :lowh.triangle.server)
 
-(defun render (route)
-  (let ((controller (first route)))
-    (if (fboundp controller)
-	(apply controller (rest route))
-	(render-error "404 Not found" "controller function not found"))))
+;;  Static routes
 
-(defun routed-by (uri)
-  (or (facts:first-bound ((uri :routed-by ?)))
-      '(render-error "404 Not found" "no route")))
+(defun define-static-route (uri controller-form)
+  (setf (gethash uri *static-routes*) (lambda ()
+					(apply (first controller-form)
+					       (rest controller-form)))
+	(gethash controller-form *static-routes/reverse*) uri))
 
-(defun route (req)
+(defun static-route-controller (uri)
+  (gethash uri *static-routes*))
+
+;;  Template routes
+
+(defstruct templated-route
+  (uri-template ())
+  (controller-form () :type cons)
+  (function () :type function))
+
+(defun find-templated-route (uri-template)
+  (find uri-template *templated-routes*
+	:key #'templated-route-uri-template
+	:test #'string=))
+
+(defmacro define-templated-route (uri-template controller-form)
+  (let ((g!uri (gensym "URI-")))
+    `(let ((old (find-templated-route ,uri-template)))
+       (when old
+	 (remove old *templated-routes*))
+       (push (make-templated-route :uri-template ,uri-template
+				   :controller-form ',controller-form
+				   :function
+				   (lambda (,g!uri)
+				     (uri-template-bind (,uri-template ,g!uri)
+				       (lambda () ,controller-form))))
+	     *templated-routes*))))
+
+(defun templated-route-controller (uri)
+  (do ((routes *templated-routes* (rest routes))
+       (fun (funcall (templated-route-function (car *templated-routes*)) uri)
+	    (funcall (templated-route-function (car routes)) uri)))
+      (fun fun)))
+
+(defun templated-route-reverse (controller)
+  (let ((route (find controller *templated-routes*
+		     :key #'templated-route-controller
+		     :test (lambda (c template)
+			     (declare (ignorable c template))
+			     (error "FIXME: reverse templated routes")))))
+    (when route
+      (templated-route-uri-template route))))
+
+;;  Abstract routes functions
+
+(defun uri-template-is-static-p (uri-template)
+  (not (find #\{ uri-template)))
+
+(defmacro define-route (uri-template controller-form)
+  (if (uri-template-is-static-p uri-template)
+      `(define-static-route ,uri-template ',controller-form)
+      `(define-templated-route ,uri-template ,controller-form)))
+
+(defun find-route (uri)
+  (or (static-route-controller uri)
+      (templated-route-controller uri)
+      (lambda () (render-error "404 Not found" "no route"))))
+
+;;  Rendering
+
+(defun route-request (req)
   (time
    (with-request req
-     (let* ((*headers-output* (make-string-output-stream
-			       :element-type 'base-char))
-	    (*standard-output* (make-string-output-stream
-				:element-type 'character))
-	    (route (routed-by *uri*)))
-       (log-msg :info "~A ~S -> ~S" (cgi-env :request_method) *uri* route)
-       (render route)
-       (let ((content (get-output-stream-string *standard-output*)))
-	 (content-length (trivial-utf-8:utf-8-byte-length content))
-	 (crlf *headers-output*)
-	 (let ((headers (get-output-stream-string *headers-output*)))
-	   (when *debug*
-	     (log-msg :debug "FULL REPLY: ~S~%~S" headers content))
-	   (sb-fastcgi:fcgx-puts req headers)
-	   (sb-fastcgi:fcgx-puts-utf-8 req content)))))))
+     (let ((route (find-route *uri*)))
+       (with-reply (reply)
+	 (log-msg :info "~A ~S -> ~S" (cgi-env :request_method) *uri* route)
+	 (funcall route)
+	 (let ((content (reply-get-output reply)))
+	   (content-length (length content))
+	   (crlf *headers-output*)
+	   (let ((headers (reply-get-headers reply)))
+	     (when (find :reply *debug*)
+	       (log-msg :debug "REPLY: ~S~%~S" headers
+			(trivial-utf-8:utf-8-bytes-to-string content)))
+	     (sb-fastcgi:fcgx-puts req headers)
+	     (sb-fastcgi::fcgx-putchars req content))))))))

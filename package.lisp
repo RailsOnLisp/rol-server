@@ -20,7 +20,7 @@
 
 (defpackage :lowh.triangle.server
   (:nicknames :L>server)
-  (:use :cl :alexandria :L>assets :L>files)
+  (:use :cl :alexandria :L>assets :L>files :trivial-gray-streams)
   (:export
    ;;  Config
    #:*debug*
@@ -28,10 +28,17 @@
    ;;  Crypto
    #:load-secret
    #:hmac
+   #:hmac-string
+   #:make-random-string
    ;;  Data
    #:load-facts
    ;;  Routing
    #:*method*
+   #:define-route
+   ;;  Asset routes
+   #:*compile-assets*
+   #:asset-route
+   #:route-precompiled-assets
    ;;  Forms
    #:with-form-data
    ;;  HTTP Headers
@@ -45,7 +52,11 @@
    #:*session*
    #:*session-cookie*
    #:*session-timeout*
+   #:session-attach-or-create
    #:session-create
+   #:session-delete
+   #:session-reset
+   #:session-hmac
    ;;  Helpers
    #:odd/even
    #:to-url
@@ -53,6 +64,8 @@
    #:*layout*
    #:render-view
    #:render-error
+   ;;  Resource
+   #:define-resource-controller
    ;;  Run
    #:run
    ;;  Assets

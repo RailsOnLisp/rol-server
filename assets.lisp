@@ -18,26 +18,27 @@
 
 (in-package :lowh.triangle.server)
 
-;; public
+;;  Render assets on demand
 
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-(defvar *session* nil)
-(defvar *session-timeout* (* 8 3600))
-(defvar *session-cookie* :triangle_sid)
+(defun asset-route (url)
+  (unless (string= url *asset-url-prefix*
+		   :end1 (length *asset-url-prefix*))
+    (http-error "404 not found" "asset prefix not found"))
+  (let* ((spec (subseq url (length *asset-url-prefix*)))
+	 (asset (first (find-assets-from-spec spec))))
+    (unless asset
+      (http-error "404 not found" "asset not found: ~S" spec))
+    (let ((path (pathname (asset-path asset))))
+      (compile-asset asset path)
+      (with-input-from-file/utf-8 (in path)
+	;; FIXME: binary output
+	(copy-stream in *standard-output*)))))
 
-(defvar *compile-assets* t)
-
-;; private
-
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
-(defvar *form-data* nil)
-
-(defvar *static-routes* (make-hash-table :test 'equal))
-(defvar *static-routes/reverse* (make-hash-table :test 'equal))
-(defvar *templated-routes* nil)
+(defun route-precompiled-assets (&optional (enable t))
+  (when enable
+    (msg "Precompile asset routes")
+    (with-msg-indent (1)
+      (dolist (asset (locate-precompiled-assets))
+	(let ((url (asset-url asset)))
+	  (msg "~A" url)
+	  (define-static-route url `(asset-route ,url)))))))

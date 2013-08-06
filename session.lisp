@@ -18,40 +18,84 @@
 
 (in-package :lowh.triangle.server)
 
+;;  Session
+
+(defstruct session
+  id ctime atime key remote-addr user-agent)
+
 (defun session-is-valid (session)
-  (facts:let-with ((atime (session :atime ?)))
+  (with-slots (atime) session
     (and atime
 	 (< (get-universal-time)
 	    (+ *session-timeout* atime)))))
 
 (defun session-is-secure (session)
-  (facts:bound-p ((session :client-address (cgi-env "REMOTE_ADDR"))
-		  (session :user-agent (cgi-env "HTTP_USER_AGENT")))))
-		 
+  (with-slots (remote-addr user-agent) session
+    (and (string= remote-addr (cgi-env "REMOTE_ADDR"))
+	 (string= user-agent (cgi-env "HTTP_USER_AGENT")))))
+
+;;  Session ID
+
+(defpackage :lowh.triangle.server.sessions
+  (:nicknames :L>server.sessions))
+
+(defun make-sid ()
+  (do ((sid #1=(make-random-string 171) #1#))
+      ((not (session-find sid))
+       (intern sid :L>server.sessions))))
+
+(defun session-delete (s)
+  (etypecase s
+    (session (session-delete (session-id s)))
+    (symbol (makunbound s)
+	    (unintern s :L>server.sessions))))
+
 (defun session-gc ()
-  (facts:with-transaction
-    (facts:with ((?session :is-a :session))
-      (unless (session-is-valid ?session)
-	(facts:rm ((?session ?p ?o)))))))
+  (do-symbols (sid :L>server.sessions)
+    (unless (session-is-valid (symbol-value sid))
+      (session-delete sid))))
+
+(defun session-find (sid)
+  (when sid
+    (let ((sym (find-symbol sid :L>server.sessions)))
+      (when sym
+	(symbol-value sym)))))
+
+;;
 
 (defun session-create ()
-  "Return a new session id"
+  "Return a new session"
   (session-gc)
   (facts:with-transaction
-    (let ((session (do ((sess #1=(make-random-string 171) #1#))
-		       ((null (or (facts:bound-p ((sess ?p ?o))))
-			s)))
-	  (time (get-universal-time)))
-      (facts:add (session :is-a :session)
-		 (session :client-address (cgi-env "REMOTE_ADDR"))
-		 (session :user-agent (cgi-env "HTTP_USER_AGENT"))
-		 (session :ctime time)
-		 (session :atime time))
-      (set-cookie *session-cookie* session (+ *session-timeout*
-					      (get-universal-time)))
+    (let* ((sid (make-sid))
+	   (time (get-universal-time))
+	   (session (make-session :id sid
+				  :ctime time
+				  :atime time
+				  :key (make-random-string 64)
+				  :remote-addr (cgi-env "REMOTE_ADDR")
+				  :user-agent (cgi-env "HTTP_USER_AGENT"))))
+      (set sid session)
+      (set-cookie *session-cookie* sid (+ *session-timeout*
+					  (get-universal-time)))
       (setf *session* session))))
 
+(defun session-touch (session)
+  (with-slots (atime) session
+    (setf atime (get-universal-time))))
+
 (defun session-attach ()
-  (when-let ((session (cookie-value *session-cookie*)))
-    (facts:bound-p ((session :is-a :session))
-		   
+  (when-let ((session (session-find (cookie-value *session-cookie*))))
+    (if (and (session-is-valid session)
+	     (session-is-secure session))
+	(progn
+	  (session-touch session)
+	  (setf *session* session)
+	  session)
+	(session-delete session))))
+
+(defun session-attach-or-create ()
+  (or (session-attach) (session-create)))
+
+(defun session-hmac (&rest parts)
+  (apply #'hmac-string (session-key *session*) parts))

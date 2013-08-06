@@ -16,12 +16,14 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(defpackage :lowh.triangle.server.system
-  (:use :cl :asdf))
+(in-package #:cl-user)
 
-(in-package :lowh.triangle.server.system)
+(defpackage #:lowh.triangle.server.system
+  (:use #:cl #:asdf))
 
-(asdf:defsystem :lowh.triangle.server
+(in-package #:lowh.triangle.server.system)
+
+(defsystem lowh.triangle.server
   :name "lowh.triangle.server"
   :author "Thomas de Grivel <billitch@gmail.com>"
   :version "0.1"
@@ -32,23 +34,30 @@
 	       "ironclad"
 	       "lowh-facts"
 	       "lowh.triangle.assets"
+	       "lowh.triangle.assets.precompile"
 	       "lowh.triangle.files"
 	       "sb-fastcgi"
+	       "flexi-streams"
 	       "trivial-utf-8")
   :components
   ((:file "package")
-   (:file "config" :depends-on ("package"))
-   (:file "secret" :depends-on ("package"))
-   (:file "vars" :depends-on ("package"))
-   (:file "logging" :depends-on ("package"))
-   (:file "conditions" :depends-on ("package"))
-   (:file "forms" :depends-on ("package" "vars"))
-   (:file "headers" :depends-on ("package" "vars"))
-   (:file "render" :depends-on ("headers"))
-   (:file "templates" :depends-on ("headers"))
-   (:file "helpers" :depends-on ("templates"))
-   (:file "request" :depends-on ("forms"))
-   (:file "session" :depends-on ("request" "secret"))
-   (:file "routing" :depends-on ("render" "request" "templates"))
-   (:file "facts" :depends-on ("package"))
-   (:file "running" :depends-on ("routing" "facts"))))
+   (:file "config"      :depends-on ("package"))
+   (:file "secret"      :depends-on ("package"))
+   (:file "vars"        :depends-on ("package"))
+   (:file "logging"     :depends-on ("package"))
+   (:file "conditions"  :depends-on ("package"))
+   (:file "io"          :depends-on ("package"))
+   (:file "resource"    :depends-on ("package"))
+   (:file "uri"         :depends-on ("package" "vars"))
+   (:file "assets"      :depends-on ("package" "vars"))
+   (:file "forms"       :depends-on ("package" "vars"))
+   (:file "headers"     :depends-on ("package" "vars"))
+   (:file "reply"       :depends-on ("io" "vars"))
+   (:file "render"      :depends-on ("headers"))
+   (:file "templates"   :depends-on ("headers"))
+   (:file "helpers"     :depends-on ("templates"))
+   (:file "request"     :depends-on ("forms"))
+   (:file "session"     :depends-on ("request" "secret"))
+   (:file "routing"     :depends-on ("io" "render" "request" "templates"))
+   (:file "facts"       :depends-on ("package"))
+   (:file "running"     :depends-on ("routing" "facts"))))

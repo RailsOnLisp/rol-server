@@ -18,26 +18,35 @@
 
 (in-package :lowh.triangle.server)
 
-;; public
+(defclass fcgi-stream (trivial-gray-stream-mixin)
+  ((req :initarg :req)
+   (pos :initform 0)))
 
-(defvar *debug* nil)
-(defvar *layout* nil)
-(defvar *port* nil)
-(defvar *session* nil)
-(defvar *session-timeout* (* 8 3600))
-(defvar *session-cookie* :triangle_sid)
+(defmethod stream-write-sequence ((stream fcgi-stream)
+				  (sequence sequence)
+				  start
+				  end
+				  &key)
+  (stream-write-sequence stream
+			 (subseq sequence
+				 (or start 0)
+				 end)
+			 0 nil))
 
-(defvar *compile-assets* t)
+(defmethod stream-write-sequence ((stream fcgi-stream)
+				  (sequence simple-base-string)
+				  (start (eql 0))
+				  (end (eql nil))
+				  &key)
+  (with-slots (req pos) stream
+    (sb-fastcgi:fcgx-puts req sequence)
+    (incf pos (length sequence))))
 
-;; private
-
-(defvar *headers-output* nil)
-(defvar *req* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
-(defvar *form-data* nil)
-
-(defvar *static-routes* (make-hash-table :test 'equal))
-(defvar *static-routes/reverse* (make-hash-table :test 'equal))
-(defvar *templated-routes* nil)
+(defmethod stream-write-sequence ((stream fcgi-stream)
+				  (sequence string)
+				  (start (eql 0))
+				  (end (eql nil))
+				  &key)
+  (with-slots (req pos) stream
+    (sb-fastcgi:fcgx-puts-utf-8 req sequence)
+    (incf pos (length sequence))))

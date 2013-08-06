@@ -16,32 +16,7 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(mapc #'load (mapcar #'enough-namestring
-		     (directory "**/*.asd")))
+(in-package :lowh.triangle.server)
 
-(require :lowh.triangle.server)
-
-(use-package :alexandria)
-(use-package :L>server)
-
-(load-secret)
-
-(dolist (dir '("app/models/*.lisp"
-	       "app/controllers/*.lisp"
-	       "config/*.lisp"))
-  (dolist (file (directory dir))
-    (when (alphanumericp (char (pathname-name file) 0))
-      (load (enough-namestring file)))))
-
-(when *compile-assets*
-  (require :lowh.triangle.assets.precompile))
-(route-precompiled-assets *compile-assets*)
-
-(defun reload ()
-  (load "lib/triangle/server/load/app"))
-
-(defun build (core)
-  (sb-ext:save-lisp-and-die core
-			    :toplevel #'run
-			    #+sb-core-compression :compression
-			    #+sb-core-compression t))
+(defun debug-p (tag)
+  (find tag *debug*))

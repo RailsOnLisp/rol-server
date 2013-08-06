@@ -46,11 +46,15 @@
 ;;  HMAC
 
 (defun hmac (&rest parts)
-  (let ((h (ironclad:make-hmac *secret* :sha256)))
+  (let ((h (ironclad:make-hmac *secret* :sha512)))
     (dolist (part parts)
       (ironclad:update-hmac h (trivial-utf-8:string-to-utf-8-bytes
 			       (string part) :null-terminate t)))
     (ironclad:hmac-digest h)))
+
+(defun hmac-string (&rest parts)
+  (cl-base64:usb8-array-to-base64-string (apply #'hmac parts)
+					 :uri t))
 
 ;;  Random
 

@@ -18,8 +18,34 @@
 
 (in-package :lowh.triangle.server)
 
-(defstruct reply
-  (headers-stream (make-string-output-stream :element-type 'base-char)
-		  :type output-stream)
-  (content-stream (make-string-output-stream :element-type 'character)
-		  :type output-stream))
+(defun transform-http-content (byte)
+  byte)
+
+(trace transform-http-content)
+
+(defclass reply ()
+  ((headers-stream :type stream
+		   :initarg :headers-stream
+		   :initform (make-string-output-stream :element-type 'base-char)
+		   :reader reply-headers-stream)
+   (content-stream :type stream
+		   :initarg :content-stream
+		   :initform (flexi-streams:make-flexi-stream
+			      (flexi-streams:make-in-memory-output-stream)
+			      :external-format :utf-8)
+		   :reader reply-content-stream)))
+
+(defmacro with-reply ((reply) &body body)
+  `(let* ((,reply (make-instance 'reply))
+	  (*headers-output* (reply-headers-stream ,reply))
+	  (*standard-output* (reply-content-stream ,reply)))
+     ,@body))
+
+(defun reply-get-headers (reply)
+  (get-output-stream-string
+    (reply-headers-stream reply)))
+
+(defun reply-get-output (reply)
+  (flexi-streams:get-output-stream-sequence
+   (flexi-streams:flexi-stream-stream
+    (reply-content-stream reply))))
