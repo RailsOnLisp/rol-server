@@ -30,8 +30,7 @@
       (http-error "404 not found" "asset not found: ~S" spec))
     (let ((path (pathname (asset-path asset))))
       (compile-asset asset path)
-      (with-input-from-file/utf-8 (in path)
-	;; FIXME: binary output
+      (with-open-file (in path :element-type '(unsigned-byte 8))
 	(copy-stream in *standard-output*)))))
 
 (defun route-precompiled-assets (&optional (enable t))
