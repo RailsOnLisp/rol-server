@@ -49,7 +49,7 @@
   (etypecase target
     (string (header "Status: 303 See Other")
 	    (header "Location: " target))
-    (cons (redirect-to (facts:first-bound ((?url :routed-by target)))))))
+    (cons (redirect-to (route-reverse target)))))
 
 ;;  Cookies
 

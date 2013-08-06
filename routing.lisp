@@ -29,6 +29,9 @@
 (defun static-route-controller (uri)
   (gethash uri *static-routes*))
 
+(defun static-route-reverse (controller)
+  (gethash controller *static-routes/reverse*))
+
 ;;  Template routes
 
 (defstruct templated-route
@@ -55,10 +58,12 @@
 	     *templated-routes*))))
 
 (defun templated-route-controller (uri)
-  (do ((routes *templated-routes* (rest routes))
-       (fun (funcall (templated-route-function (car *templated-routes*)) uri)
-	    (funcall (templated-route-function (car routes)) uri)))
-      (fun fun)))
+  (when *templated-routes*
+    (do ((routes *templated-routes* (rest routes))
+	 (fun (funcall (templated-route-function (car *templated-routes*)) uri)
+	      (when routes
+		(funcall (templated-route-function (car routes)) uri))))
+	(fun fun))))
 
 (defun templated-route-reverse (controller)
   (let ((route (find controller *templated-routes*
@@ -83,6 +88,11 @@
   (or (static-route-controller uri)
       (templated-route-controller uri)
       (lambda () (render-error "404 Not found" "no route"))))
+
+(defun route-reverse (controller)
+  (or (static-route-reverse controller)
+      (templated-route-reverse controller)
+      (lambda () (render-error "500 Route not found" "no route"))))
 
 ;;  Rendering
 
