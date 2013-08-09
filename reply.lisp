@@ -18,11 +18,6 @@
 
 (in-package :lowh.triangle.server)
 
-(defun transform-http-content (byte)
-  byte)
-
-(trace transform-http-content)
-
 (defclass reply ()
   ((headers-stream :type stream
 		   :initarg :headers-stream

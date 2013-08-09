@@ -18,6 +18,15 @@
 
 (in-package :lowh.triangle.server)
 
+;;  Canonical URI
+
+(defun canonical-document-uri (uri)
+  (or (when (string= "/" uri)
+	uri)
+      (cl-ppcre:regex-replace
+       "/$" (cl-ppcre:regex-replace "//" uri "/")
+       "")))
+
 ;;  URI Templates
 
 (defun parse-uri-template/token (token)

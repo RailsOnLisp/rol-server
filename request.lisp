@@ -47,6 +47,6 @@
 	  (*form-data* nil)
 	  (*method* (request-method))
 	  (*host* (cgi-env :http_host))
-	  (*uri* (cgi-env :document_uri))
+	  (*uri* (canonical-document-uri (cgi-env :document_uri)))
 	  (*session* (session-attach)))
      ,@body))

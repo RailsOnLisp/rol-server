@@ -56,7 +56,7 @@
    (:file "render"      :depends-on ("headers"))
    (:file "templates"   :depends-on ("headers"))
    (:file "helpers"     :depends-on ("templates"))
-   (:file "request"     :depends-on ("forms"))
+   (:file "request"     :depends-on ("forms" "uri"))
    (:file "session"     :depends-on ("request" "secret"))
    (:file "routing"     :depends-on ("io" "render" "request" "templates"))
    (:file "facts"       :depends-on ("package"))

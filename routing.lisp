@@ -20,17 +20,17 @@
 
 ;;  Static routes
 
+(defmacro static-route-controller (uri)
+  `(gethash ,uri *static-routes*))
+
+(defmacro static-route-reverse (controller)
+  `(gethash ,controller *static-routes/reverse*))
+
 (defun define-static-route (uri controller-form)
-  (setf (gethash uri *static-routes*) (lambda ()
+  (setf (static-route-controller uri) (lambda ()
 					(apply (first controller-form)
 					       (rest controller-form)))
-	(gethash controller-form *static-routes/reverse*) uri))
-
-(defun static-route-controller (uri)
-  (gethash uri *static-routes*))
-
-(defun static-route-reverse (controller)
-  (gethash controller *static-routes/reverse*))
+	(static-route-reverse controller-form) uri))
 
 ;;  Template routes
 
@@ -61,9 +61,10 @@
   (when *templated-routes*
     (do ((routes *templated-routes* (rest routes))
 	 (fun (funcall (templated-route-function (car *templated-routes*)) uri)
-	      (when routes
-		(funcall (templated-route-function (car routes)) uri))))
-	(fun fun))))
+	      (funcall (templated-route-function (car routes)) uri)))
+	((or (null routes)
+	     fun)
+	 fun))))
 
 (defun templated-route-reverse (controller)
   (let ((route (find controller *templated-routes*
@@ -101,7 +102,7 @@
    (with-request req
      (let ((route (find-route *uri*)))
        (with-reply (reply)
-	 (log-msg :info "~A ~S -> ~S" (cgi-env :request_method) *uri* route)
+	 (log-msg :info "~A ~S" *method* *uri*)
 	 (funcall route)
 	 (let ((content (reply-get-output reply)))
 	   (content-length (length content))

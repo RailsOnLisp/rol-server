@@ -65,7 +65,10 @@
    #:render-view
    #:render-error
    ;;  Resource
-   #:define-resource-controller
+   #:define-resource
+   #:define-action
+   #:index #:create #:update #:delete
+   #:get #:post #:put
    ;;  Run
    #:run
    ;;  Assets
