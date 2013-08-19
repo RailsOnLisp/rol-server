@@ -1,5 +1,9 @@
 ##  Compile
 
+.if exists(config/local.mk)
+.  include "config/local.mk"
+.endif
+
 APP ?= app
 MEM ?= 384
 
@@ -88,7 +92,10 @@ load:
 show:
 	@echo APP = "${APP}"
 	@echo SRCS = "${SRCS}"
-	@echo PUBLIC_FILES = "${PUBLIC_FILES}"
+	@echo APP_USER = "${APP_USER}"
+	@echo APP_DIR = "${APP_DIR}"
+	@echo WEB_USER = "${WEB_USER}"
+	@echo WEB_DIR = "${WEB_DIR}"
 
 URL ?= /
 fetch:
@@ -115,7 +122,3 @@ install-web: assets
 	${SUDO} chown -R ${WEB_USER} ${WEB_DIR}
 
 .PHONY: build assets clean-assets clean-build clean distclean install load show
-
-.if exists(config/local.mk)
-.  include "config/local.mk"
-.endif
