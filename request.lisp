@@ -18,9 +18,6 @@
 
 (in-package :lowh.triangle.server)
 
-(defun cgi-env (name)
-  (sb-fastcgi:fcgx-getparam *req* (string name)))
-
 (define-constant +http-verbs+ #(:GET :POST :PUT :DELETE)
   :test 'equalp)
 
@@ -31,22 +28,27 @@
 	:test #'string=))
 
 (defun request-method ()
-  (let ((method (http-verb (cgi-env :request_method))))
+  (let ((method (http-verb (backend-request-method))))
     (or (and (eq :POST method)
 	     (http-verb (with-form-data (_method) _method)))
 	method)))
 
+(defun request-header (name)
+  (backend-request-header name))
+
+(defun request-remote-addr ()
+  (backend-request-remote-addr))
+
 (defun cookie-value (name)
-  (when-let ((cookie (cgi-env :http_cookie)))
+  (when-let ((cookie (request-header :cookie)))
     (cl-ppcre:do-register-groups (n value) ("([^=]+)=([^;]+)" cookie)
       (when (string= name n)
 	value))))
 
-(defmacro with-request (req &body body)
-  `(let* ((*req* ,req)
-	  (*form-data* nil)
-	  (*method* (request-method))
-	  (*host* (cgi-env :http_host))
-	  (*uri* (canonical-document-uri (cgi-env :document_uri)))
-	  (*session* (session-attach)))
+(defmacro with-request (&body body)
+  `(let ((*form-data* nil)
+	 (*method* (request-method))
+	 (*host* (request-header :host))
+	 (*uri* (canonical-document-uri (backend-request-uri)))
+	 (*session* (session-attach)))
      ,@body))

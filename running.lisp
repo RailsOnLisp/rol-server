@@ -22,11 +22,7 @@
   (setf html-template:*default-template-pathname*
 	(merge-pathnames #P"app/views/"))
   (load-facts)
-  (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
-  (sb-fastcgi:socket-server 'route-request
-			    :inet-addr "127.0.0.1"
-			    :port *port*)
-  (error "fastcgi socket server exited"))
+  (backend-run))
 
 (defun run-protected ()
   (handler-bind ((sb-sys:interactive-interrupt

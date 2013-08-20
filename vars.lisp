@@ -32,7 +32,6 @@
 ;; private
 
 (defvar *headers-output* nil)
-(defvar *req* nil)
 (defvar *method* nil)
 (defvar *uri* nil)
 (defvar *host* nil)

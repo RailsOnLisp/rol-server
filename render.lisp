@@ -31,5 +31,5 @@
     (write-string msg)
     (fresh-line)
     (terpri)
-    (prin1 (sb-fastcgi:fcgx-getenv *req*))
+    (prin1 (backend-env))
     (fresh-line)))

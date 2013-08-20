@@ -31,8 +31,8 @@
 
 (defun session-is-secure (session)
   (with-slots (remote-addr user-agent) session
-    (and (string= remote-addr (cgi-env "REMOTE_ADDR"))
-	 (string= user-agent (cgi-env "HTTP_USER_AGENT")))))
+    (and (string= remote-addr (request-remote-addr))
+	 (string= user-agent (request-header :user_agent)))))
 
 ;;  Session ID
 
@@ -73,8 +73,8 @@
 				  :ctime time
 				  :atime time
 				  :key (make-random-string 64)
-				  :remote-addr (cgi-env "REMOTE_ADDR")
-				  :user-agent (cgi-env "HTTP_USER_AGENT"))))
+				  :remote-addr (request-remote-addr)
+				  :user-agent (request-header :user_agent))))
       (set sid session)
       (set-cookie *session-cookie* sid (+ *session-timeout*
 					  (get-universal-time)))

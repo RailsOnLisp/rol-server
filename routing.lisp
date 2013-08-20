@@ -97,9 +97,9 @@
 
 ;;  Rendering
 
-(defun route-request (req)
+(defun route-request ()
   (time
-   (with-request req
+   (with-request
      (let ((route (find-route *uri*)))
        (with-reply (reply)
 	 (log-msg :info "~A ~S" *method* *uri*)
@@ -111,5 +111,5 @@
 	     (when (find :reply *debug*)
 	       (log-msg :debug "REPLY: ~S~%~S" headers
 			(trivial-utf-8:utf-8-bytes-to-string content)))
-	     (sb-fastcgi:fcgx-puts req headers)
-	     (sb-fastcgi::fcgx-putchars req content))))))))
+	     (backend-write-headers headers)
+	     (backend-write-content content))))))))

@@ -23,41 +23,48 @@
 
 (in-package #:lowh.triangle.server.system)
 
-(defsystem lowh.triangle.server
-  :name "lowh.triangle.server"
-  :author "Thomas de Grivel <billitch@gmail.com>"
-  :version "0.1"
-  :description "LowH Triangle Server"
-  :depends-on ("alexandria"
-	       "cl-base64"
-	       "html-template"
-	       "ironclad"
-	       "lowh-facts"
-	       "lowh.triangle.assets"
-	       "lowh.triangle.assets.precompile"
-	       "lowh.triangle.files"
-	       "sb-fastcgi"
-	       "flexi-streams"
-	       "trivial-utf-8")
-  :components
-  ((:file "package")
-   (:file "config"      :depends-on ("package"))
-   (:file "secret"      :depends-on ("package"))
-   (:file "vars"        :depends-on ("package"))
-   (:file "logging"     :depends-on ("package"))
-   (:file "conditions"  :depends-on ("package"))
-   (:file "io"          :depends-on ("package"))
-   (:file "resource"    :depends-on ("package"))
-   (:file "uri"         :depends-on ("package" "vars"))
-   (:file "assets"      :depends-on ("package" "vars"))
-   (:file "forms"       :depends-on ("package" "vars"))
-   (:file "headers"     :depends-on ("package" "vars"))
-   (:file "reply"       :depends-on ("io" "vars"))
-   (:file "render"      :depends-on ("headers"))
-   (:file "templates"   :depends-on ("headers"))
-   (:file "helpers"     :depends-on ("templates"))
-   (:file "request"     :depends-on ("forms" "uri"))
-   (:file "session"     :depends-on ("request" "secret"))
-   (:file "routing"     :depends-on ("io" "render" "request" "templates"))
-   (:file "facts"       :depends-on ("package"))
-   (:file "running"     :depends-on ("routing" "facts"))))
+#.(let* ((backend (if (boundp '*backend*)
+		      (symbol-value '*backend*)
+		      :fastcgi))
+	 (backend-file (concatenate 'string "backend-"
+				    (string-downcase (symbol-name backend))))
+	 (backend-depends-on (case backend
+			       ((:fastcgi) '("sb-fastcgi")))))
+    `(defsystem lowh.triangle.server
+       :name "lowh.triangle.server"
+       :author "Thomas de Grivel <thomas@lowh.net>"
+       :version "0.2"
+       :description "Application server / core module"
+       :depends-on ("alexandria"
+		    "cl-base64"
+		    "html-template"
+		    "ironclad"
+		    "lowh-facts"
+		    "lowh.triangle.assets"
+		    "lowh.triangle.assets.precompile"
+		    "lowh.triangle.files"
+		    "flexi-streams"
+		    "trivial-utf-8"
+		    ,@backend-depends-on)
+       :components
+       ((:file "package")
+	(:file "config"      :depends-on ("package"))
+	(:file "secret"      :depends-on ("package"))
+	(:file "vars"        :depends-on ("package"))
+	(:file "logging"     :depends-on ("package"))
+	(:file "conditions"  :depends-on ("package"))
+	(:file "resource"    :depends-on ("package"))
+	(:file "uri"         :depends-on ("package" "vars"))
+	(:file "assets"      :depends-on ("package" "vars"))
+	(:file ,backend-file :depends-on ("package"))
+	(:file "forms"       :depends-on ("package" "vars" ,backend-file))
+	(:file "headers"     :depends-on ("package" "vars"))
+	(:file "reply"       :depends-on ("vars"))
+	(:file "render"      :depends-on ("headers" ,backend-file))
+	(:file "templates"   :depends-on ("headers"))
+	(:file "helpers"     :depends-on ("templates"))
+	(:file "request"     :depends-on ("forms" "uri" ,backend-file))
+	(:file "session"     :depends-on ("request" "secret"))
+	(:file "routing"     :depends-on ("render" "request" "templates" ,backend-file))
+	(:file "facts"       :depends-on ("package"))
+	(:file "running"     :depends-on ("routing" "facts" ,backend-file)))))

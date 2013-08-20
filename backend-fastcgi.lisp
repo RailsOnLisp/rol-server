@@ -18,6 +18,70 @@
 
 (in-package :lowh.triangle.server)
 
+;;  Config
+
+#+openbsd
+(handler-case
+    (sb-fastcgi:load-libfcgi "/usr/local/lib/libfcgi.so.0.0")
+  (error (e)
+    (format t "~%~%~A~%~%Could not load libfcgi, 'pkg_add fcgi' maybe ?~%~%" e)
+    (sb-ext:exit :code 1)))
+
+;;  Request
+
+(defvar *req* nil)
+
+(defun backend-request-env ()
+  (sb-fastcgi:fcgx-getenv *req*))
+
+(defun backend-request-getenv (name)
+  (sb-fastcgi:fcgx-getparam *req* (string name)))
+
+(defun backend-request-method ()
+  (sb-fastcgi:fcgx-getparam *req* :request_method))
+
+(defun backend-request-header (name)
+  (sb-fastcgi:fcgx-getparam *req* (str "HTTP_" (string-upcase name))))
+
+(defun backend-request-uri ()
+  (sb-fastcgi:fcgx-getparam *req* :document_uri))
+
+(defun backend-request-remote-addr ()
+  (sb-fastcgi:fcgx-getparam *req* :remote_addr))
+
+;;  Forms
+
+(defun backend-read-request-data ()
+  (let ((data (sb-fastcgi:fcgx-read-all *req*)))
+    (trivial-utf-8:utf-8-bytes-to-string
+     (apply #'concatenate data))))
+
+(defun backend-read-form-data ()
+  (let ((content-type (sb-fastcgi:fcgx-getparam *req* "CONTENT_TYPE")))
+    (cond ((string-equal "application/x-www-form-urlencoded" content-type)
+	   (parse-www-form-url-encoded (backend-read-request-data))))))
+
+;;  Reply
+
+(defun backend-write-headers (headers)
+  (sb-fastcgi:fcgx-puts *req* headers))
+
+(defun backen-write-content (content)
+  (sb-fastcgi::fcgx-putchars *req* content))
+
+;;  Running
+
+(defun backend-run ()
+  (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
+  (sb-fastcgi:socket-server (lambda (req)
+			      (let ((*req* req))
+				(route-request)))
+			    :inet-addr "127.0.0.1"
+			    :port *port*)
+  (error "fastcgi socket server exited"))
+
+;;  I/O
+
 (defclass fcgi-stream (trivial-gray-stream-mixin)
   ((req :initarg :req)
    (pos :initform 0)))

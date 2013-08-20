@@ -47,18 +47,8 @@
       (push (cons (url-decode var) (url-decode value)) form-data))
     (nreverse form-data)))
 
-(defun read-request-data ()
-  (let ((data (sb-fastcgi:fcgx-read-all *req*)))
-    (trivial-utf-8:utf-8-bytes-to-string
-     (apply #'concatenate data))))
-
-(defun read-form-data ()
-  (let ((content-type (sb-fastcgi:fcgx-getparam *req* "CONTENT_TYPE")))
-    (cond ((string-equal "application/x-www-form-urlencoded" content-type)
-	   (parse-www-form-url-encoded (read-request-data))))))
-
 (defun form-data ()
-  (or *form-data* (setf *form-data* (read-form-data))))
+  (or *form-data* (setf *form-data* (backend-read-form-data))))
 
 (defmacro with-form-data (vars &body body)
   (let ((form-data (gensym "FORM-DATA-")))
