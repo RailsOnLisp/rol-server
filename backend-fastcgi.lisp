@@ -34,20 +34,17 @@
 (defun backend-request-env ()
   (sb-fastcgi:fcgx-getenv *req*))
 
-(defun backend-request-getenv (name)
-  (sb-fastcgi:fcgx-getparam *req* (string name)))
-
 (defun backend-request-method ()
-  (sb-fastcgi:fcgx-getparam *req* :request_method))
+  (sb-fastcgi:fcgx-getparam *req* "REQUEST_METHOD"))
 
 (defun backend-request-header (name)
   (sb-fastcgi:fcgx-getparam *req* (str "HTTP_" (string-upcase name))))
 
 (defun backend-request-uri ()
-  (sb-fastcgi:fcgx-getparam *req* :document_uri))
+  (sb-fastcgi:fcgx-getparam *req* "DOCUMENT_URI"))
 
 (defun backend-request-remote-addr ()
-  (sb-fastcgi:fcgx-getparam *req* :remote_addr))
+  (sb-fastcgi:fcgx-getparam *req* "REMOTE_ADDR"))
 
 ;;  Forms
 
@@ -63,11 +60,18 @@
 
 ;;  Reply
 
-(defun backend-write-headers (headers)
-  (sb-fastcgi:fcgx-puts *req* headers))
+(defun status (&rest msg)
+  (apply #'header :status msg))
 
-(defun backen-write-content (content)
-  (sb-fastcgi::fcgx-putchars *req* content))
+(defun backend-send-headers ()
+  (write-string +crlf+ *headers-output*)
+  (let ((headers (get-output-stream-string *headers-output*)))
+    (sb-fastcgi:fcgx-puts *req* headers)
+    headers))
+
+(defun backend-send-body (content)
+  (sb-fastcgi::fcgx-putchars *req* content)
+  (setf *reply* (trivial-utf-8:utf-8-bytes-to-string content)))
 
 ;;  Running
 
