@@ -28,10 +28,10 @@
 	 (asset (first (find-assets-from-spec spec))))
     (unless asset
       (http-error "404 not found" "asset not found: ~S" spec))
-    (let ((path (pathname (asset-path asset))))
-      (compile-asset asset path)
-      (with-open-file (in path :element-type '(unsigned-byte 8))
-	(copy-stream in *standard-output*)))))
+    (with-temporary-file (tmp :prefix "tmp/asset-route")
+      (compile-asset asset tmp)
+      (file-position tmp 0)
+      (copy-stream tmp *standard-output*))))
 
 (defun route-precompiled-assets (&optional (enable t))
   (when enable
