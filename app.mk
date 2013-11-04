@@ -1,45 +1,59 @@
-##  Compile
 
-.if exists(config/local.mk)
-.  include "config/local.mk"
-.endif
+##  Defaults
 
-APP ?= app
-MEM ?= 384
+SRCS_  != find * \( -name '.*' -prune \) \
+          -or -name '[a-z]*.lisp' -print \
+          -or -name '[a-z]*.asd' -print
 
-CORE = ${APP}.sbcl
+VIEWS_ != find app/views -type f -name '*[0-9a-z]'
 
-SRCS !=	find * \( -name '.*' -prune \) \
-	-or -name '[a-z]*.lisp' -print \
-	-or -name '[a-z]*.asd' -print
+DATA_  != find data -type f -name '*.facts'
 
-VIEWS != find app/views -type f -name '*[0-9a-z]'
+LOWH_TRIANGLE_SERVER_ = lib/triangle/server
 
-DATA !=	find data -type f -name '*.facts'
+SBCL_ = env LC_ALL=en_US.UTF-8 sbcl
 
-FIND_PUBLIC = cd public && find . \
- \( -name \*~ -or -name *\#* -prune \) \
- -or -type f -print
-
-LOWH_TRIANGLE_SERVER = lib/triangle/server
-
-SBCL = env LC_ALL=en_US.UTF-8 sbcl
-
-SBCL_OPTS = \
+SBCL_OPTS_ = \
 	--dynamic-space-size ${MEM} \
 	--noinform \
 	--end-runtime-options
 
-SBCL_DEBUG_OPTS = \
+SBCL_DEBUG_OPTS_ = \
 	${SBCL_OPTS} \
 	--eval '(declaim (optimize (debug 3) (safety 2) (speed 0) (space 0)))'
 
-SBCL_BUILD_OPTS = \
+SBCL_BUILD_OPTS_ = \
 	--disable-ldb \
 	--lose-on-corruption \
 	${SBCL_OPTS} \
 	--eval '(declaim (optimize (debug 2) (safety 2) (speed 3) (space 2) (compilation-speed 0)))' \
 	--disable-debugger
+
+#  Allow local override
+
+.if exists(config/local.mk)
+.  include "config/local.mk"
+.endif
+
+#  Apply defaults
+
+APP   ?= app
+MEM   ?= 384
+CORE  ?= ${APP}.sbcl
+SRCS  ?= ${SRCS_}
+VIEWS ?= ${VIEWS_}
+DATA  ?= ${DATA_}
+LOWH_TRIANGLE_SERVER ?= ${LOWH_TRIANGLE_SERVER_}
+SBCL ?= ${SBCL_}
+SBCL_OPTS ?= ${SBCL_OPTS_}
+SBCL_DEBUG_OPTS ?= ${SBCL_DEBUG_OPTS_}
+SBCL_BUILD_OPTS ?= ${SBCL_BUILD_OPTS_}
+
+##  Compile
+
+FIND_PUBLIC = cd public && find . \
+ \( -name \*~ -or -name *\#* -prune \) \
+ -or -type f -print
 
 LOAD_APP = \
 	--load ${LOWH_TRIANGLE_SERVER}/load/app
