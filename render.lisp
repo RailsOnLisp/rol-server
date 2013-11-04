@@ -31,5 +31,5 @@
     (write-string msg)
     (fresh-line)
     (terpri)
-    (prin1 (backend-env))
+    (prin1 (backend-request-env))
     (fresh-line)))

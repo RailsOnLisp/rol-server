@@ -20,7 +20,8 @@
 
 (defpackage :lowh.triangle.server
   (:nicknames :L>server)
-  (:use :cl :alexandria :L>assets :L>files :trivial-gray-streams)
+  (:use :cl :alexandria :L>assets :L>files :L>uri
+	:let-over-lambda :trivial-gray-streams)
   (:export
    ;;  Config
    #:*debug*
@@ -58,6 +59,7 @@
    #:session-reset
    #:session-hmac
    ;;  Helpers
+   #:+crlf+
    #:odd/even
    #:to-url
    ;;  Views
@@ -73,7 +75,7 @@
    #:run
    ;;  Assets
    . #.(let (list)
-	 (dolist (pkg '(:L>assets :L>files))
+	 (dolist (pkg '(:L>assets :L>files :L>uri))
 	   (do-external-symbols (sym pkg)
 	     (push (symbol-name sym) list)))
 	 list)

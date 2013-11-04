@@ -23,13 +23,12 @@
 
 (in-package #:lowh.triangle.server.system)
 
-#.(let* ((backend (if (boundp '*backend*)
-		      (symbol-value '*backend*)
-		      :fastcgi))
+#.(let* ((backend (if (boundp 'cl-user::*backend*)
+		      (symbol-value 'cl-user::*backend*)
+		      :hunchentoot))
 	 (backend-file (concatenate 'string "backend-"
-				    (string-downcase (symbol-name backend))))
-	 (backend-depends-on (case backend
-			       ((:fastcgi) '("sb-fastcgi")))))
+				    (string-downcase (symbol-name backend)))))
+    (pushnew backend *features*)
     `(defsystem lowh.triangle.server
        :name "lowh.triangle.server"
        :author "Thomas de Grivel <thomas@lowh.net>"
@@ -39,13 +38,17 @@
 		    "cl-base64"
 		    "html-template"
 		    "ironclad"
+		    "let-over-lambda"
 		    "lowh-facts"
 		    "lowh.triangle.assets"
 		    "lowh.triangle.assets.precompile"
 		    "lowh.triangle.files"
+		    "lowh.triangle.uri"
 		    "flexi-streams"
 		    "trivial-utf-8"
-		    ,@backend-depends-on)
+		    ,@(case backend
+			    ((:fastcgi) '("sb-fastcgi"))
+			    ((:hunchentoot) '("hunchentoot"))))
        :components
        ((:file "package")
 	(:file "config"      :depends-on ("package"))
@@ -54,17 +57,19 @@
 	(:file "logging"     :depends-on ("package"))
 	(:file "conditions"  :depends-on ("package"))
 	(:file "resource"    :depends-on ("package"))
-	(:file "uri"         :depends-on ("package" "vars"))
 	(:file "assets"      :depends-on ("package" "vars"))
-	(:file ,backend-file :depends-on ("package"))
+	(:file ,backend-file :depends-on ("package" #+hunchentoot
+					  "headers" "logging"))
 	(:file "forms"       :depends-on ("package" "vars" ,backend-file))
 	(:file "headers"     :depends-on ("package" "vars"))
-	(:file "reply"       :depends-on ("vars"))
+	(:file "reply"       :depends-on ("vars" ,backend-file))
 	(:file "render"      :depends-on ("headers" ,backend-file))
 	(:file "templates"   :depends-on ("headers"))
 	(:file "helpers"     :depends-on ("templates"))
-	(:file "request"     :depends-on ("forms" "uri" ,backend-file))
+	(:file "request"     :depends-on ("forms" ,backend-file))
 	(:file "session"     :depends-on ("request" "secret"))
-	(:file "routing"     :depends-on ("render" "request" "templates" ,backend-file))
+	(:file "routing"     :depends-on ("render" "request"
+					  "templates" ,backend-file))
 	(:file "facts"       :depends-on ("package"))
-	(:file "running"     :depends-on ("routing" "facts" ,backend-file)))))
+	(:file "running"     :depends-on ("routing" "facts"
+					  ,backend-file)))))

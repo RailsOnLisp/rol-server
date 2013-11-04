@@ -29,14 +29,22 @@
 
 (defvar *compile-assets* t)
 
-;; private
+(define-constant +crlf+ (coerce #(#\CR #\LF) 'string)
+  :test 'string=)
 
-(defvar *headers-output* nil)
-(defvar *method* nil)
-(defvar *uri* nil)
-(defvar *host* nil)
-(defvar *form-data* nil)
+;; private
 
 (defvar *static-routes* (make-hash-table :test 'equal))
 (defvar *static-routes/reverse* (make-hash-table :test 'equal))
 (defvar *templated-routes* nil)
+
+;; transient
+
+(defvar *headers-output*)
+(defvar *method*)
+(defvar *uri*)
+(defvar *host*)
+(defvar *form-data*)
+(defvar *reply*)
+(defvar *reply-sent*)
+(defvar *headers-output*)

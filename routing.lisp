@@ -20,17 +20,25 @@
 
 ;;  Static routes
 
-(defmacro static-route-controller (uri)
-  `(gethash ,uri *static-routes*))
+(defsetf static-route-controller (uri) (value)
+  `(setf (gethash ,uri *static-routes*) ,value))
+
+(defun static-route-controller (uri)
+  (gethash uri *static-routes*))
 
 (defmacro static-route-reverse (controller)
   `(gethash ,controller *static-routes/reverse*))
 
 (defun define-static-route (uri controller-form)
-  (setf (static-route-controller uri) (lambda ()
-					(apply (first controller-form)
-					       (rest controller-form)))
+  (setf (static-route-controller uri) controller-form
 	(static-route-reverse controller-form) uri))
+
+(defun list-static-routes ()
+  (let (routes)
+    (maphash (lambda (uri form)
+	       (push (list uri form) routes))
+	     *static-routes*)
+    (sort routes #'string< :key #'car)))
 
 ;;  Template routes
 
@@ -54,17 +62,16 @@
 				   :function
 				   (lambda (,g!uri)
 				     (uri-template-bind (,uri-template ,g!uri)
-				       (lambda () ,controller-form))))
+				       (list ,@controller-form))))
 	     *templated-routes*))))
 
 (defun templated-route-controller (uri)
   (when *templated-routes*
-    (do ((routes *templated-routes* (rest routes))
-	 (fun (funcall (templated-route-function (car *templated-routes*)) uri)
-	      (funcall (templated-route-function (car routes)) uri)))
-	((or (null routes)
-	     fun)
-	 fun))))
+    (loop
+       for route in *templated-routes*
+       for fun = (funcall (templated-route-function route) uri)
+       until fun
+       return fun)))
 
 (defun templated-route-reverse (controller)
   (let ((route (find controller *templated-routes*
@@ -74,6 +81,12 @@
 			     (error "FIXME: reverse templated routes")))))
     (when route
       (templated-route-uri-template route))))
+
+(defun list-templated-routes ()
+  (mapcar (lambda (route)
+	    (list (templated-route-uri-template route)
+		  (templated-route-controller-form route)))
+	  *templated-routes*))
 
 ;;  Abstract routes functions
 
@@ -88,28 +101,27 @@
 (defun find-route (uri)
   (or (static-route-controller uri)
       (templated-route-controller uri)
-      (lambda () (render-error "404 Not found" "no route"))))
+      '(render-error "404 Not found" "no route")))
 
 (defun route-reverse (controller)
   (or (static-route-reverse controller)
       (templated-route-reverse controller)
-      (lambda () (render-error "500 Route not found" "no route"))))
+      '(render-error "500 Route not found" "no route")))
+
+(defun list-routes ()
+  (append (list-static-routes)
+	  (list-templated-routes)))
 
 ;;  Rendering
 
+(defun render-route (route)
+  (apply (the symbol (car route))
+	 (the list (cdr route))))
+
 (defun route-request ()
-  (time
-   (with-request
-     (let ((route (find-route *uri*)))
-       (with-reply (reply)
-	 (log-msg :info "~A ~S" *method* *uri*)
-	 (funcall route)
-	 (let ((content (reply-get-output reply)))
-	   (content-length (length content))
-	   (crlf *headers-output*)
-	   (let ((headers (reply-get-headers reply)))
-	     (when (find :reply *debug*)
-	       (log-msg :debug "REPLY: ~S~%~S" headers
-			(trivial-utf-8:utf-8-bytes-to-string content)))
-	     (backend-write-headers headers)
-	     (backend-write-content content))))))))
+  (with-request
+    (let ((route (the cons (find-route *uri*))))
+      (log-msg :info "~A ~S -> ~S" *method* *uri* route)
+      (with-reply
+	(time (render-route route))
+	(force-output *trace-output*)))))

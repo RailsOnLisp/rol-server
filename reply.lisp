@@ -18,29 +18,44 @@
 
 (in-package :lowh.triangle.server)
 
-(defclass reply ()
-  ((headers-stream :type stream
-		   :initarg :headers-stream
-		   :initform (make-string-output-stream :element-type 'base-char)
-		   :reader reply-headers-stream)
-   (content-stream :type stream
-		   :initarg :content-stream
-		   :initform (flexi-streams:make-flexi-stream
-			      (flexi-streams:make-in-memory-output-stream)
-			      :external-format :utf-8)
-		   :reader reply-content-stream)))
+(defun reply-send ()
+  (unless *reply-sent*
+    (setq *reply-sent* t)
+    (let ((content (flexi-streams:get-output-stream-sequence
+		    (flexi-streams:flexi-stream-stream
+		     *standard-output*))))
+      (content-length (length content))
+      (let ((headers (backend-send-headers)))
+	(backend-send-body content)
+	(when (find :reply *debug*)
+	  (log-msg :debug "REPLY: ~A~&~A" headers *reply*))))
+    *reply*))
 
-(defmacro with-reply ((reply) &body body)
-  `(let* ((,reply (make-instance 'reply))
-	  (*headers-output* (reply-headers-stream ,reply))
-	  (*standard-output* (reply-content-stream ,reply)))
+(defmacro with-reply-handlers (&body body)
+  `(handler-bind ((warning
+		   (lambda (w)
+		     (log-msg :warn "~A" w)
+		     (muffle-warning w)))
+		  (condition
+		   (lambda (c)
+		     (unless *reply-sent*
+		       (let ((status (http-error-status c)))
+			 (log-msg (if (char= #\5 (char status 0)) :error :info)
+				  "~A" c)
+			 (render-error status (http-error-message c)))
+		       (reply-send)))))
      ,@body))
 
-(defun reply-get-headers (reply)
-  (get-output-stream-string
-    (reply-headers-stream reply)))
-
-(defun reply-get-output (reply)
-  (flexi-streams:get-output-stream-sequence
-   (flexi-streams:flexi-stream-stream
-    (reply-content-stream reply))))
+(defmacro with-reply (&body body)
+  `(let* ((*reply* nil)
+	  (*reply-sent* nil)
+	  #-hunchentoot
+	  (*headers-output* (make-string-output-stream :element-type 'base-char))
+	  (*standard-output* (flexi-streams:make-flexi-stream
+			      (flexi-streams:make-in-memory-output-stream)
+			      :external-format :utf-8)))
+     #+hunchentoot
+     (setf hunchentoot:*catch-errors-p* (not (find :reply *debug*)))
+     (with-reply-handlers ,@body)
+     (reply-send)
+     *reply*))

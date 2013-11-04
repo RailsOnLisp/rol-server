@@ -20,44 +20,45 @@
 
 ;;  Headers
 
-(defun crlf (&optional (stream *standard-output*))
-  (write-char #\CR stream)
-  (write-char #\LF stream))
+#-hunchentoot
+(defun header (name &rest parts)
+  (write-rope `(,(string-capitalize name) ": " ,@parts ,+crlf+)
+	      *headers-output*))
 
-(defun header (&rest parts)
-  (dolist (part parts)
-    (when part
-      (write-string (string part) *headers-output*)))
-  (crlf *headers-output*))
+#+hunchentoot
+(defun header (name &rest parts)
+  (setf (hunchentoot:header-out name)
+	(apply #'str parts)))
 
 (defmacro define-header-function (name)
   `(defun ,name (&rest parts)
-     (apply #'header
-	    ,(concatenate 'string (string-capitalize name) ": ")
-	    parts)))
+     (apply #'header ,(intern (string-upcase name) :keyword) parts)))
 
-(define-header-function status)
 (define-header-function content-type)
 
 (defun content-length (bytes)
-  (format *headers-output* "Content-Length: ~D" bytes)
-  (crlf *headers-output*))
+  #+hunchentoot
+  (setf (hunchentoot:header-out :content-length) bytes)
+  #-hunchentoot
+  (header :content-length (format nil "~D" bytes)))
 
 ;;  Redirections
 
 (defun redirect-to (target)
   (etypecase target
-    (string (header "Status: 303 See Other")
-	    (header "Location: " target))
+    (string (header "Status" "303 See Other")
+	    (header "Location" target))
     (cons (redirect-to (route-reverse target)))))
 
 ;;  Cookies
 
+#-hunchentoot
 (define-constant +rfc822-day+
     (coerce '("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")
 	    '(simple-array (simple-array base-char (3)) (7)))
   :test 'equalp)
 
+#-hunchentoot
 (define-constant +rfc822-month+
     (coerce '("Jan" "Feb" "Mar" "Apr"
 	      "May" "Jun" "Jul" "Aug"
@@ -65,6 +66,7 @@
 	    '(simple-array (simple-array base-char (3)) (12)))
   :test 'equalp)
 
+#-hunchentoot
 (defun rfc1123-date-time (universal-time)
   (multiple-value-bind (second minute hour day month year dow)
       (decode-universal-time universal-time 0)
@@ -72,11 +74,24 @@
 	    (aref +rfc822-day+ dow) day (aref +rfc822-month+ month) year
 	    hour minute second)))
 
+#-hunchentoot
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
 		   secure (http-only t))
-  (header "Set-Cookie: " name "=" value
-	  "; Expires=" (rfc1123-date-time expires)
-	  "; Domain=" domain
-	  "; Path=" path
-	  (when secure "; Secure")
-	  (when http-only "; HttpOnly")))
+  (header "Set-Cookie"
+    name "=" value
+    "; Expires=" (rfc1123-date-time expires)
+    "; Domain=" domain
+    "; Path=" path
+    (when secure "; Secure")
+    (when http-only "; HttpOnly")))
+
+#+hunchentoot
+(defun set-cookie (name value expires &optional (domain *host*) (path "/")
+		   secure (http-only t))
+  (hunchentoot:set-cookie name
+			  :value value
+			  :expires expires
+			  :path path
+			  :domain domain
+			  :secure secure
+			  :http-only http-only))
