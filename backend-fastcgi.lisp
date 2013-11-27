@@ -60,61 +60,38 @@
 
 ;;  Reply
 
+(defgeneric backend-send (data))
+
+(defmethod backend-send ((data string))
+  (sb-fastcgi:fcgx-puts *req* data))
+
+(defmethod backend-send ((data array))
+  (sb-fastcgi:fcgx-putchars *req* data))
+
+;;  Reply headers
+
 (defun status (&rest msg)
-  (apply #'header :status msg))
+  (apply #'header 'status msg))
+
+(defun backend-header (name &rest parts)
+  (backend-send (string-capitalize name))
+  (backend-send ": ")
+  (walk-str #'backend-send parts)
+  (backend-send +crlf+))
 
 (defun backend-send-headers ()
-  (write-string +crlf+ *headers-output*)
-  (let ((headers (get-output-stream-string *headers-output*)))
-    (sb-fastcgi:fcgx-puts *req* headers)
-    headers))
-
-(defun backend-send-body (content)
-  (sb-fastcgi::fcgx-putchars *req* content)
-  (setf *reply* (trivial-utf-8:utf-8-bytes-to-string content)))
+  (backend-send +crlf+))
 
 ;;  Running
 
+(defvar *headers-output*)
+
 (defun backend-run ()
-  (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
-  (sb-fastcgi:socket-server (lambda (req)
-			      (let ((*req* req))
-				(route-request)))
-			    :inet-addr "127.0.0.1"
-			    :port *port*)
-  (error "fastcgi socket server exited"))
-
-;;  I/O
-
-(defclass fcgi-stream (trivial-gray-stream-mixin)
-  ((req :initarg :req)
-   (pos :initform 0)))
-
-(defmethod stream-write-sequence ((stream fcgi-stream)
-				  (sequence sequence)
-				  start
-				  end
-				  &key)
-  (stream-write-sequence stream
-			 (subseq sequence
-				 (or start 0)
-				 end)
-			 0 nil))
-
-(defmethod stream-write-sequence ((stream fcgi-stream)
-				  (sequence simple-base-string)
-				  (start (eql 0))
-				  (end (eql nil))
-				  &key)
-  (with-slots (req pos) stream
-    (sb-fastcgi:fcgx-puts req sequence)
-    (incf pos (length sequence))))
-
-(defmethod stream-write-sequence ((stream fcgi-stream)
-				  (sequence string)
-				  (start (eql 0))
-				  (end (eql nil))
-				  &key)
-  (with-slots (req pos) stream
-    (sb-fastcgi:fcgx-puts-utf-8 req sequence)
-    (incf pos (length sequence))))
+  (flet ((fastcgi-request (req)
+	   (let ((*req* req))
+	     (route-request))))
+    (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
+    (sb-fastcgi:socket-server #'fastcgi-request
+			      :inet-addr "127.0.0.1"
+			      :port *port*)
+    (error "fastcgi socket server exited")))

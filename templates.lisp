@@ -29,7 +29,7 @@
 (defun render-template (template params)
   (html-template:fill-and-print-template template
 					 params
-					 :stream *standard-output*))
+					 :stream *reply-stream*))
 
 (defun type-mime (type)
   (case type

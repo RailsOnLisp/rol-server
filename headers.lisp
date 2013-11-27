@@ -20,15 +20,8 @@
 
 ;;  Headers
 
-#-hunchentoot
 (defun header (name &rest parts)
-  (write-rope `(,(string-capitalize name) ": " ,@parts ,+crlf+)
-	      *headers-output*))
-
-#+hunchentoot
-(defun header (name &rest parts)
-  (setf (hunchentoot:header-out name)
-	(apply #'str parts)))
+  (apply #'backend-header name parts))
 
 (defmacro define-header-function (name)
   `(defun ,name (&rest parts)
@@ -37,10 +30,7 @@
 (define-header-function content-type)
 
 (defun content-length (bytes)
-  #+hunchentoot
-  (setf (hunchentoot:header-out :content-length) bytes)
-  #-hunchentoot
-  (header :content-length (format nil "~D" bytes)))
+  (header :content-length bytes))
 
 ;;  Redirections
 

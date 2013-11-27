@@ -22,14 +22,11 @@
   (unless *reply-sent*
     (setq *reply-sent* t)
     (let ((content (flexi-streams:get-output-stream-sequence
-		    (flexi-streams:flexi-stream-stream
-		     *standard-output*))))
+		    (flexi-streams:flexi-stream-stream *reply-stream*))))
       (content-length (length content))
-      (let ((headers (backend-send-headers)))
-	(backend-send-body content)
-	(when (find :reply *debug*)
-	  (log-msg :debug "REPLY: ~A~&~A" headers *reply*))))
-    *reply*))
+      (backend-send-headers)
+      (backend-send content)
+      nil)))
 
 (defmacro with-reply-handlers (&body body)
   `(handler-bind ((warning
@@ -46,16 +43,22 @@
 		       (reply-send)))))
      ,@body))
 
+(defclass reply-stream (flexi-streams:flexi-output-stream) ()
+  (:default-initargs
+   :flexi-stream-external-format (flexi-streams:make-external-format :utf-8)
+   :stream (flexi-streams:make-in-memory-output-stream
+	    :element-type '(unsigned-byte 8))))
+
+(defmethod stream-element-type ((stream reply-stream))
+  '(unsigned-byte 8))
+
 (defmacro with-reply (&body body)
   `(let* ((*reply* nil)
 	  (*reply-sent* nil)
-	  #-hunchentoot
-	  (*headers-output* (make-string-output-stream :element-type 'base-char))
-	  (*standard-output* (flexi-streams:make-flexi-stream
-			      (flexi-streams:make-in-memory-output-stream)
-			      :external-format :utf-8)))
+	  (*reply-stream* (make-instance 'reply-stream)))
      #+hunchentoot
      (setf hunchentoot:*catch-errors-p* (not (find :reply *debug*)))
-     (with-reply-handlers ,@body)
-     (reply-send)
+     (with-reply-handlers
+       ,@body
+       (reply-send))
      *reply*))

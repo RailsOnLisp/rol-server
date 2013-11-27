@@ -47,8 +47,6 @@
 (defun backend-request-remote-addr ()
   (hunchentoot:remote-addr*))
 
-;;  Headers
-
 ;;  Forms
 
 (defun backend-read-request-data ()
@@ -63,13 +61,17 @@
   (setf (hunchentoot:return-code*) (parse-integer status-string
 						  :junk-allowed t)))
 
+(defun backend-header (name &rest parts)
+  (setf (hunchentoot:header-out name)
+	(apply #'str parts)))
+
 (defun backend-send-headers ()
   (with-output-to-string (out)
     (mapc (lambda (h)
 	    (format out "~A: ~A~A" (car h) (cdr h) +crlf+))
 	  (hunchentoot:headers-out*))))
 
-(defun backend-send-body (content)
+(defun backend-send (content)
   (setf *reply* (trivial-utf-8:utf-8-bytes-to-string content)))
 
 ;;  Running
@@ -80,7 +82,9 @@
 (defmethod hunchentoot:acceptor-request-dispatcher ((hunchentoot:*acceptor*
 						     triangle-acceptor))
   (lambda (hunchentoot:*request*)
-    (route-request)))
+    (let ((*reply*))
+      (route-request)
+      *reply*)))
 
 (defun backend-run ()
   (log-msg :info "starting hunchentoot at 127.0.0.1:~A" *port*)

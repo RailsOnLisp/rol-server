@@ -40,11 +40,10 @@
 
 ;; transient
 
-(defvar *headers-output*)
 (defvar *method*)
 (defvar *uri*)
 (defvar *host*)
 (defvar *form-data*)
 (defvar *reply*)
 (defvar *reply-sent*)
-(defvar *headers-output*)
+(defvar *reply-stream*)
