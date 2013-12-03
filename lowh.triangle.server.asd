@@ -36,13 +36,13 @@
        :description "Application server / core module"
        :depends-on ("alexandria"
 		    "cl-base64"
-		    "html-template"
 		    "ironclad"
 		    "let-over-lambda"
 		    "lowh-facts"
 		    "lowh.triangle.assets"
 		    "lowh.triangle.assets.precompile"
 		    "lowh.triangle.files"
+		    "lowh.triangle.template"
 		    "lowh.triangle.uri"
 		    "flexi-streams"
 		    "trivial-utf-8"
@@ -51,7 +51,6 @@
 			    ((:hunchentoot) '("hunchentoot"))))
        :components
        ((:file "package")
-	(:file "config"      :depends-on ("package"))
 	(:file "secret"      :depends-on ("package"))
 	(:file "vars"        :depends-on ("package"))
 	(:file "logging"     :depends-on ("package"))

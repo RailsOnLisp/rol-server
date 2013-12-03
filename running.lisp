@@ -19,8 +19,6 @@
 (in-package :lowh.triangle.server)
 
 (defun run-handled ()
-  (setf html-template:*default-template-pathname*
-	(merge-pathnames #P"app/views/"))
   (load-facts)
   (backend-run))
 

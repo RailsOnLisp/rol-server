@@ -19,17 +19,11 @@
 (in-package :lowh.triangle.server)
 
 (defun find-template (type name &rest directories)
-  (let ((path (make-pathname :directory (cons :relative
-					      (mapcar #'string-downcase
-						      directories))
-			     :name (string-downcase name)
-			     :type (string-downcase type))))
-    (html-template:create-template-printer path)))
-
-(defun render-template (template params)
-  (html-template:fill-and-print-template template
-					 params
-					 :stream *reply-stream*))
+  (make-pathname :directory (list* :relative "app" "views"
+				   (mapcar #'string-downcase
+					   directories))
+		 :name (string-downcase name)
+		 :type (string-downcase type)))
 
 (defun type-mime (type)
   (case type
@@ -37,12 +31,11 @@
     ((:html) "text/html")
     (:otherwise (string-downcase type))))
 
-(defun render-view (controller action type params)
-  (let* ((template (find-template type action controller))
-	 (layout (find-template type *layout* "_layouts")))
+(defun render-view (controller action type)
+  (let ((template (find-template type action controller))
+	(layout (find-template type *layout* "_layouts")))
     (content-type (type-mime type))
-    (render-template layout
-		     `(:controller ,(string-downcase controller)
-				   :action ,(string-downcase action)
-				   :parts ((,template ,@params))
-				   ,@params))))
+    (template-let (template controller action)
+      (print-template layout))))
+
+(setq *template-output* (make-synonym-stream '*reply-stream*))

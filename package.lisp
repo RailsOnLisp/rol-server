@@ -20,7 +20,7 @@
 
 (defpackage :lowh.triangle.server
   (:nicknames :L>server)
-  (:use :cl :alexandria :L>assets :L>files :L>uri
+  (:use :cl :alexandria :L>assets :L>files :L>template :L>uri
 	:let-over-lambda :trivial-gray-streams)
   (:export
    ;;  Config
@@ -75,7 +75,7 @@
    #:run
    ;;  Assets
    . #.(let (list)
-	 (dolist (pkg '(:L>assets :L>files :L>uri))
+	 (dolist (pkg '(:L>assets :L>files :L>template :L>uri))
 	   (do-external-symbols (sym pkg)
 	     (push (symbol-name sym) list)))
 	 list)
