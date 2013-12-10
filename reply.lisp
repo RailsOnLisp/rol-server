@@ -33,7 +33,9 @@
 		     (lambda (c)
 		       (unless *reply-sent*
 			 (let ((status (http-error-status c)))
-			   (log-msg (if (char= #\5 (char status 0)) :error :info)
+			   (log-msg (if (char= #\5 (char status 0))
+					:error
+					:info)
 				    "~A" c)
 			   (render-error status (http-error-message c))))
 		       (invoke-restart 'reply))))

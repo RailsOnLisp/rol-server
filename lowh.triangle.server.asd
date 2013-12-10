@@ -56,8 +56,7 @@
 	(:file "conditions"  :depends-on ("package"))
 	(:file "resource"    :depends-on ("package"))
 	(:file "assets"      :depends-on ("package" "vars"))
-	(:file ,backend-file :depends-on ("package" #+hunchentoot
-					  "headers" "logging"))
+	(:file ,backend-file :depends-on ("package" "headers" "logging"))
 	(:file "forms"       :depends-on ("package" "vars" ,backend-file))
 	(:file "headers"     :depends-on ("package" "vars"))
 	(:file "reply"       :depends-on ("vars" ,backend-file))
@@ -69,5 +68,4 @@
 	(:file "routing"     :depends-on ("render" "request"
 					  "templates" ,backend-file))
 	(:file "facts"       :depends-on ("package"))
-	(:file "running"     :depends-on ("routing" "facts"
-					  ,backend-file)))))
+	(:file "running"     :depends-on ("routing" "facts" ,backend-file)))))
