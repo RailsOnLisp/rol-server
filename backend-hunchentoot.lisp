@@ -72,7 +72,7 @@
 	  (hunchentoot:headers-out*))))
 
 (defun backend-send (content)
-  (setf *reply* (trivial-utf-8:utf-8-bytes-to-string content)))
+  (trivial-utf-8:utf-8-bytes-to-string content))
 
 ;;  Running
 
@@ -82,9 +82,8 @@
 (defmethod hunchentoot:acceptor-request-dispatcher ((hunchentoot:*acceptor*
 						     triangle-acceptor))
   (lambda (hunchentoot:*request*)
-    (let ((*reply*))
-      (route-request)
-      *reply*)))
+    (let ((hunchentoot:*catch-errors-p* (not (find :reply *debug*))))
+      (route-request))))
 
 (defun backend-run ()
   (log-msg :info "starting hunchentoot at 127.0.0.1:~A" *port*)

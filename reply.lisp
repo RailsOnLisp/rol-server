@@ -25,8 +25,7 @@
 		    (flexi-streams:flexi-stream-stream *reply-stream*))))
       (content-length (length content))
       (backend-send-headers)
-      (backend-send content)
-      nil)))
+      (backend-send content))))
 
 (defmacro with-reply-handlers (&body body)
   `(with-simple-restart (reply "Send HTTP reply")
@@ -50,12 +49,8 @@
   '(unsigned-byte 8))
 
 (defmacro with-reply (&body body)
-  `(let* ((*reply* nil)
-	  (*reply-sent* nil)
-	  (*reply-stream* (make-instance 'reply-stream)))
-     #+hunchentoot
-     (setf hunchentoot:*catch-errors-p* (not (find :reply *debug*)))
+  `(let ((*reply-sent* nil)
+         (*reply-stream* (make-instance 'reply-stream)))
      (with-reply-handlers
-       ,@body
-       (reply-send))
-     *reply*))
+       ,@body)
+     (reply-send)))

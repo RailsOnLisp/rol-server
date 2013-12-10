@@ -44,6 +44,5 @@
 (defvar *uri*)
 (defvar *host*)
 (defvar *form-data*)
-(defvar *reply*)
 (defvar *reply-sent*)
 (defvar *reply-stream*)

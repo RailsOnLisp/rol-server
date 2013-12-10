@@ -63,10 +63,12 @@
 (defgeneric backend-send (data))
 
 (defmethod backend-send ((data string))
-  (sb-fastcgi:fcgx-puts *req* data))
+  (sb-fastcgi:fcgx-puts *req* data)
+  (values))
 
 (defmethod backend-send ((data array))
-  (sb-fastcgi:fcgx-putchars *req* data))
+  (sb-fastcgi:fcgx-putchars *req* data)
+  (values))
 
 ;;  Reply headers
 
