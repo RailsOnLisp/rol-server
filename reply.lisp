@@ -29,19 +29,16 @@
       nil)))
 
 (defmacro with-reply-handlers (&body body)
-  `(handler-bind ((warning
-		   (lambda (w)
-		     (log-msg :warn "~A" w)
-		     (muffle-warning w)))
-		  (condition
-		   (lambda (c)
-		     (unless *reply-sent*
-		       (let ((status (http-error-status c)))
-			 (log-msg (if (char= #\5 (char status 0)) :error :info)
-				  "~A" c)
-			 (render-error status (http-error-message c)))
-		       (reply-send)))))
-     ,@body))
+  `(with-simple-restart (reply "Send HTTP reply")
+     (handler-bind ((error
+		     (lambda (c)
+		       (unless *reply-sent*
+			 (let ((status (http-error-status c)))
+			   (log-msg (if (char= #\5 (char status 0)) :error :info)
+				    "~A" c)
+			   (render-error status (http-error-message c))))
+		       (invoke-restart 'reply))))
+       ,@body)))
 
 (defclass reply-stream (flexi-streams:flexi-output-stream) ()
   (:default-initargs

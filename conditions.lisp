@@ -18,7 +18,7 @@
 
 (in-package :lowh.triangle.server)
 
-(define-condition http-error ()
+(define-condition http-error (error)
   ((status :type string :reader http-error-status :initarg :message)
    (message :type string :reader http-error-message :initarg :message)))
 

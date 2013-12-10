@@ -23,21 +23,19 @@
   (backend-run))
 
 (defun run-protected ()
-  (handler-bind ((sb-sys:interactive-interrupt
+  (handler-bind ((condition
+		  (lambda (e)
+		    (log-msg :info "~A" e)))
+		 (error
+		  (lambda (e)
+		    (log-msg :error "~A" e)))
+		 (sb-sys:interactive-interrupt
 		  (lambda (c)
 		    (declare (ignore c))
 		    (log-msg :emerg "caught interrupt")
-		    (return-from run-protected 0)))
-		 (warning
-		  (lambda (w)
-		    (log-msg :warn "~A" w)
-		    (muffle-warning w)))
-		 (condition
-		  (lambda (c)
-		    (let ((status (http-error-status c)))
-		      (log-msg (if (char= #\5 (char status 0)) :error :info)
-			       "~A" c)))))
-    (run-handled)))
+		    (return-from run-protected 0))))
+    (with-logged-warnings
+      (run-handled))))
 
 (defun run ()
   (unwind-protect (run-protected)

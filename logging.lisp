@@ -21,3 +21,10 @@
 (defun log-msg (level fmt &rest args)
   (format *error-output* "~&~A ~?~%" level fmt args)
   (force-output *error-output*))
+
+(defmacro with-logged-warnings (&body body)
+  `(handler-bind ((warning
+		   (lambda (w)
+		     (log-msg :warn "~A" w)
+		     (muffle-warning w))))
+     ,@body))
