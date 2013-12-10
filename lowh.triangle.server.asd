@@ -40,7 +40,6 @@
 		    "let-over-lambda"
 		    "lowh-facts"
 		    "lowh.triangle.assets"
-		    "lowh.triangle.assets.precompile"
 		    "lowh.triangle.files"
 		    "lowh.triangle.template"
 		    "lowh.triangle.uri"
