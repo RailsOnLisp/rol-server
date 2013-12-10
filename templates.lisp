@@ -36,6 +36,7 @@
 	(layout (find-template type *layout* "_layouts")))
     (content-type (type-mime type))
     (template-let (template controller action)
-      (print-template layout))))
+      (let ((*print-case* :downcase))
+	(print-template layout)))))
 
 (setq *template-output* (make-synonym-stream '*reply-stream*))
