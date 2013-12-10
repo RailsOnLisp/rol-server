@@ -32,12 +32,6 @@
 (define-constant +crlf+ (coerce #(#\CR #\LF) 'string)
   :test 'string=)
 
-;; private
-
-(defvar *static-routes* (make-hash-table :test 'equal))
-(defvar *static-routes/reverse* (make-hash-table :test 'equal))
-(defvar *templated-routes* nil)
-
 ;; transient
 
 (defvar *method*)

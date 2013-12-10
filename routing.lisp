@@ -20,6 +20,15 @@
 
 ;;  Static routes
 
+(defvar *static-routes*)
+(defvar *static-routes/reverse*)
+
+(defun clear-static-routes ()
+  (setq *static-routes*         (make-hash-table :test 'equal)
+	*static-routes/reverse* (make-hash-table :test 'equal)))
+
+(clear-static-routes)
+
 (defsetf static-route-controller (uri) (value)
   `(setf (gethash ,uri *static-routes*) ,value))
 
@@ -47,31 +56,65 @@
   (controller-form () :type cons)
   (function () :type function))
 
+(defvar *templated-routes* nil)
+
+(defun clear-templated-routes ()
+  (setq *templated-routes* nil))
+
 (defun find-templated-route (uri-template)
   (find uri-template *templated-routes*
 	:key #'templated-route-uri-template
 	:test #'string=))
 
-(defmacro define-templated-route (uri-template controller-form)
-  (let ((g!uri (gensym "URI-")))
-    `(let ((old (find-templated-route ,uri-template)))
-       (when old
-	 (remove old *templated-routes*))
-       (push (make-templated-route :uri-template ,uri-template
-				   :controller-form ',controller-form
-				   :function
-				   (lambda (,g!uri)
-				     (uri-template-bind (,uri-template ,g!uri)
-				       (list ,@controller-form))))
-	     *templated-routes*))))
+(defun remove-templated-route (uri-template)
+  (setf *templated-routes*
+	(remove uri-template *templated-routes*
+		:key #'templated-route-uri-template
+		:test #'string=)))
+
+(defun update-templated-route (templated-route)
+  (let ((uri-template (templated-route-uri-template templated-route)))
+    (labels ((iter (cell)
+	       (cond
+		 ((endp cell) (push templated-route *templated-routes*))
+		 ((string= uri-template (templated-route-uri-template
+					 (car cell)))
+		  (rplaca cell templated-route))
+		 (t (iter (cdr cell))))))
+      (iter *templated-routes*))))
+
+(defun list-unquote-if (test list)
+  (labels ((walk (x)
+	     (if (funcall test x)
+		 x
+		 (cond ((consp x) (loop for v = x then (cdr v)
+				     while (consp v)
+				     collect (walk (car v)) into cars
+				     finally (return
+					       (if (null v)
+						   `(list ,@cars)
+						   `(list* ,@cars
+							   ,(walk v))))))
+		       ((or (null x)
+			    (eq t x)
+			    (keywordp x)) x)
+		       ((symbolp x) `(quote ,x))
+		       (t x)))))
+    (walk list)))
+
+(defun define-templated-route (uri controller-form)
+  (update-templated-route
+   (make-templated-route :uri-template (uri-template-string uri)
+			 :controller-form controller-form
+			 :function (compile-uri-template-matcher
+				    uri `(,(list-unquote-if
+					    #'uri-var-p
+					    controller-form))))))
 
 (defun templated-route-controller (uri)
-  (when *templated-routes*
-    (loop
-       for route in *templated-routes*
-       for fun = (funcall (templated-route-function route) uri)
-       until fun
-       return fun)))
+  (some (lambda (route)
+	  (funcall (templated-route-function route) uri))
+	*templated-routes*))
 
 (defun templated-route-reverse (controller)
   (let ((route (find controller *templated-routes*
@@ -90,13 +133,14 @@
 
 ;;  Abstract routes functions
 
-(defun uri-template-is-static-p (uri-template)
-  (not (find #\{ uri-template)))
-
-(defmacro define-route (uri-template controller-form)
-  (if (uri-template-is-static-p uri-template)
-      `(define-static-route ,uri-template ',controller-form)
-      `(define-templated-route ,uri-template ,controller-form)))
+(defmacro define-route (uri &body controller-form)
+  (let ((g!uri (gensym "URI-"))
+	(g!form (gensym "FORM-")))
+    `(let ((,g!uri ,uri)
+	   (,g!form (progn ,@controller-form)))
+       (if (uri-template-p ,g!uri)
+	   (define-templated-route ,g!uri ,g!form)
+	   (define-static-route ,g!uri ,g!form)))))
 
 (defun find-route (uri)
   (or (static-route-controller uri)
@@ -111,6 +155,10 @@
 (defun list-routes ()
   (append (list-static-routes)
 	  (list-templated-routes)))
+
+(defun clear-routes ()
+  (clear-static-routes)
+  (clear-templated-routes))
 
 ;;  Rendering
 

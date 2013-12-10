@@ -36,10 +36,10 @@
    ;;  Routing
    #:*method*
    #:define-route
+   #:clear-routes
    ;;  Asset routes
-   #:*compile-assets*
-   #:asset-route
-   #:route-precompiled-assets
+   #:asset-controller
+   #:define-assets-route
    ;;  Forms
    #:with-form-data
    ;;  HTTP Headers
@@ -66,6 +66,7 @@
    #:*layout*
    #:render-view
    #:render-error
+   #:print-asset-tag
    ;;  Resource
    #:define-resource
    #:define-action
@@ -73,7 +74,7 @@
    #:get #:post #:put
    ;;  Run
    #:run
-   ;;  Assets
+   ;;  Re-export other symbols
    . #.(let (list)
 	 (dolist (pkg '(:L>assets :L>files :L>template :L>uri))
 	   (do-external-symbols (sym pkg)

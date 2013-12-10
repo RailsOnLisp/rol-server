@@ -20,21 +20,28 @@
 
 ;;  Render assets on demand
 
-(defun asset-route (url)
-  (unless (string= url *asset-url-prefix*
-		   :end1 (length *asset-url-prefix*))
-    (http-error "404 not found" "asset prefix not found"))
-  (let* ((spec (subseq url (length *asset-url-prefix*)))
-	 (asset (first (find-assets-from-spec spec))))
-    (unless asset
-      (http-error "404 not found" "asset not found: ~S" spec))
-    (compile-asset asset *reply-stream*)))
+(defun debug-asset-p (asset)
+  (and (find :assets *debug*)
+       (typep asset 'preprocessed-asset)))
 
-(defun route-precompiled-assets (&optional (enable t))
-  (when enable
-    (msg "Precompile asset routes")
-    (with-msg-indent (1)
-      (dolist (asset (locate-precompiled-assets))
-	(let ((url (asset-url asset)))
-	  (msg "~A" url)
-	  (define-static-route url `(asset-route ,url)))))))
+(defun asset-controller (asset-spec)
+  (let ((asset (find-asset asset-spec)))
+    (unless asset
+      (http-error "404 not found" "asset not found: ~S" asset-spec))
+    (if (debug-asset-p asset)
+	(process-asset asset *reply-stream*)
+	(compile-asset asset *reply-stream*))))
+
+(defun define-assets-route (url-prefix path-prefix)
+  (let ((url-prefix (string-right-trim "/" url-prefix)))
+    (define-route (str url-prefix "{/asset-spec}")
+      `(let ((*asset-url-prefix* ,url-prefix)
+	     (*asset-path-prefix* ,path-prefix))
+	 (asset-route L>uri.vars::asset-spec)))))
+
+(defun print-asset-tag (spec &rest args)
+  (let ((asset (find-asset spec)))
+    (if (debug-asset-p asset)
+	(dolist (asset-fragment (preprocess-asset asset))
+	  (apply #'asset-include *reply-stream* :html asset-fragment args))
+	(apply #'asset-include *reply-stream* :html asset args))))

@@ -24,6 +24,11 @@
 (use-package :alexandria)
 (use-package :L>server)
 
+;;  Clear old definitions
+
+(clear-routes)
+(clear-template-cache)
+
 (load-secret)
 
 (dolist (dir '("app/models/*.lisp"
@@ -32,10 +37,6 @@
   (dolist (file (directory dir))
     (when (alphanumericp (char (pathname-name file) 0))
       (load (enough-namestring file)))))
-
-(when *compile-assets*
-  (require :lowh.triangle.assets.precompile))
-(route-precompiled-assets *compile-assets*)
 
 (defun reload ()
   (load "lib/triangle/server/load/app"))
