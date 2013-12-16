@@ -29,7 +29,7 @@
 
 ;;  Request
 
-(defvar *req* nil)
+(defvar *req*)
 
 (defun backend-request-env ()
   (sb-fastcgi:fcgx-getenv *req*))
