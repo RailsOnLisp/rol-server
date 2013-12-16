@@ -81,7 +81,8 @@
 					 (car cell)))
 		  (rplaca cell templated-route))
 		 (t (iter (cdr cell))))))
-      (iter *templated-routes*))))
+      (iter *templated-routes*)
+      templated-route)))
 
 (defun list-unquote-if (test list)
   (labels ((walk (x)

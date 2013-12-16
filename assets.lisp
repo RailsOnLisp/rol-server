@@ -24,20 +24,18 @@
   (and (find :assets *debug*)
        (typep asset 'preprocessed-asset)))
 
-(defun asset-controller (asset-spec)
-  (let ((asset (find-asset asset-spec)))
+(defun asset-controller (name ext *assets-url-template* *assets-path-template*)
+  (let* ((asset-spec (str name (when ext ".") ext))
+	 (asset (find-asset asset-spec)))
     (unless asset
       (http-error "404 not found" "asset not found: ~S" asset-spec))
     (if (debug-asset-p asset)
 	(process-asset asset *reply-stream*)
 	(compile-asset asset *reply-stream*))))
 
-(defun define-assets-route (url-prefix path-prefix)
-  (let ((url-prefix (string-right-trim "/" url-prefix)))
-    (define-route (str url-prefix "{/asset-spec}")
-      `(let ((*asset-url-prefix* ,url-prefix)
-	     (*asset-path-prefix* ,path-prefix))
-	 (asset-route L>uri.vars::asset-spec)))))
+(defun define-assets-route (url-template path-template)
+  (define-route url-template
+    `(asset-controller ,(uri-var 'name) ,(uri-var 'ext) ,url-template ,path-template)))
 
 (defun print-asset-tag (spec &rest args)
   (let ((asset (find-asset spec)))
