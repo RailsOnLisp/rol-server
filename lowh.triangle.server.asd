@@ -44,6 +44,7 @@
 		    "lowh.triangle.template"
 		    "lowh.triangle.uri"
 		    "flexi-streams"
+		    "trivial-backtrace"
 		    "trivial-utf-8"
 		    ,@(case backend
 			    ((:fastcgi) '("sb-fastcgi"))

@@ -20,16 +20,19 @@
 
 (defun render-text (text)
   (content-type "text/plain")
-  (write-string text))
+  (write-string text *reply-stream*))
 
 (defun render-error (status-string &optional (msg ""))
   (status status-string)
   (content-type "text/plain")
-  (write-string status-string)
+  (write-string status-string *reply-stream*)
   (when *debug*
-    (fresh-line)
-    (write-string msg)
-    (fresh-line)
-    (terpri)
-    (prin1 (backend-request-env))
-    (fresh-line)))
+    (fresh-line *reply-stream*)
+    (write-string msg *reply-stream*)
+    (fresh-line *reply-stream*)
+    (terpri *reply-stream*)
+    (prin1 (backend-request-env) *reply-stream*)
+    (fresh-line *reply-stream*)
+    (trivial-backtrace:map-backtrace
+     (lambda (&rest args)
+       (format *reply-stream* "~%~A~%" args)))))

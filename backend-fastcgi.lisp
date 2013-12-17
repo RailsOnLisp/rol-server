@@ -38,7 +38,9 @@
   (sb-fastcgi:fcgx-getparam *req* "REQUEST_METHOD"))
 
 (defun backend-request-header (name)
-  (sb-fastcgi:fcgx-getparam *req* (str "HTTP_" (string-upcase name))))
+  (let ((name (str "HTTP_" (nsubstitute #\_ #\- (string-upcase name)
+					:test #'char=))))
+    (sb-fastcgi:fcgx-getparam *req* name)))
 
 (defun backend-request-uri ()
   (sb-fastcgi:fcgx-getparam *req* "DOCUMENT_URI"))
@@ -63,17 +65,23 @@
 (defgeneric backend-send (data))
 
 (defmethod backend-send ((data string))
+  (when (find :reply *debug*)
+    (log-msg :debug "SEND ~S" (if (eq +crlf+ data)
+				  '+crlf+
+				  data)))
   (sb-fastcgi:fcgx-puts *req* data)
   (values))
 
 (defmethod backend-send ((data array))
+  (when (find :reply *debug*)
+    (log-msg :debug "SEND ~D bytes" (length data)))
   (sb-fastcgi:fcgx-putchars *req* data)
   (values))
 
 ;;  Reply headers
 
-(defun status (&rest msg)
-  (apply #'header 'status msg))
+(defun backend-status (&rest parts)
+  (apply #'backend-header 'status parts))
 
 (defun backend-header (name &rest parts)
   (backend-send (string-capitalize name))

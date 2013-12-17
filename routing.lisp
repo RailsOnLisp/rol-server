@@ -171,6 +171,8 @@
   (with-request
     (let ((route (the cons (find-route *uri*))))
       (log-msg :info "~A ~S -> ~S" *method* *uri* route)
+      (when (find :request *debug*)
+	(log-msg :debug "ENV ~S" (backend-request-env)))
       (with-reply
 	(time (render-route route))
 	(force-output *trace-output*)))))

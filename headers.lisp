@@ -20,6 +20,9 @@
 
 ;;  Headers
 
+(defun status (&rest parts)
+  (apply #'backend-status parts))
+
 (defun header (name &rest parts)
   (apply #'backend-header name parts))
 
@@ -36,19 +39,17 @@
 
 (defun redirect-to (target)
   (etypecase target
-    (string (header "Status" "303 See Other")
+    (string (status "303 See Other")
 	    (header "Location" target))
     (cons (redirect-to (route-reverse target)))))
 
 ;;  Cookies
 
-#-hunchentoot
 (define-constant +rfc822-day+
     (coerce '("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")
 	    '(simple-array (simple-array base-char (3)) (7)))
   :test 'equalp)
 
-#-hunchentoot
 (define-constant +rfc822-month+
     (coerce '("Jan" "Feb" "Mar" "Apr"
 	      "May" "Jun" "Jul" "Aug"
@@ -56,7 +57,6 @@
 	    '(simple-array (simple-array base-char (3)) (12)))
   :test 'equalp)
 
-#-hunchentoot
 (defun rfc1123-date-time (universal-time)
   (multiple-value-bind (second minute hour day month year dow)
       (decode-universal-time universal-time 0)
@@ -64,7 +64,6 @@
 	    (aref +rfc822-day+ dow) day (aref +rfc822-month+ month) year
 	    hour minute second)))
 
-#-hunchentoot
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
 		   secure (http-only t))
   (header "Set-Cookie"
@@ -74,14 +73,3 @@
     "; Path=" path
     (when secure "; Secure")
     (when http-only "; HttpOnly")))
-
-#+hunchentoot
-(defun set-cookie (name value expires &optional (domain *host*) (path "/")
-		   secure (http-only t))
-  (hunchentoot:set-cookie name
-			  :value value
-			  :expires expires
-			  :path path
-			  :domain domain
-			  :secure secure
-			  :http-only http-only))

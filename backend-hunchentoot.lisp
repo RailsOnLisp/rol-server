@@ -25,7 +25,7 @@
 (setf hunchentoot:*log-lisp-backtraces-p* t)
 (setf hunchentoot:*log-lisp-warnings-p* t)
 (setf hunchentoot:*show-lisp-errors-p* t)
-(defvar hunchentoot:*show-lisp-backtraces-p* t)
+(setf hunchentoot:*catch-errors-p* nil)
 
 ;;  Request
 
@@ -57,19 +57,32 @@
 
 ;;  Reply
 
-(defun status (status-string)
-  (setf (hunchentoot:return-code*) (parse-integer status-string
-						  :junk-allowed t)))
+(defun backend-status (&rest parts)
+  (let ((status-string (apply #'str parts)))
+    (setf (hunchentoot:return-code*) (parse-integer status-string
+						    :junk-allowed t))))
 
 (defun backend-header (name &rest parts)
   (setf (hunchentoot:header-out name)
-	(apply #'str parts)))
+	(if (and parts (null (cdr parts)) (integerp (car parts)))
+	    (car parts) ;; pass single integer as-is
+	    (apply #'str parts))))
 
 (defun backend-send-headers ()
   (with-output-to-string (out)
     (mapc (lambda (h)
 	    (format out "~A: ~A~A" (car h) (cdr h) +crlf+))
 	  (hunchentoot:headers-out*))))
+
+(defun set-cookie (name value expires &optional (domain *host*) (path "/")
+		   secure (http-only t))
+  (hunchentoot:set-cookie name
+			  :value value
+			  :expires expires
+			  :path path
+			  :domain domain
+			  :secure secure
+			  :http-only http-only))
 
 (defun backend-send (content)
   (trivial-utf-8:utf-8-bytes-to-string content))
