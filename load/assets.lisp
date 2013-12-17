@@ -16,7 +16,10 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(require :lowh.triangle.assets.precompile)
+(mapc #'load (mapcar #'enough-namestring
+		     (directory "**/*.asd")))
+
+(require :lowh.triangle.assets)
 
 (use-package :L>assets)
 

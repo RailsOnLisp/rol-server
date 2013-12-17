@@ -71,7 +71,7 @@ FIND_PUBLIC = cd public && find . \
  -or -type f -print
 
 LOAD_APP = \
-	--load ${LOWH_TRIANGLE_SERVER}/load/app
+	--load load
 
 LOAD_ASSETS = \
 	--load ${LOWH_TRIANGLE_SERVER}/load/assets \
@@ -114,7 +114,6 @@ distclean: clean
 
 load:
 	${SBCL} ${SBCL_DEBUG_OPTS} ${LOAD_APP} \
-		--eval '(setf *debug* t)' \
 		--eval '(run)' \
 		--quit
 
