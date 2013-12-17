@@ -43,26 +43,47 @@
 	    (header "Location" target))
     (cons (redirect-to (route-reverse target)))))
 
+(defun not-modified ()
+  (status "403 Not Modified"))
+
 ;;  Cookies
 
 (define-constant +rfc822-day+
-    (coerce '("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")
-	    '(simple-array (simple-array base-char (3)) (7)))
+    #("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")
   :test 'equalp)
 
 (define-constant +rfc822-month+
-    (coerce '("Jan" "Feb" "Mar" "Apr"
-	      "May" "Jun" "Jul" "Aug"
-	      "Sep" "Oct" "Nov" "Dec")
-	    '(simple-array (simple-array base-char (3)) (12)))
+    #("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   :test 'equalp)
 
 (defun rfc1123-date-time (universal-time)
   (multiple-value-bind (second minute hour day month year dow)
       (decode-universal-time universal-time 0)
     (format nil "~A, ~2,'0D ~A ~4,'0D ~2,'0D:~2,'0D:~2,'0D GMT"
-	    (aref +rfc822-day+ dow) day (aref +rfc822-month+ month) year
+	    (aref +rfc822-day+ dow) day (svref +rfc822-month+ (1- month)) year
 	    hour minute second)))
+
+(defun parse-rfc1123-day (string)
+  (1+ (position string +rfc822-day+ :test #'string-equal)))
+
+(defun parse-rfc1123-month (string)
+  (1+ (position string +rfc822-month+ :test #'string-equal)))
+
+(defpackage rfc1123-timezone)
+
+(defun parse-rfc1123-timezone (string)
+  (symbol-value (find-symbol (string-upcase string) :rfc1123-timezone)))
+
+(defun parse-rfc1123-date-time (string)
+  "FIXME: check against RFC1123"
+  (cl-ppcre:register-groups-bind ((#'parse-rfc1123-day dow)
+				  (#'parse-integer d)
+				  (#'parse-rfc1123-month mo)
+				  (#'parse-integer y h mi s)
+				  (#'parse-rfc1123-timezone tz))
+      ("([A-Za-z]{3}), ([0-9]+) ([A-Za-z]{3}) ([0-9]+) ([0-9]+):([0-9]+):([0-9]+) ([A-Z]{3})"
+       string)
+    (values (encode-universal-time s mi h d mo y tz) dow)))
 
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
 		   secure (http-only t))
@@ -73,3 +94,6 @@
     "; Path=" path
     (when secure "; Secure")
     (when http-only "; HttpOnly")))
+
+(in-package :rfc1123-timezone)
+(cl:defconstant GMT 0)

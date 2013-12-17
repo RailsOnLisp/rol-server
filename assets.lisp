@@ -29,17 +29,27 @@
 	 (asset (find-asset asset-spec)))
     (unless asset
       (http-error "404 not found" "asset not found: ~S" asset-spec))
-    (if (debug-asset-p asset)
-	(process-asset asset *reply-stream*)
-	(compile-asset asset *reply-stream*))))
+    (let ((write-date (asset-write-date asset))
+	  (if-modified-since (request-header :if-modified-since)))
+      (cond ((and if-modified-since
+		  (= (parse-rfc1123-date-time if-modified-since)
+		     write-date))
+	     (status "304 not modified"))
+	    ((debug-asset-p asset)
+	     (header :last-modified (rfc1123-date-time write-date))
+	     (process-asset asset *reply-stream*))
+	    (t
+	     (header :last-modified (rfc1123-date-time write-date))
+	     (compile-asset asset *reply-stream*))))))
 
 (defun define-assets-route (url-template path-template)
   (define-route url-template
-    `(asset-controller ,(uri-var 'name) ,(uri-var 'ext) ,url-template ,path-template)))
+    `(asset-controller ,(uri-var 'name) ,(uri-var 'ext)
+		       ,url-template ,path-template)))
 
 (defun print-asset-tag (spec &rest args)
   (let ((asset (find-asset spec)))
     (if (debug-asset-p asset)
-	(dolist (asset-fragment (preprocess-asset asset))
-	  (apply #'asset-include *reply-stream* :html asset-fragment args))
+	(dolist (source (asset-sources asset))
+	  (apply #'asset-include *reply-stream* :html source args))
 	(apply #'asset-include *reply-stream* :html asset args))))
