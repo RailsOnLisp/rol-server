@@ -18,9 +18,8 @@
 
 (in-package :lowh.triangle.server)
 
-(define-condition http-error (error)
-  ((status :type string :reader http-error-status :initarg :message)
-   (message :type string :reader http-error-message :initarg :message)))
+(defgeneric http-error-status (condition))
+(defgeneric http-error-message (condition))
 
 (defmethod http-error-status (condition)
   "500 Internal server error")
@@ -28,16 +27,27 @@
 (defmethod http-error-message (condition)
   (format nil "~A: ~A" (type-of condition) condition))
 
-(defun http-error (status msg-fmt &rest args)
-  (signal 'http-error
-	  :status status
-	  :message (if args
-		       (apply 'format nil msg-fmt args)
-		       msg-fmt)))
+(define-condition http-error (error)
+  ((status :type string :initarg :status)
+   (message :type string :initarg :message)))
 
-(defmethod print-object ((o http-error) stream)
+(defmethod http-error-status ((e http-error))
+  (slot-value e 'status))
+
+(defmethod http-error-message ((e http-error))
+  (slot-value e 'message))
+
+(defun http-error (status msg-fmt &rest args)
+  (error 'http-error
+	 :status status
+	 :message (if args
+		      (apply 'format nil msg-fmt args)
+		      msg-fmt)))
+
+(defmethod print-object ((e http-error) stream)
   (if (and *print-pretty* (not *print-readably*))
       (format stream "~A~%~A"
-	      (http-error-status o) (http-error-message o))
-      (format stream "(http-error ~S ~S)"
-	      (http-error-status o) (http-error-message o))))
+	      (http-error-status e) (http-error-message e))
+      (print `(http-error ,(http-error-status e)
+			  ,(http-error-message e))
+	     stream)))

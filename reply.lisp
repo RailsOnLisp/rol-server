@@ -32,13 +32,19 @@
      (handler-bind ((error
 		     (lambda (c)
 		       (unless *reply-sent*
-			 (let ((status (http-error-status c)))
+			 (let ((status (http-error-status c))
+			       (msg (http-error-message c))
+			       backtrace)
 			   (log-msg (if (char= #\5 (char status 0))
 					:error
 					:info)
-				    "~A" c)
-			   (render-error status (http-error-message c))))
-		       (invoke-restart 'reply))))
+				    "~A ~A" status msg)
+			   (when (find :backtrace *debug*)
+			     (ignore-errors
+			       (trivial-backtrace:map-backtrace
+				(lambda (x) (push x backtrace)))))
+			   (render-error status msg c backtrace))
+			 (invoke-restart 'reply)))))
        ,@body)))
 
 (defclass reply-stream (flexi-streams:flexi-output-stream) ()
@@ -49,6 +55,11 @@
 
 (defmethod stream-element-type ((stream reply-stream))
   '(unsigned-byte 8))
+
+(defmethod flexi-streams:get-output-stream-sequence ((stream reply-stream)
+						     &key as-list)
+  (flexi-streams:get-output-stream-sequence
+   (flexi-streams:flexi-stream-stream stream) :as-list as-list))
 
 (defmacro with-reply (&body body)
   `(let ((*reply-sent* nil)

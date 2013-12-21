@@ -23,10 +23,7 @@
   (backend-run))
 
 (defun run-protected ()
-  (handler-bind ((condition
-		  (lambda (e)
-		    (log-msg :info "~A" e)))
-		 (error
+  (handler-bind ((error
 		  (lambda (e)
 		    (log-msg :error "~A" e)))
 		 (sb-sys:interactive-interrupt

@@ -32,11 +32,15 @@
     (:otherwise (string-downcase type))))
 
 (defun render-view (controller action type)
-  (let ((template (find-template type action controller))
-	(layout (find-template type *layout* "_layouts")))
-    (content-type (type-mime type))
-    (template-let (template controller action)
-      (let ((*print-case* :downcase))
-	(print-template layout)))))
+  (handler-bind ((unbound-variable (lambda (e)
+				     (log-msg :warn "Unbound variable ~S"
+					      (cell-error-name e))
+				     (use-value nil e))))
+    (let ((template (find-template type action controller))
+	  (layout (find-template type *layout* "_layouts")))
+      (content-type (type-mime type))
+      (template-let (template controller action)
+	(let ((*print-case* :downcase))
+	  (print-template layout))))))
 
 (setq *template-output* (make-synonym-stream '*reply-stream*))

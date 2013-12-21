@@ -60,13 +60,13 @@
 	(:file ,backend-file :depends-on ("package" "headers" "logging" "vars"))
 	(:file "forms"       :depends-on (,backend-file))
 	(:file "headers"     :depends-on ("package" "vars"))
-	(:file "reply"       :depends-on (,backend-file))
-	(:file "render"      :depends-on (,backend-file))
+	(:file "render"      :depends-on ("templates" ,backend-file))
+	(:file "reply"       :depends-on ("render" ,backend-file))
 	(:file "templates"   :depends-on ("headers"))
 	(:file "helpers"     :depends-on ("templates"))
 	(:file "request"     :depends-on ("forms" ,backend-file))
 	(:file "session"     :depends-on ("request" "secret"))
-	(:file "routing"     :depends-on ("render" "reply" "request"
+	(:file "routing"     :depends-on ("reply" "request"
 					  "templates" ,backend-file))
 	(:file "facts"       :depends-on ("package"))
 	(:file "running"     :depends-on ("routing" "facts" ,backend-file)))))
