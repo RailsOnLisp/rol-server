@@ -35,12 +35,11 @@
 		  (= (parse-rfc1123-date-time if-modified-since)
 		     write-date))
 	     (status "304 not modified"))
-	    ((debug-asset-p asset)
-	     (header :last-modified (rfc1123-date-time write-date))
-	     (process-asset asset *reply-stream*))
-	    (t
-	     (header :last-modified (rfc1123-date-time write-date))
-	     (compile-asset asset *reply-stream*))))))
+	    (t (header :last-modified (rfc1123-date-time write-date))
+	       (header :content-type (mime-type asset))
+	       (if (debug-asset-p asset)
+		   (process-asset asset *reply-stream*)
+		   (compile-asset asset *reply-stream*)))))))
 
 (defun define-assets-route (url-template path-template)
   (define-route url-template
