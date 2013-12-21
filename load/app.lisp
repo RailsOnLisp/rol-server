@@ -16,8 +16,9 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(mapc #'load (mapcar #'enough-namestring
-		     (directory "**/*.asd")))
+(dolist (asd (directory "**/*.asd"))
+  (unless (char= #\. (char (pathname-name asd) 0))
+    (load asd)))
 
 (require :lowh.triangle.server)
 
