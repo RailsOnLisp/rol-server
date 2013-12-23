@@ -39,10 +39,9 @@
 					:error
 					:info)
 				    "~A ~A" status msg)
-			   (when (find :backtrace *debug*)
-			     (ignore-errors
-			       (trivial-backtrace:map-backtrace
-				(lambda (x) (push x backtrace)))))
+			   (ignore-errors
+			     (trivial-backtrace:map-backtrace
+			      (lambda (x) (push x backtrace))))
 			   (render-error status msg c backtrace))
 			 (invoke-restart 'reply)))))
        ,@body)))

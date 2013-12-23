@@ -23,24 +23,15 @@
 				   (mapcar #'string-downcase
 					   directories))
 		 :name (string-downcase name)
-		 :type (string-downcase type)))
-
-(defun type-mime (type)
-  (case type
-    ((:txt :text) "text/plain")
-    ((:html) "text/html")
-    (:otherwise (string-downcase type))))
+		 :type (subseq (string-downcase type) 1)))
 
 (defun render-view (controller action type)
-  (handler-bind ((unbound-variable (lambda (e)
-				     (log-msg :warn "Unbound variable ~S"
-					      (cell-error-name e))
-				     (use-value nil e))))
-    (let ((template (find-template type action controller))
-	  (layout (find-template type *layout* "_layouts")))
-      (content-type (type-mime type))
-      (template-let (template controller action)
-	(let ((*print-case* :downcase))
-	  (print-template layout))))))
+  (declare (type extension type))
+  (let ((template (find-template type action controller))
+	(layout (find-template type *layout* "_layouts")))
+    (content-type (type-mime type))
+    (template-let (template controller action)
+      (let ((*print-case* :downcase))
+	(print-template layout)))))
 
 (setq *template-output* (make-synonym-stream '*reply-stream*))

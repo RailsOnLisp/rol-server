@@ -36,13 +36,27 @@
     (fresh-line *reply-stream*)
     (mapc #'print backtrace)))
 
-(defun render-error (status-string &optional (message "") condition backtrace)
-  (if *debug*
-      (template-let (status-string message condition backtrace)
-	(render-view :error :debug :html))
-      (template-let (status-string message)
-	(render-view :error (subseq status-string 0 3) :html))))
+(defun find-error-template (status)
+  (flet ((type-match (type)
+	   (print `(type ,type))
+	   (flet ((try-name (name)
+		    (print `(name ,name))
+		    (let ((template (find-template type name "_errors")))
+		      (when (probe-file template)
+			(list template type)))))
+	     (or (when *debug*
+		   (try-name :debug))
+		 (try-name (subseq status 0 3))
+		 (try-name (str (char status 0) "00"))
+		 (try-name "500")))))
+    (or (type-match '.html)
+	(type-match '.txt)
+	(type-match '.json))))
 
-#+nil
-(lambda (&rest args)
-  (format *reply-stream* "~%~A~%" args))
+(defun render-error (status &optional (message "") condition backtrace)
+  (destructuring-bind (&optional template type) (find-error-template status)
+    (cond (template (when type
+		      (content-type (mime-type type) "; charset=utf-8"))
+		    (template-let (status message condition backtrace)
+		      (print-template template)))
+	  (:otherwise (render-error.txt status message condition backtrace)))))
