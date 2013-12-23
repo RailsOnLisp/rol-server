@@ -64,6 +64,13 @@ SBCL_OPTS ?= ${SBCL_OPTS_}
 SBCL_DEBUG_OPTS ?= ${SBCL_DEBUG_OPTS_}
 SBCL_BUILD_OPTS ?= ${SBCL_BUILD_OPTS_}
 
+APP_USER  ?= www
+APP_GROUP ?= ${APP_USER}
+APP_DIR   ?= /var/lib/service/${APP}/
+WEB_USER  ?= www
+WEB_GROUP ?= ${WEB_USER}
+WEB_DIR   ?= /sites/${APP}/public/
+
 ##  Compile
 
 FIND_PUBLIC = cd public && find . \
@@ -84,7 +91,11 @@ ${CORE}: Makefile ${SRCS}
 run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
 	sed < ${LOWH_TRIANGLE_SERVER}/run.in > run.tmp \
 		-e 's/%APP%/${APP}/g' \
-		-e 's/%CORE%/${CORE}/g'
+		-e 's/%CORE%/${CORE}/g' \
+		-e 's/%APP_USER%/${APP_USER}/g' \
+		-e 's/%APP_GROUP%/${APP_GROUP}/g' \
+		-e 's/%WEB_USER%/${WEB_USER}/g' \
+		-e 's/%WEB_GROUP%/${WEB_GROUP}/g'
 	chmod 755 run.tmp
 	mv run.tmp run
 
@@ -119,11 +130,13 @@ load:
 
 show:
 	@echo APP = "${APP}"
-	@echo SRCS = "${SRCS}"
-	@echo APP_USER = "${APP_USER}"
 	@echo APP_DIR = "${APP_DIR}"
-	@echo WEB_USER = "${WEB_USER}"
+	@echo APP_GROUP = "${APP_GROUP}"
+	@echo APP_USER = "${APP_USER}"
+	@echo SRCS = "${SRCS}"
 	@echo WEB_DIR = "${WEB_DIR}"
+	@echo WEB_GROUP = "${WEB_GROUP}"
+	@echo WEB_USER = "${WEB_USER}"
 
 URL ?= /
 fetch:
@@ -131,22 +144,17 @@ fetch:
 
 ##  Install
 
-APP_USER ?= www:www
-APP_DIR  ?= /var/lib/service/${APP}/
-WEB_USER ?= ${APP_USER}
-WEB_DIR  ?= /sites/${APP}/public/
-
 install: install-app install-web
 
 install-app: build
 	ls -1 ${CORE} run ${VIEWS} ${DATA} | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
 	${SUDO} chmod -R u=rwX,g=rX,o= ${APP_DIR}
-	${SUDO} chown -R ${APP_USER} ${APP_DIR}
+	${SUDO} chown -R "${APP_USER}:${APP_GROUP}" ${APP_DIR}
 
 install-web: assets
 	${FIND_PUBLIC} | ${SUDO} rsync -lstv --files-from=/dev/stdin . ${WEB_DIR}
 	${SUDO} chmod -R u=rwX,g=rX,o= ${WEB_DIR}
-	${SUDO} chown -R ${WEB_USER} ${WEB_DIR}
+	${SUDO} chown -R "${WEB_USER}:${WEB_GROUP}" ${WEB_DIR}
 
 .PHONY: build assets clean-assets clean-build clean distclean install load show
