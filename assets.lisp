@@ -36,7 +36,7 @@
 		     write-date))
 	     (status "304 not modified"))
 	    (t (header :last-modified (rfc1123-date-time write-date))
-	       (header :content-type (mime-type asset))
+	       (header :content-type (mime-type asset) "; charset=utf-8")
 	       (if (debug-asset-p asset)
 		   (process-asset asset *reply-stream*)
 		   (compile-asset asset *reply-stream*)))))))
