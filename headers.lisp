@@ -21,6 +21,7 @@
 ;;  Headers
 
 (defun status (&rest parts)
+  (log-msg :info (str parts))
   (apply #'backend-status parts))
 
 (defun header (name &rest parts)

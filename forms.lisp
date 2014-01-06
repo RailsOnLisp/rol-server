@@ -47,14 +47,29 @@
       (push (cons (url-decode var) (url-decode value)) form-data))
     (nreverse form-data)))
 
+(defun parse-www-form-json-encoded (string)
+  (json:decode-json-from-string string))
+
 (defun form-data ()
-  (or *form-data* (setf *form-data* (backend-read-form-data))))
+  (or *form-data*
+      (setf *form-data* (backend-read-form-data))))
+
+(defgeneric form-data-get (form-data key))
+
+(defmethod form-data-get ((form-data cons) key)
+  (cdr (assoc key form-data :test #'string-equal)))
+
+(defmethod form-data-get ((form-data json:fluid-object) key)
+  (slot-value form-data key))
 
 (defmacro with-form-data (vars &body body)
   (let ((form-data (gensym "FORM-DATA-")))
     `(let ((,form-data (form-data)))
+       (when (find :request *debug*)
+	 (log-msg :debug "FORM ~S" ,form-data))
        (let ,(mapcar (lambda (var)
-		       `(,var (cdr (assoc ,(symbol-name var) ,form-data
-					  :test #'string-equal))))
+		       `(,var (form-data-get
+			       ,form-data
+			       ',(intern (symbol-name var) :keyword))))
 		     vars)
 	 ,@body))))

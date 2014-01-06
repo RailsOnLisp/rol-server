@@ -19,13 +19,13 @@
 (in-package :lowh.triangle.server)
 
 (defun render-text (text)
-  (content-type "text/plain")
+  (content-type :text/plain)
   (write-string text *reply-stream*))
 
 (defun render-error.txt (status-string &optional (msg "") condition backtrace)
   (flexi-streams:get-output-stream-sequence *reply-stream*)
   (status status-string)
-  (content-type "text/plain")
+  (content-type :text/plain)
   (write-string status-string *reply-stream*)
   (when *debug*
     (fresh-line *reply-stream*)
@@ -38,9 +38,7 @@
 
 (defun find-error-template (status)
   (flet ((type-match (type)
-	   (print `(type ,type))
 	   (flet ((try-name (name)
-		    (print `(name ,name))
 		    (let ((template (find-template type name "_errors")))
 		      (when (probe-file template)
 			(list template type)))))
@@ -60,3 +58,7 @@
 		    (template-let (status message condition backtrace)
 		      (print-template template)))
 	  (:otherwise (render-error.txt status message condition backtrace)))))
+
+(defun render-json (thing)
+  (content-type :application/json)
+  (json:encode-json thing *reply-stream*))

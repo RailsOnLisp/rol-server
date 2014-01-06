@@ -56,9 +56,12 @@
      (apply #'concatenate data))))
 
 (defun backend-read-form-data ()
-  (let ((content-type (sb-fastcgi:fcgx-getparam *req* "CONTENT_TYPE")))
-    (cond ((string-equal "application/x-www-form-urlencoded" content-type)
-	   (parse-www-form-url-encoded (backend-read-request-data))))))
+  (let ((content-type (string-downcase
+		       (sb-fastcgi:fcgx-getparam *req* "CONTENT_TYPE"))))
+    (cond ((cl-ppcre:scan "^application/x-www-form-urlencoded\\b" content-type)
+	   (parse-www-form-url-encoded (backend-read-request-data)))
+	  ((cl-ppcre:scan "^application/json\\b" content-type)
+	   (parse-www-form-json-encoded (backend-read-request-data))))))
 
 ;;  Reply
 

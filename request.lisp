@@ -39,6 +39,16 @@
 (defun request-remote-addr ()
   (backend-request-remote-addr))
 
+(defun accept-p (&rest types)
+  (cl-ppcre:scan `(:sequence :word-boundary
+			     ,(if (cdr types)
+				  `(:alternation ,@(mapcar #'string-upcase types))
+				  (string-upcase (car types)))
+			     :word-boundary)
+		 (string-upcase (request-header :accept))))
+
+(trace accept-p)
+
 (defun cookie-value (name)
   (when-let ((cookie (request-header :cookie)))
     (cl-ppcre:do-register-groups (n value) ("([^=]+)=([^;]+)" cookie)
@@ -46,9 +56,9 @@
 	value))))
 
 (defmacro with-request (&body body)
-  `(let ((*form-data* nil)
-	 (*method* (request-method))
-	 (*host* (request-header :host))
-	 (*uri* (canonical-document-uri (backend-request-uri)))
-	 (*session* (session-attach)))
+  `(let* ((*form-data* nil)
+	  (*method* (request-method))
+	  (*host* (request-header :host))
+	  (*uri* (canonical-document-uri (backend-request-uri)))
+	  (*session* (session-attach)))
      ,@body))

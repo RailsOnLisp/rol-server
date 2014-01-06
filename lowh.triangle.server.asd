@@ -52,6 +52,7 @@
        :components
        ((:file "package")
 	(:file "conditions"  :depends-on ("package"))
+	(:file "json"        :depends-on ("package"))
 	(:file "logging"     :depends-on ("package"))
 	(:file "resource"    :depends-on ("package"))
 	(:file "secret"      :depends-on ("package"))
