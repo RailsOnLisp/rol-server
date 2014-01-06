@@ -19,7 +19,8 @@
 (in-package :lowh.triangle.server)
 
 (defun log-msg (level fmt &rest args)
-  (let ((*print-case* :upcase))
+  (let ((*print-case* :upcase)
+	(*print-pretty* nil))
     (format *error-output* "~&~A ~?~%" level fmt args)
     (force-output *error-output*)))
 
