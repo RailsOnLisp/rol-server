@@ -44,3 +44,15 @@
 			 (progn (write-char #\- out)
 				(nohyphen (1+ i))))))))
 	(nohyphen 0)))))
+
+(defgeneric uri-for (thing)
+  (:documentation "Returns a URI used to access THING."))
+
+(defmethod uri-for ((thing cons))
+  (route-reverse thing))
+
+(defgeneric h (thing)
+  (:documentation "Returns the HTML code for THING."))
+
+(defmethod h ((thing string))
+  (quote-html thing))
