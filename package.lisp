@@ -20,12 +20,16 @@
 
 (defpackage :lowh.triangle.server
   (:nicknames :L>server)
-  (:use :cl :alexandria :L>assets :L>files :L>template :L>uri
+  (:use :cl :alexandria :L>assets :L>ext :L>files :L>template :L>uri
 	:let-over-lambda :trivial-gray-streams)
   (:export
    ;;  Config
    #:*debug*
    #:*port*
+   ;;  Conditions
+   #:http-error
+   #:http-error-status
+   #:http-error-message
    ;;  Crypto
    #:load-secret
    #:hmac
@@ -33,9 +37,14 @@
    #:make-random-string
    ;;  Data
    #:load-facts
+   ;;  Request
+   #:accept-p
    ;;  Routing
    #:*method*
    #:define-route
+   #:find-route
+   #:route-reverse
+   #:list-routes
    #:clear-routes
    ;;  Asset routes
    #:asset-controller
@@ -62,17 +71,23 @@
    #:+crlf+
    #:odd/even
    #:to-url
+   #:uri-for
+   #:h
+   #:j
    ;;  Views
    #:*layout*
-   #:render-view
-   #:render-error
    #:print-asset-tag
+   #:render-error
+   #:render-json
+   #:render-text
+   #:render-view
    ;;  Resource
    #:define-resource
    #:define-action
    #:index #:create #:update #:delete
    #:get #:post #:put
    ;;  Run
+   #:load-app
    #:run
    ;;  Re-export other symbols
    . #.(let (list)
