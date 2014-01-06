@@ -117,14 +117,28 @@
 	  (funcall (templated-route-function route) uri))
 	*templated-routes*))
 
-(defun templated-route-reverse (controller)
-  (let ((route (find controller *templated-routes*
-		     :key #'templated-route-controller
-		     :test (lambda (c template)
-			     (declare (ignorable c template))
-			     (error "FIXME: reverse templated routes")))))
-    (when route
-      (templated-route-uri-template route))))
+(defun templated-route-reverse (controller-form)
+  (labels ((unify (r v acc &optional (tail acc))
+	     (cond ((and (endp r) (endp v)) acc)
+		   ((or (endp r) (endp v)) nil)
+		   ((uri-var-p (car r))
+		    (unify (cdr r) (cdr v) acc
+			   (cdr (setf (cdr tail)
+				      (list (intern (symbol-name (car r))
+						    :keyword)
+					    (car v))))))
+		   ((equal (car r) (car v))
+		    (unify (cdr r) (cdr v) acc tail))
+		   (t nil)))
+	   (match-routes (routes)
+	     (unless (endp routes)
+	       (or (unify (templated-route-controller-form (car routes))
+			  controller-form
+			  (cons (car routes) nil))
+		   (match-routes (cdr routes))))))
+    (when-let ((match (match-routes *templated-routes*)))
+      (apply #'expand-uri nil (templated-route-uri-template (car match))
+	     (cdr match)))))
 
 (defun list-templated-routes ()
   (mapcar (lambda (route)
@@ -146,12 +160,14 @@
 (defun find-route (uri)
   (or (static-route-controller uri)
       (templated-route-controller uri)
-      '(render-error "404 Not found" "no route")))
+      `(render-error "404 Not found"
+		     ,(format nil "No route configured for ~S." uri))))
 
 (defun route-reverse (controller)
   (or (static-route-reverse controller)
       (templated-route-reverse controller)
-      '(render-error "500 Route not found" "no route")))
+      (http-error "500 Route not found"
+		  "No route matches ~S." controller)))
 
 (defun list-routes ()
   (append (list-static-routes)
@@ -168,11 +184,14 @@
 	 (the list (cdr route))))
 
 (defun route-request ()
-  (with-request
-    (let ((route (the cons (find-route *uri*))))
-      (log-msg :info "~A ~S -> ~S" *method* *uri* route)
-      (when (find :request *debug*)
-	(log-msg :debug "ENV ~S" (backend-request-env)))
-      (with-reply
-	(time (render-route route))
-	(force-output *trace-output*)))))
+  (time
+   (with-request
+     (with-reply
+       (when (find :app *debug*)
+	 (load-app))
+       (let ((route (the cons (find-route *uri*))))
+	 (log-msg :info "~A ~S -> ~S" *method* *uri* route)
+	 (when (find :request *debug*)
+	   (log-msg :debug "ENV ~S" (backend-request-env)))
+	 (render-route route)))
+     (force-output *trace-output*))))
