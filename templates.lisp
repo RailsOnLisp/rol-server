@@ -29,7 +29,7 @@
   (declare (type extension type))
   (let ((template (find-template type action controller))
 	(layout (find-template type *layout* "_layouts")))
-    (content-type (type-mime type))
+    (content-type (mime-type type))
     (template-let (template controller action)
       (let ((*print-case* :downcase))
 	(print-template layout)))))

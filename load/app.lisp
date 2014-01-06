@@ -24,6 +24,7 @@
 
 (use-package :alexandria)
 (use-package :L>server)
+(use-package :L>ext)
 
 ;;  Clear old definitions
 
@@ -31,13 +32,7 @@
 (clear-template-cache)
 
 (load-secret)
-
-(dolist (dir '("app/models/*.lisp"
-	       "app/controllers/*.lisp"
-	       "config/*.lisp"))
-  (dolist (file (directory dir))
-    (when (alphanumericp (char (pathname-name file) 0))
-      (load (enough-namestring file)))))
+(load-app)
 
 (defun reload ()
   (load "lib/triangle/server/load/app"))

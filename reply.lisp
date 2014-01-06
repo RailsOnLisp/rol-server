@@ -42,6 +42,7 @@
 			   (ignore-errors
 			     (trivial-backtrace:map-backtrace
 			      (lambda (x) (push x backtrace))))
+			   (flexi-streams:get-output-stream-sequence *reply-stream*)
 			   (render-error status msg c backtrace))
 			 (invoke-restart 'reply)))))
        ,@body)))

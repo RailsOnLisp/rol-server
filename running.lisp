@@ -18,6 +18,23 @@
 
 (in-package :lowh.triangle.server)
 
+(defvar *app-cache*
+  (make-hash-table :test 'equal))
+
+(defun load-app ()
+  (dolist (dir '("app/models/*.lisp"
+		 "app/controllers/*.lisp"
+		 "config/*.lisp"))
+    (dolist (file (directory dir))
+      (when (alphanumericp (char (pathname-name file) 0))
+	(let* ((name (enough-namestring file))
+	       (date (file-write-date file))
+	       (cached (gethash name *app-cache* -1)))
+	  (unless (= cached date)
+	    (setf (gethash name *app-cache*) date)
+	    (log-msg :info "loading ~S (~S < ~S)" name cached date)
+	    (load name)))))))
+
 (defun run-handled ()
   (load-facts)
   (backend-run))

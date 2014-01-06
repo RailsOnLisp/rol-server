@@ -23,6 +23,7 @@
 (require :lowh.triangle.assets)
 
 (use-package :L>assets)
+(use-package :L>ext)
 
 (load "config/assets")
 
