@@ -37,6 +37,7 @@
        :depends-on ("alexandria"
 		    "cl-base64"
 		    "cl-debug"
+		    "cl-unicode"
 		    "ironclad"
 		    "let-over-lambda"
 		    "lowh-facts"

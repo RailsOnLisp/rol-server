@@ -27,23 +27,31 @@
 
 ;;  To URL
 
+(defun unaccent (c)
+  (or (cl-ppcre:register-groups-bind (name)
+	  ("(.*) WITH .*" (cl-unicode:unicode-name c))
+	(cl-unicode:character-named name))
+      c))
+
 (defun to-url (str)
   (string-trim
    "-"
    (with-output-to-string (out)
      (let ((len (length str)))
-       (labels ((nohyphen (i)
+       (labels ((out (c)
+		  (write-char (unaccent (char-downcase c)) out))
+		(nohyphen (i)
 		  (when (< i len)
 		    (let ((c (char str i)))
 		      (if (alphanumericp c)
-			  (progn (write-char (char-downcase c) out)
+			  (progn (out c)
 				 (hyphen (1+ i)))
 			  (nohyphen (1+ i))))))
 		(hyphen (i)
 		  (when (< i len)
 		    (let ((c (char str i)))
 		      (if (alphanumericp c)
-			  (progn (write-char (char-downcase c) out)
+			  (progn (write-char (unaccent (char-downcase c)) out)
 				 (hyphen (1+ i)))
 			  (progn (write-char #\- out)
 				 (nohyphen (1+ i))))))))
