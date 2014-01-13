@@ -40,3 +40,15 @@
 
 (defmethod lessp:lessp ((a json:fluid-object) (b json:fluid-object))
   (lessp:lessp (j a) (j b)))
+
+(defmethod make-load-form ((obj json:fluid-object) &optional env)
+  (declare (ignore env))
+  `(json:decode-json ,(j obj)))
+
+(defgeneric bound-slots (object))
+
+(defmethod bound-slots (object)
+  (loop :for def :in (closer-mop:class-slots (class-of object))
+     :for name = (closer-mop:slot-definition-name def)
+     :when (slot-boundp object name)
+     :collect name))

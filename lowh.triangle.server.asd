@@ -36,14 +36,17 @@
        :description "Application server / core module"
        :depends-on ("alexandria"
 		    "cl-base64"
+		    "cl-debug"
 		    "ironclad"
 		    "let-over-lambda"
 		    "lowh-facts"
 		    "lowh.triangle.assets"
 		    "lowh.triangle.files"
+		    "lowh.triangle.log"
 		    "lowh.triangle.template"
 		    "lowh.triangle.uri"
 		    "flexi-streams"
+		    "str"
 		    "trivial-backtrace"
 		    "trivial-utf-8"
 		    ,@(case backend
@@ -53,12 +56,11 @@
        ((:file "package")
 	(:file "conditions"  :depends-on ("package"))
 	(:file "json"        :depends-on ("package"))
-	(:file "logging"     :depends-on ("package"))
 	(:file "resource"    :depends-on ("package"))
 	(:file "secret"      :depends-on ("package"))
 	(:file "vars"        :depends-on ("package"))
 	(:file "assets"      :depends-on ("package" "routing" "vars"))
-	(:file ,backend-file :depends-on ("package" "headers" "logging" "vars"))
+	(:file ,backend-file :depends-on ("package" "headers" "vars"))
 	(:file "forms"       :depends-on (,backend-file))
 	(:file "headers"     :depends-on ("package" "vars"))
 	(:file "render"      :depends-on ("templates" ,backend-file))

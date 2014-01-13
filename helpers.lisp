@@ -25,25 +25,29 @@
 	      (list* :odd/even (if odd "odd" "even") x))
 	    list)))
 
+;;  To URL
+
 (defun to-url (str)
-  (with-output-to-string (out)
-    (let ((len (length str)))
-      (labels ((nohyphen (i)
-		 (when (< i len)
-		   (let ((c (char str i)))
-		     (if (alphanumericp c)
-			 (progn (write-char (char-downcase c) out)
-				(hyphen (1+ i)))
-			 (nohyphen (1+ i))))))
-	       (hyphen (i)
-		 (when (< i len)
-		   (let ((c (char str i)))
-		     (if (alphanumericp c)
-			 (progn (write-char (char-downcase c) out)
-				(hyphen (1+ i)))
-			 (progn (write-char #\- out)
-				(nohyphen (1+ i))))))))
-	(nohyphen 0)))))
+  (string-trim
+   "-"
+   (with-output-to-string (out)
+     (let ((len (length str)))
+       (labels ((nohyphen (i)
+		  (when (< i len)
+		    (let ((c (char str i)))
+		      (if (alphanumericp c)
+			  (progn (write-char (char-downcase c) out)
+				 (hyphen (1+ i)))
+			  (nohyphen (1+ i))))))
+		(hyphen (i)
+		  (when (< i len)
+		    (let ((c (char str i)))
+		      (if (alphanumericp c)
+			  (progn (write-char (char-downcase c) out)
+				 (hyphen (1+ i)))
+			  (progn (write-char #\- out)
+				 (nohyphen (1+ i))))))))
+	 (nohyphen 0))))))
 
 (defgeneric uri-for (thing)
   (:documentation "Returns a URI used to access THING."))
@@ -51,8 +55,37 @@
 (defmethod uri-for ((thing cons))
   (route-reverse thing))
 
+;; To HTML
+
 (defgeneric h (thing)
   (:documentation "Returns the HTML code for THING."))
 
+(defmethod h ((thing null))
+  "")
+
 (defmethod h ((thing string))
   (quote-html thing))
+
+(defmethod h ((thing symbol))
+  (h (string-downcase thing)))
+
+;;  Markdown
+
+(defgeneric markdown (destination input))
+
+(defmethod markdown ((destination stream) (input stream))
+  (sb-ext:run-program "markdown" '("-xcodehilite(force_linenos=True)" "/dev/stdin")
+		      :search t
+		      :input input
+		      :output destination))
+
+(defmethod markdown ((destination null) (input t))
+  (with-output-to-string (s)
+    (markdown s input)))
+
+(defmethod markdown ((destination t) (input string))
+  (with-input-from-string (s input)
+    (markdown destination s)))
+
+(defun print-markdown (input)
+  (markdown *reply-stream* input))

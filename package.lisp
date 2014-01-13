@@ -20,8 +20,17 @@
 
 (defpackage :lowh.triangle.server
   (:nicknames :L>server)
-  (:use :cl :alexandria :L>assets :L>ext :L>files :L>template :L>uri
-	:let-over-lambda :trivial-gray-streams)
+  (:use :cl
+	:alexandria
+	:L>assets
+	:L>ext
+	:L>files
+	:L>log
+	:L>template
+	:L>uri
+	:let-over-lambda
+	:str
+	:trivial-gray-streams)
   (:export
    ;;  Config
    #:*debug*
@@ -37,6 +46,11 @@
    #:make-random-string
    ;;  Data
    #:load-facts
+   ;;  Resource
+   #:define-resource
+   #:has-one
+   #:has-many
+   #:define-resource-macro
    ;;  Request
    #:accept-p
    ;;  Routing
@@ -72,8 +86,11 @@
    #:odd/even
    #:to-url
    #:uri-for
-   #:h
    #:j
+   #:h
+   #:markdown
+   #:print-markdown
+   #:bound-slots
    ;;  Views
    #:*layout*
    #:print-asset-tag
@@ -83,6 +100,8 @@
    #:render-view
    ;;  Resource
    #:define-resource
+   #:has-one
+   #:has-many
    #:define-action
    #:index #:create #:update #:delete
    #:get #:post #:put

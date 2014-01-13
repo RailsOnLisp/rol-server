@@ -27,7 +27,9 @@
   (setq *static-routes*         (make-hash-table :test 'equal)
 	*static-routes/reverse* (make-hash-table :test 'equal)))
 
-(clear-static-routes)
+(unless (and (boundp '*static-routes*)
+             (boundp '*static-routes/reverse*))
+  (clear-static-routes))
 
 (defsetf static-route-controller (uri) (value)
   `(setf (gethash ,uri *static-routes*) ,value))

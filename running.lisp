@@ -22,9 +22,9 @@
   (make-hash-table :test 'equal))
 
 (defun load-app ()
-  (dolist (dir '("app/models/*.lisp"
-		 "app/controllers/*.lisp"
-		 "config/*.lisp"))
+  (dolist (dir '("config/*.lisp"
+		 "app/models/*.lisp"
+		 "app/controllers/*.lisp"))
     (dolist (file (directory dir))
       (when (alphanumericp (char (pathname-name file) 0))
 	(let* ((name (enough-namestring file))

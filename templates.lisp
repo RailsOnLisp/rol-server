@@ -25,13 +25,17 @@
 		 :name (string-downcase name)
 		 :type (subseq (string-downcase type) 1)))
 
+(defvar *render-view-nested* nil)
+
 (defun render-view (controller action type)
   (declare (type extension type))
-  (let ((template (find-template type action controller))
-	(layout (find-template type *layout* "_layouts")))
-    (content-type (mime-type type))
-    (template-let (template controller action)
-      (let ((*print-case* :downcase))
-	(print-template layout)))))
+  (let ((template (find-template type action controller)))
+    (if *render-view-nested*
+	(print-template template)
+	(let ((layout (find-template type *layout* "_layouts"))
+	      (*render-view-nested* t))
+	  (content-type (mime-type type))
+	  (template-let (template controller action)
+	    (print-template layout))))))
 
 (setq *template-output* (make-synonym-stream '*reply-stream*))

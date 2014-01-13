@@ -16,23 +16,32 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
+(require :str)
+(use-package :str)
+
 (dolist (asd (directory "**/*.asd"))
   (unless (char= #\. (char (pathname-name asd) 0))
     (load asd)))
 
-(require :lowh.triangle.server)
-
+(require :alexandria)
 (use-package :alexandria)
+
+(require :lowh.triangle.files)
+(use-package :L>files)
+
+(require :lowh.triangle.server)
 (use-package :L>server)
+
+(require :lowh.triangle.assets)
 (use-package :L>ext)
 
 ;;  Clear old definitions
 
-(clear-routes)
-(clear-template-cache)
+(L>server:clear-routes)
+(L>server:clear-template-cache)
 
-(load-secret)
-(load-app)
+(L>server:load-secret)
+(L>server:load-app)
 
 (defun reload ()
   (load "lib/triangle/server/load/app"))
