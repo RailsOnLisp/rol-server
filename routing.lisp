@@ -75,16 +75,18 @@
 		:test #'string=)))
 
 (defun update-templated-route (templated-route)
-  (let ((uri-template (templated-route-uri-template templated-route)))
-    (labels ((iter (cell)
-	       (cond
-		 ((endp cell) (push templated-route *templated-routes*))
-		 ((string= uri-template (templated-route-uri-template
-					 (car cell)))
-		  (rplaca cell templated-route))
-		 (t (iter (cdr cell))))))
-      (iter *templated-routes*)
-      templated-route)))
+  (if (null *templated-routes*)
+      (push templated-route *templated-routes*)
+      (let ((uri-template (templated-route-uri-template templated-route)))
+	(labels ((iter (cell)
+		   (cond ((string= uri-template
+				   (templated-route-uri-template (car cell)))
+			  (setf (car cell) templated-route))
+			 ((endp (cdr cell))
+			  (setf (cdr cell) (cons templated-route nil)))
+			 (t (iter (cdr cell))))))
+	  (iter *templated-routes*))))
+  templated-route)
 
 (defun list-unquote-if (test list)
   (labels ((walk (x)
