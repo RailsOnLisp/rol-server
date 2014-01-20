@@ -49,10 +49,11 @@
        (intern sid :L>server.sessions))))
 
 (defun session-delete (s)
-  (etypecase s
-    (session (session-delete (session-id s)))
-    (symbol (makunbound s)
-	    (unintern s :L>server.sessions))))
+  (when s
+    (etypecase s
+      (session (session-delete (session-id s)))
+      (symbol (makunbound s)
+	      (unintern s :L>server.sessions)))))
 
 (defun session-gc ()
   (do-symbols (sid :L>server.sessions)
@@ -90,17 +91,18 @@
   (delete-cookie *session-cookie*))
 
 (defun session-attach ()
-  (when-let ((session (session-find (cookie-value *session-cookie*))))
-    (if (and (session-is-valid session)
-	     (session-is-secure session))
-	(progn
-	  (session-touch session)
-	  (setf *session* session)
-	  session)
-	(session-end))))
+  (or *session*
+      (when-let ((session (session-find (cookie-value *session-cookie*))))
+	(if (and (session-is-valid session)
+		 (session-is-secure session))
+	    (progn
+	      (session-touch session)
+	      (setf *session* session)
+	      session)
+	    (session-end)))))
 
-(defun session (&optional create)
-  (or *session* (session-attach) (when create (session-create))))
+(defun session ()
+  (or (session-attach) (session-create)))
 
 (defun session-reset ()
   (let ((s *session*))
@@ -111,7 +113,7 @@
   (apply #'hmac-string (session-key (session)) parts))
 
 (defun session-get (key)
-  (when-let ((s *session*))
+  (when-let ((s (session-attach)))
     (getf (session-data s) key)))
 
 (defsetf session-get (key) (value)
