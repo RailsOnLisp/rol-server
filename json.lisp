@@ -52,3 +52,18 @@
      :for name = (closer-mop:slot-definition-name def)
      :when (slot-boundp object name)
      :collect name))
+
+(defmacro define-accessors (class &body accessors)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     ,@(mapcar (lambda (slot)
+		 `(defun ,(sym class #\. slot) (,class)
+		    (when (slot-boundp ,class ',slot)
+		      (slot-value ,class ',slot))))
+	       accessors)))
+
+(defun set-attributes (obj &rest attributes)
+  (if attributes
+      (destructuring-bind (key value &rest rest) attributes
+	(setf (slot-value obj key) value)
+	(apply #'set-attributes obj rest))
+      obj))

@@ -21,7 +21,7 @@
 ;;  Session
 
 (defstruct session
-  id ctime atime key remote-addr user-agent)
+  id ctime atime key remote-addr user-agent data)
 
 (defun session-is-valid (session)
   (with-slots (atime) session
@@ -33,6 +33,10 @@
   (with-slots (remote-addr user-agent) session
     (and (string= remote-addr (request-remote-addr))
 	 (string= user-agent (request-header :user_agent)))))
+
+(defun session-touch (session)
+  (with-slots (atime) session
+    (setf atime (get-universal-time))))
 
 ;;  Session ID
 
@@ -61,9 +65,9 @@
       (when sym
 	(symbol-value sym)))))
 
-;;
+;;  Cookie API
 
-(defun session-create ()
+(defun session-create (&key data)
   "Return a new session"
   (session-gc)
   (facts:with-transaction
@@ -74,15 +78,16 @@
 				  :atime time
 				  :key (make-random-string 64)
 				  :remote-addr (request-remote-addr)
-				  :user-agent (request-header :user_agent))))
+				  :user-agent (request-header :user_agent)
+				  :data data)))
       (set sid session)
       (set-cookie *session-cookie* sid (+ *session-timeout*
 					  (get-universal-time)))
-      (setf *session* session))))
+      (setq *session* session))))
 
-(defun session-touch (session)
-  (with-slots (atime) session
-    (setf atime (get-universal-time))))
+(defun session-end ()
+  (setq *session* nil)
+  (delete-cookie *session-cookie*))
 
 (defun session-attach ()
   (when-let ((session (session-find (cookie-value *session-cookie*))))
@@ -92,10 +97,22 @@
 	  (session-touch session)
 	  (setf *session* session)
 	  session)
-	(session-delete session))))
+	(session-end))))
 
-(defun session-attach-or-create ()
-  (or (session-attach) (session-create)))
+(defun session (&optional create)
+  (or *session* (session-attach) (when create (session-create))))
+
+(defun session-reset ()
+  (let ((s *session*))
+    (session-delete s)
+    (session-create :data (when s (session-data s)))))
 
 (defun session-hmac (&rest parts)
-  (apply #'hmac-string (session-key *session*) parts))
+  (apply #'hmac-string (session-key (session)) parts))
+
+(defun session-get (key)
+  (when-let ((s *session*))
+    (getf (session-data s) key)))
+
+(defsetf session-get (key) (value)
+  `(setf (getf (session-data (session)) ,key) ,value))

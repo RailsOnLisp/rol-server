@@ -88,13 +88,17 @@
 
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
 		   secure (http-only t))
-  (header "Set-Cookie"
+  (header :set-cookie
     name "=" value
     "; Expires=" (rfc1123-date-time expires)
     "; Domain=" domain
     "; Path=" path
     (when secure "; Secure")
     (when http-only "; HttpOnly")))
+
+(defun delete-cookie (name)
+  ;; FIXME: check RFC
+  (header :set-cookie name "="))
 
 (in-package :rfc1123-timezone)
 (cl:defconstant GMT 0)

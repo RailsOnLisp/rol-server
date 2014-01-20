@@ -52,6 +52,7 @@
    #:has-many
    #:define-resource-macro
    ;;  Request
+   #:*uri*
    #:accept-p
    ;;  Routing
    #:*method*
@@ -72,27 +73,32 @@
    #:content-length
    #:redirect-to
    #:set-cookie
+   #:delete-cookie
    ;;  Session
    #:*session*
    #:*session-cookie*
    #:*session-timeout*
-   #:session-attach-or-create
-   #:session-create
-   #:session-delete
-   #:session-reset
+   #:session
+   #:session-end
+   #:session-get
    #:session-hmac
+   #:session-reset
    ;;  Helpers
    #:+crlf+
    #:odd/even
    #:to-url
    #:uri-for
-   #:j
    #:h
    #:markdown
    #:print-markdown
+   ;;  JSON
+   #:j
+   #:define-accessors
    #:bound-slots
+   #:set-attributes
    ;;  Views
    #:*layout*
+   #:find-template
    #:print-asset-tag
    #:render-error
    #:render-json
