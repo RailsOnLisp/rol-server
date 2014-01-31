@@ -38,11 +38,12 @@
 
 ;;  Redirections
 
-(defun redirect-to (target)
-  (etypecase target
-    (string (status "303 See Other")
-	    (header "Location" target))
-    (cons (redirect-to (route-reverse target)))))
+(defun redirect-to (target &rest params &key &allow-other-keys)
+  (let ((query (when params (format nil "?~{~A=~A~^&~}" params))))
+    (etypecase target
+      (string (status "303 See Other")
+	      (header "Location" target query))
+      (cons (redirect-to (str (route-reverse target) query))))))
 
 (defun not-modified ()
   (status "403 Not Modified"))
