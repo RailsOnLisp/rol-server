@@ -87,7 +87,6 @@
    ;;  Helpers
    #:+crlf+
    #:odd/even
-   #:to-url
    #:uri-for
    #:h
    #:markdown
