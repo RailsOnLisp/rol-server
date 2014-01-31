@@ -191,11 +191,11 @@
   (time
    (with-request
      (with-reply
-       (when (find :app *debug*)
+       (when (debug-p :app)
 	 (load-app))
        (let ((route (the cons (find-route *uri*))))
 	 (log-msg :info "~A ~S -> ~S" *method* *uri* route)
-	 (when (find :request *debug*)
+	 (when (debug-p :request)
 	   (log-msg :debug "ENV ~S" (backend-request-env)))
 	 (render-route route)))
      (force-output *trace-output*))))

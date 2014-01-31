@@ -27,7 +27,7 @@
   (status status-string)
   (content-type :text/plain)
   (write-string status-string *reply-stream*)
-  (when *debug*
+  (when (debug-p :app)
     (fresh-line *reply-stream*)
     (write-string msg *reply-stream*)
     (fresh-line *reply-stream*)
@@ -42,7 +42,7 @@
 		    (let ((template (find-template type name "_errors")))
 		      (when (probe-file template)
 			(list template type)))))
-	     (or (when *debug*
+	     (or (when (debug-p :app)
 		   (try-name :debug))
 		 (try-name (subseq status 0 3))
 		 (try-name (str (char status 0) "00"))

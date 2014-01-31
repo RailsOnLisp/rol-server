@@ -21,7 +21,7 @@
 ;;  Render assets on demand
 
 (defun debug-asset-p (asset)
-  (and (find :assets *debug*)
+  (and (debug-p :assets)
        (typep asset 'preprocessed-asset)))
 
 (defun asset-controller (name ext *assets-url-template* *assets-path-template*)

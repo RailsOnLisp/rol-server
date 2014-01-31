@@ -65,7 +65,7 @@
 (defmacro with-form-data (vars &body body)
   (let ((form-data (gensym "FORM-DATA-")))
     `(let ((,form-data (form-data)))
-       (when (find :request *debug*)
+       (when (debug-p :request)
 	 (log-msg :debug "FORM ~S" ,form-data))
        (let ,(mapcar (lambda (var)
 		       `(,var (form-data-get

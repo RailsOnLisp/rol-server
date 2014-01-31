@@ -68,7 +68,7 @@
 (defgeneric backend-send (data))
 
 (defmethod backend-send ((data string))
-  (when (find :reply *debug*)
+  (when (debug-p :reply)
     (log-msg :debug "SEND ~S" (if (eq +crlf+ data)
 				  '+crlf+
 				  data)))
@@ -76,7 +76,7 @@
   (values))
 
 (defmethod backend-send ((data array))
-  (when (find :reply *debug*)
+  (when (debug-p :reply)
     (log-msg :debug "SEND ~D bytes" (length data)))
   (sb-fastcgi:fcgx-putchars *req* data)
   (values))

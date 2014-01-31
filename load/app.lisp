@@ -35,6 +35,9 @@
 (require :lowh.triangle.assets)
 (use-package :L>ext)
 
+(require :cl-debug)
+(use-package :debug)
+
 ;;  Clear old definitions
 
 (L>server:clear-routes)

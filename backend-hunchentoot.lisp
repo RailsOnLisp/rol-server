@@ -95,7 +95,7 @@
 (defmethod hunchentoot:acceptor-request-dispatcher ((hunchentoot:*acceptor*
 						     triangle-acceptor))
   (lambda (hunchentoot:*request*)
-    (let ((hunchentoot:*catch-errors-p* (not (find :reply *debug*))))
+    (let ((hunchentoot:*catch-errors-p* (not (debug-p :reply))))
       (route-request))))
 
 (defun backend-run ()

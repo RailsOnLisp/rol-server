@@ -22,6 +22,7 @@
   (:nicknames :L>server)
   (:use :cl
 	:alexandria
+	:debug
 	:L>assets
 	:L>ext
 	:L>files
@@ -33,7 +34,6 @@
 	:trivial-gray-streams)
   (:export
    ;;  Config
-   #:*debug*
    #:*port*
    ;;  Conditions
    #:http-error

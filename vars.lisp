@@ -20,7 +20,6 @@
 
 ;; public
 
-(defvar *debug* nil)
 (defvar *layout* nil)
 (defvar *port* nil)
 (defvar *session* nil)
