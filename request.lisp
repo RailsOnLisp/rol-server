@@ -47,12 +47,10 @@
 			     :word-boundary)
 		 (string-upcase (request-header :accept))))
 
-(trace accept-p)
-
 (defun cookie-value (name)
   (when-let ((cookie (request-header :cookie)))
-    (cl-ppcre:do-register-groups (n value) ("([^=]+)=([^;]+)" cookie)
-      (when (string= name n)
+    (cl-ppcre:register-groups-bind (n value) ("([^=]+)=([^;]+)" cookie)
+      (when (string= (str name) n)
 	value))))
 
 (defmacro with-request (&body body)

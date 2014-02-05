@@ -82,8 +82,8 @@
 				  :user-agent (request-header :user_agent)
 				  :data data)))
       (set sid session)
-      (set-cookie *session-cookie* sid (+ *session-timeout*
-					  (get-universal-time)))
+      (set-cookie *session-cookie* (symbol-name sid)
+		  (+ *session-timeout* (get-universal-time)))
       (setq *session* session))))
 
 (defun session-end ()
@@ -105,9 +105,12 @@
   (or (session-attach) (session-create)))
 
 (defun session-reset ()
-  (let ((s *session*))
-    (session-delete s)
-    (session-create :data (when s (session-data s)))))
+  (let ((old-sid (session-id *session*))
+	(new-sid (make-sid)))
+    (setf (session-id *session*) new-sid)
+    (set-cookie *session-cookie* (symbol-name new-sid)
+		(+ *session-timeout* (get-universal-time)))
+    (session-delete old-sid)))
 
 (defun session-hmac (&rest parts)
   (apply #'hmac-string (session-key (session)) parts))
