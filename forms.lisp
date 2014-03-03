@@ -44,7 +44,7 @@
   (let (form-data)
     (cl-ppcre:do-register-groups (var value)
 	("([^&=]+)(?:=([^&=]*))?" string nil :sharedp t)
-      (push (cons (url-decode var) (url-decode value)) form-data))
+      (push (cons (url-decode var) (url-decode (or value ""))) form-data))
     (nreverse form-data)))
 
 (defun parse-www-form-json-encoded (string)
@@ -55,6 +55,9 @@
       (setf *form-data* (backend-read-form-data))))
 
 (defgeneric form-data-get (form-data key))
+
+(defmethod form-data-get ((form-data null) key)
+  nil)
 
 (defmethod form-data-get ((form-data cons) key)
   (cdr (assoc key form-data :test #'string-equal)))
