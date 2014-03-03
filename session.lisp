@@ -105,12 +105,13 @@
   (or (session-attach) (session-create)))
 
 (defun session-reset ()
-  (let ((old-sid (session-id *session*))
-	(new-sid (make-sid)))
-    (setf (session-id *session*) new-sid)
-    (set-cookie *session-cookie* (symbol-name new-sid)
-		(+ *session-timeout* (get-universal-time)))
-    (session-delete old-sid)))
+  (when *session*
+    (let ((old-sid (session-id *session*))
+	  (new-sid (make-sid)))
+      (setf (session-id *session*) new-sid)
+      (set-cookie *session-cookie* (symbol-name new-sid)
+		  (+ *session-timeout* (get-universal-time)))
+      (session-delete old-sid))))
 
 (defun session-hmac (&rest parts)
   (apply #'hmac-string (session-key (session)) parts))
@@ -121,3 +122,9 @@
 
 (defsetf session-get (key) (value)
   `(setf (getf (session-data (session)) ,key) ,value))
+
+;;  Alert boxes
+
+(defmacro session-alert (level &rest message-parts)
+  `(push (list ,level (str ,@message-parts))
+	 (session-get :alerts)))
