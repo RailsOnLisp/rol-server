@@ -86,6 +86,7 @@
    #:session-reset
    ;;  Helpers
    #:+crlf+
+   #:alert
    #:odd/even
    #:uri-for
    #:h

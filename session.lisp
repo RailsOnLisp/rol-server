@@ -122,9 +122,3 @@
 
 (defsetf session-get (key) (value)
   `(setf (getf (session-data (session)) ,key) ,value))
-
-;;  Alert boxes
-
-(defmacro session-alert (level &rest message-parts)
-  `(push (list ,level (str ,@message-parts))
-	 (session-get :alerts)))

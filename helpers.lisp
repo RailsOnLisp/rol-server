@@ -67,3 +67,11 @@
 
 (defun print-markdown (input)
   (markdown *reply-stream* input))
+
+;;  Alert boxes
+
+(defvar L>template.vars::alerts)
+
+(defmacro alert (level &rest message-parts)
+  `(push (list ,level (str ,@message-parts))
+	 L>template.vars::alerts))
