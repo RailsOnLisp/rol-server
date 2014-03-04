@@ -70,8 +70,8 @@
 
 ;;  Alert boxes
 
-(defvar L>template.vars::alerts)
+(define-template-var alerts)
 
 (defmacro alert (level &rest message-parts)
   `(push (list ,level (str ,@message-parts))
-	 L>template.vars::alerts))
+	 (template-var alerts)))
