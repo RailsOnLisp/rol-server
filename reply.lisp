@@ -69,3 +69,18 @@
      (with-reply-handlers
        ,@body)
      (reply-send)))
+
+;;  Send file
+
+(defun send-file (path)
+  (with-open-file (stream path :if-does-not-exist nil
+			  :element-type '(unsigned-byte 8))
+    (unless stream
+      (http-error "404 Not found" "File not found"))
+    (header :content-type (mime-type stream))
+    (header :content-length (file-length stream))
+    (backend-send-headers)
+    (loop with buf = (make-array 4096 :element-type '(unsigned-byte 8))
+       for r = (read-sequence buf stream)
+       while (< 0 r)
+       do (backend-send (if (= r 4096) buf (subseq buf 0 r))))))

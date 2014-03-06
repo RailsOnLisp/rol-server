@@ -64,6 +64,8 @@
    ;;  Asset routes
    #:asset-controller
    #:define-assets-route
+   ;;  Reply
+   #:send-file
    ;;  Forms
    #:with-form-data
    ;;  HTTP Headers
