@@ -21,6 +21,9 @@
 (defvar *app-cache*
   (make-hash-table :test 'equal))
 
+(defun clear-app-cache ()
+  (clrhash *app-cache*))
+
 (defun load-app ()
   (dolist (dir '("config/*.lisp"
 		 "app/models/*.lisp"

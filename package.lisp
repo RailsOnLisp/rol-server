@@ -115,6 +115,7 @@
    #:index #:create #:update #:delete
    #:get #:post #:put
    ;;  Run
+   #:clear-app-cache
    #:load-app
    #:run
    ;;  Re-export other symbols

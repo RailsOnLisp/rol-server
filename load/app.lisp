@@ -40,6 +40,7 @@
 
 ;;  Clear old definitions
 
+(L>server:clear-app-cache)
 (L>server:clear-routes)
 (L>server:clear-template-cache)
 
