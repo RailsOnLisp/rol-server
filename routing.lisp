@@ -44,12 +44,16 @@
   (setf (static-route-controller uri) controller-form
 	(static-route-reverse controller-form) uri))
 
+(defun sstring< (a b)
+  (declare (type simple-string a b))
+  (string< a b))
+
 (defun list-static-routes ()
   (let (routes)
     (maphash (lambda (uri form)
 	       (push (list uri form) routes))
 	     *static-routes*)
-    (sort routes #'string< :key #'car)))
+    (sort routes #'sstring< :key #'car)))
 
 ;;  Template routes
 
