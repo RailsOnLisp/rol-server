@@ -83,7 +83,7 @@
 
 ;;  Relation to one object
 
-(define-resource-macro has-one (resource-name slot-name &key read-only many)
+(define-resource-macro has-one (resource-name slot-name &key read-only having many)
   (let ((accessor (resource-relation slot-name)))
     `(progn (defun ,accessor (,resource-name)
 	      (facts:first-bound ((,resource-name ',accessor ?))))
@@ -93,7 +93,16 @@
 		       (facts:rm ((,,resource-name ',',accessor ?)))
 		       (facts:add (,,resource-name ',',accessor ,,slot-name))
 		       ,,slot-name))))
+	    ,@(when having
+		`((defun ,having (,slot-name)
+		    (facts:collect ((?x ',accessor ,slot-name)) ?x))
+		  (defmacro ,(sym 'do- having)
+		      ((var ,slot-name) &body body)
+		    `(facts:with ((?x ',',accessor ,,slot-name))
+		       (let ((,var ?x))
+			 ,@body)))))
 	    ,@(when many
+		(warn "(HAS-ONE .. :MANY ..) is deprecated. Please use :HAVING instead.")
 		(let ((many-accessor (resource-relation many)))
 		  `((defun ,many-accessor (,resource-name)
 		      (facts:collect ((?x ',accessor ,resource-name))
