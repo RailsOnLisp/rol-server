@@ -48,6 +48,8 @@
 
 (defun print-asset-tag (spec &rest args)
   (let ((asset (find-asset spec)))
+    (unless asset
+      (http-error "404 Not found" "Asset not found"))
     (if (debug-asset-p asset)
 	(dolist (source (asset-sources asset))
 	  (apply #'asset-include *reply-stream* :html source args))
