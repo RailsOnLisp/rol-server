@@ -80,6 +80,9 @@ FIND_PUBLIC = cd public && find . \
 LOAD_APP = \
 	--load load
 
+LOAD_TESTS = \
+	--load ${LOWH_TRIANGLE_SERVER}/load/tests \
+
 LOAD_ASSETS = \
 	--load ${LOWH_TRIANGLE_SERVER}/load/assets \
 
@@ -141,6 +144,12 @@ show:
 URL ?= /
 fetch:
 	printf "GET ${URL} HTTP/1.0\nHost: www-nv.local\n\n" | nc www-nv.local 80
+
+##  Test
+
+test:
+	${SBCL} ${SBCL_DEBUG_OPTS} ${LOAD_APP} ${LOAD_TESTS} \
+		--eval '(run-tests)'
 
 ##  Install
 
