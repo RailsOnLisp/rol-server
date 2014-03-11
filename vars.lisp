@@ -22,7 +22,7 @@
 
 (defvar *layout* nil)
 (defvar *port* nil)
-(defvar *session* nil)
+(defvar *session*)
 (defvar *session-timeout* (* 8 3600))
 (defvar *session-cookie* :triangle_sid)
 

@@ -58,5 +58,5 @@
 	  (*method* (request-method))
 	  (*host* (request-header :host))
 	  (*uri* (canonical-document-uri (backend-request-uri)))
-	  (*session* (session-attach)))
+	  (*session*))
      ,@body))
