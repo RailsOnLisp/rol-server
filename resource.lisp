@@ -135,6 +135,6 @@
 	      (facts:with-anon (,',resource-name)
 		(facts:add (,',resource-name :is-a ',',resource-name
 					     ',',resource.id id
-					     ,@properties)))
-	      id)))
+					     ,@properties))
+		,',resource-name))))
        ,@body)))
