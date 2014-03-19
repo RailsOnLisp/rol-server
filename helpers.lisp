@@ -51,6 +51,9 @@
 
 (defgeneric markdown (destination input))
 
+(defmethod markdown ((destination t) (input null))
+  nil)
+
 (defmethod markdown ((destination stream) (input stream))
   (sb-ext:run-program "markdown" '("-xcodehilite(force_linenos=True)" "/dev/stdin")
 		      :search t
