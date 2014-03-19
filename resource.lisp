@@ -113,28 +113,36 @@
 			 (let ((,var ?x))
 			   ,@body)))))))))
 
-;;  The actual macro
+;;  ID
 
-(defun make-resource-id ()
-  (base64:integer-to-base64-string
-   (random most-positive-fixnum) :uri t))
-
-(defmacro define-resource (resource-name &body body)
+(define-resource-macro random-id (resource-name &key (length 6))
   (let ((find-resource (sym 'find- resource-name))
-	(resource.id (sym resource-name '.id)))
-    `(with-resource-macros ,resource-name
-       (has-one id :read-only t)
+	(resource-id (sym resource-name '.id)))
+    `(progn
+       (define-resource/has-one ,resource-name id :read-only t)
        (defun ,find-resource (id)
 	 (facts:first-bound ((?c :is-a ',resource-name)
-			     (?c ',resource.id id))))
+			     (?c ',resource-id id))))
        (defmacro ,(sym 'add- resource-name) (&body properties)
 	 `(facts:with-transaction
-	    (let ((id (loop for i = (make-resource-id)
+	    (let ((id (loop for i = (make-resource-id ,,length)
 			 while (,',find-resource i)
 			 finally (return i))))
 	      (facts:with-anon (,',resource-name)
 		(facts:add (,',resource-name :is-a ',',resource-name
-					     ',',resource.id id
+					     ',',resource-id id
 					     ,@properties))
-		,',resource-name))))
-       ,@body)))
+		,',resource-name)))))))
+
+;;  The actual macro
+
+;;  Some use cases for MAKE-RESOURCE-ID require strong random for security purposes.
+
+(defun make-resource-id (length)
+  (make-random-string length))
+
+(defmacro define-resource (resource-name &body body)
+  `(with-resource-macros ,resource-name
+     ,@(unless (find 'random-id body :key #'car)
+	 '((random-id)))
+     ,@body))
