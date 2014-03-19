@@ -81,7 +81,6 @@
    #:*session-cookie*
    #:*session-timeout*
    #:session
-   #:session-data
    #:session-end
    #:session-get
    #:session-hmac
