@@ -54,9 +54,9 @@
 	value))))
 
 (defmacro with-request (&body body)
-  `(let* ((*form-data* nil)
+  `(let* ((*session*)
+	  (*form-data* nil)
 	  (*method* (request-method))
 	  (*host* (request-header :host))
-	  (*uri* (canonical-document-uri (backend-request-uri)))
-	  (*session*))
+	  (*uri* (canonical-document-uri (backend-request-uri))))
      ,@body))
