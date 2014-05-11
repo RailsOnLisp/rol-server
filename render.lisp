@@ -52,12 +52,15 @@
 	(type-match '.json))))
 
 (defun render-error (status &optional (message "") condition backtrace)
-  (destructuring-bind (&optional template type) (find-error-template status)
-    (cond (template (when type
-		      (content-type (mime-type type) "; charset=utf-8"))
-		    (template-let (status message condition backtrace)
-		      (print-template template)))
-	  (:otherwise (render-error.txt status message condition backtrace)))))
+  (handler-case
+      (destructuring-bind (&optional template type) (find-error-template status)
+	(cond (template (when type
+			  (content-type (mime-type type) "; charset=utf-8"))
+			(template-let (status message condition backtrace)
+			  (print-template template)))
+	      (:otherwise (render-error.txt status message condition backtrace))))
+    (error ()
+      (render-error.txt status message condition backtrace))))
 
 (defun render-json (thing)
   (content-type :application/json)
