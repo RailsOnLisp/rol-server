@@ -63,7 +63,8 @@
   (cdr (assoc key form-data :test #'string-equal)))
 
 (defmethod form-data-get ((form-data json:fluid-object) key)
-  (slot-value form-data key))
+  (when (slot-boundp form-data key)
+    (slot-value form-data key)))
 
 (defmacro with-form-data (vars &body body)
   (let ((form-data (gensym "FORM-DATA-")))
