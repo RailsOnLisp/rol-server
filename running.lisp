@@ -19,24 +19,38 @@
 (in-package :lowh.triangle.server)
 
 (defvar *app-cache*
-  (make-hash-table :test 'equal))
+  (make-hash-table :test 'equal)
+  "Hash table for storing modification time of loaded app sources.")
 
 (defun clear-app-cache ()
   (clrhash *app-cache*))
+
+(defvar *app-modules*
+  nil
+  "Modules to be loaded along with the app.")
+
+(defun clear-modules ()
+  (setq *app-modules* nil))
+
+(defun require-module (name)
+  (pushnew name *app-modules* :test #'string=))
 
 (defun load-app ()
   (dolist (dir '("config/*.lisp"
 		 "app/models/*.lisp"
 		 "app/controllers/*.lisp"))
-    (dolist (file (directory dir))
-      (when (alphanumericp (char (pathname-name file) 0))
-	(let* ((name (enough-namestring file))
-	       (date (file-write-date file))
-	       (cached (gethash name *app-cache* -1)))
-	  (unless (= cached date)
-	    (setf (gethash name *app-cache*) date)
-	    (log-msg :info "loading ~S (~S < ~S)" name cached date)
-	    (load name)))))))
+    (dolist (module (cons nil (reverse *app-modules*)))
+      (when module
+	(setq dir (str "lib/triangle/" module "/" dir)))
+      (dolist (file (directory dir))
+	(when (alphanumericp (char (pathname-name file) 0))
+	  (let* ((name (enough-namestring file))
+		 (date (file-write-date file))
+		 (cached (gethash name *app-cache* -1)))
+	    (unless (= cached date)
+	      (setf (gethash name *app-cache*) date)
+	      (log-msg :info "loading ~S (~S < ~S)" name cached date)
+	      (load name))))))))
 
 (defun run-handled ()
   (load-facts)
