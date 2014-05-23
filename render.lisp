@@ -45,7 +45,7 @@
 	     (or (try-name (subseq status 0 3))
 		 (try-name (str (char status 0) "00"))
 		 (when (debug-p :app)
-		   (try-name :debug))
+		   (try-name "debug"))
 		 (try-name "500")))))
     (or (type-match '.html)
 	(type-match '.txt)
