@@ -67,6 +67,7 @@
    ;;  Reply
    #:send-file
    ;;  Forms
+   #:form-data
    #:with-form-data
    ;;  HTTP Headers
    #:header
