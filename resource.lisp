@@ -84,14 +84,20 @@
 ;;  Relation to one object
 
 (define-resource-macro has-one (resource-name slot-name &key read-only having many)
-  (let ((accessor (resource-relation slot-name)))
+  (let* ((accessor (resource-relation slot-name))
+	 (?accessor (sym "?" accessor)))
     `(progn (defun ,accessor (,resource-name)
 	      (facts:first-bound ((,resource-name ',accessor ?))))
 	    ,@(unless read-only
 		`((defsetf ,accessor (,resource-name) (,slot-name)
 		    `(facts:with-transaction
-		       (facts:rm ((,,resource-name ',',accessor ?)))
-		       (facts:add (,,resource-name ',',accessor ,,slot-name))
+		       (let ((missing t))
+			 (facts:with ((,,resource-name ',',accessor ,',?accessor))
+			   (if (lessp:lessp-equal ,',?accessor ,,slot-name)
+			       (setq missing nil)
+			       (facts:rm ((,,resource-name ',',accessor ,',?accessor)))))
+			 (when missing
+			   (facts:add (,,resource-name ',',accessor ,,slot-name))))
 		       ,,slot-name))))
 	    ,@(when having
 		`((defun ,having (,slot-name)
