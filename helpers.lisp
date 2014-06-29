@@ -47,6 +47,9 @@
 (defmethod h ((thing symbol))
   (h (string-downcase thing)))
 
+(defmethod h ((thing number))
+  (h (atom-str thing)))
+
 ;;  Markdown
 
 (defgeneric markdown (destination input))
