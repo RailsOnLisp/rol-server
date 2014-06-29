@@ -24,7 +24,6 @@
 
 (defun render-error.txt (status-string &optional (msg "") condition backtrace)
   (flexi-streams:get-output-stream-sequence *reply-stream*)
-  (status status-string)
   (content-type :text/plain)
   (write-string status-string *reply-stream*)
   (when (debug-p :app)
@@ -52,6 +51,7 @@
 	(type-match '.json))))
 
 (defun render-error (status &optional (message "") condition backtrace)
+  (status status)
   (handler-case
       (destructuring-bind (&optional template type) (find-error-template status)
 	(cond (template (when type
