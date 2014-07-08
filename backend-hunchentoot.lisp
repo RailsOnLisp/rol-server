@@ -76,7 +76,7 @@
 
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
 		   secure (http-only t))
-  (hunchentoot:set-cookie name
+  (hunchentoot:set-cookie (string name)
 			  :value value
 			  :expires expires
 			  :path path
