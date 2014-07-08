@@ -94,6 +94,7 @@
    #:h
    #:markdown
    #:print-markdown
+   #:urls-to-links
    ;;  JSON
    #:j
    #:define-accessors

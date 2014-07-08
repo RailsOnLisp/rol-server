@@ -50,6 +50,9 @@
 (defmethod h ((thing number))
   (h (atom-str thing)))
 
+(defmethod h ((object json:fluid-object))
+  (h (j object)))
+
 ;;  Markdown
 
 (defgeneric markdown (destination input))
@@ -73,6 +76,18 @@
 
 (defun print-markdown (input)
   (markdown *reply-stream* input))
+
+;;  Convert URLs to links
+
+(defun urls-to-links (text)
+  (cl-ppcre:regex-replace-all
+   "(^|\\s)(https?://\\S+)"
+   text
+   (lambda (s s1 s2 m1 m2 r1 r2)
+     (declare (ignore s1 s2 m1 m2))
+     (let ((space (subseq s (svref r1 0) (svref r2 0)))
+	   (url   (subseq s (svref r1 1) (svref r2 1))))
+       (str space "<a href=\"" (h url) "\">" (h url) "</a>")))))
 
 ;;  Alert boxes
 
