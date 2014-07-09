@@ -50,6 +50,7 @@
 		    "str"
 		    "trivial-backtrace"
 		    "trivial-utf-8"
+		    "cl-inflector"
 		    ,@(case backend
 			    ((:fastcgi) '("sb-fastcgi"))
 			    ((:hunchentoot) '("hunchentoot"))))

@@ -64,6 +64,17 @@
 		 x)))
     `(progn ,@(mapcar #'walk body))))
 
+;;  Iterator
+
+(defun resource-iterator (accessor resource-name)
+  `((defun ,accessor (,resource-name)
+      (facts:collect ((,resource-name ',accessor ?x))
+	?x))
+    (defmacro ,(sym 'do- accessor) ((var ,resource-name) &body body)
+      `(facts:with ((,,resource-name ',',accessor ?x))
+	 (let ((,var ?x))
+	   ,@body)))))
+
 ;;  Relations
 
 (defmacro resource-relation (slot-name)
@@ -71,15 +82,12 @@
 
 ;;  Relation with multiple objects
 
-(define-resource-macro has-many (resource-name collection-name)
+(define-resource-macro has-many (resource-name collection-name &key having)
   (let ((accessor (resource-relation collection-name)))
-    `(progn (defun ,accessor (,resource-name)
-	      (facts:collect ((,resource-name ',accessor ?x))
-		?x))
-	    (defmacro ,(sym 'do- accessor) ((var ,resource-name) &body body)
-	      `(facts:with ((,,resource-name ',',accessor ?x))
-		 (let ((,var ?x))
-		   ,@body))))))
+    `(progn ,@(resource-iterator accessor resource-name)
+	    ,@(when having (resource-iterator having (sym
+						      (cl-inflector:singular-of
+						       collection-name)))))))
 
 ;;  Relation to one object
 
@@ -99,14 +107,7 @@
 			 (when missing
 			   (facts:add (,,resource-name ',',accessor ,,slot-name))))
 		       ,,slot-name))))
-	    ,@(when having
-		`((defun ,having (,slot-name)
-		    (facts:collect ((?x ',accessor ,slot-name)) ?x))
-		  (defmacro ,(sym 'do- having)
-		      ((var ,slot-name) &body body)
-		    `(facts:with ((?x ',',accessor ,,slot-name))
-		       (let ((,var ?x))
-			 ,@body)))))
+	    ,@(when having (resource-iterator having slot-name))
 	    ,@(when many
 		(warn "(HAS-ONE .. :MANY ..) is deprecated. Please use :HAVING instead.")
 		(let ((many-accessor (resource-relation many)))
