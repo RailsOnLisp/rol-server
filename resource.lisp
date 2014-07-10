@@ -66,14 +66,18 @@
 
 ;;  Iterator
 
-(defun resource-iterator (accessor resource-name)
+(defun resource-iterator (accessor resource-name &optional reverse)
   `((defun ,accessor (,resource-name)
-      (facts:collect ((,resource-name ',accessor ?x))
+      (facts:collect ,(if reverse
+			  `((?x ',reverse ,resource-name))
+			  `((,resource-name ',accessor ?x)))
 	?x))
     (defmacro ,(sym 'do- accessor) ((var ,resource-name) &body body)
-      `(facts:with ((,,resource-name ',',accessor ?x))
-	 (let ((,var ?x))
-	   ,@body)))))
+      (list 'facts:with (list ,(if reverse
+				   `(list '?x '',reverse ,resource-name)
+				   `(list ,resource-name '',accessor '?x)))
+	    `(let ((,var ?x))
+	       ,@body)))))
 
 ;;  Relations
 
@@ -85,9 +89,10 @@
 (define-resource-macro has-many (resource-name collection-name &key having)
   (let ((accessor (resource-relation collection-name)))
     `(progn ,@(resource-iterator accessor resource-name)
-	    ,@(when having (resource-iterator having (sym
-						      (cl-inflector:singular-of
-						       collection-name)))))))
+	    ,@(when having (resource-iterator having
+					      (sym (cl-inflector:singular-of
+						    collection-name))
+					      accessor)))))
 
 ;;  Relation to one object
 
@@ -107,7 +112,7 @@
 			 (when missing
 			   (facts:add (,,resource-name ',',accessor ,,slot-name))))
 		       ,,slot-name))))
-	    ,@(when having (resource-iterator having slot-name))
+	    ,@(when having (resource-iterator having slot-name accessor))
 	    ,@(when many
 		(warn "(HAS-ONE .. :MANY ..) is deprecated. Please use :HAVING instead.")
 		(let ((many-accessor (resource-relation many)))
