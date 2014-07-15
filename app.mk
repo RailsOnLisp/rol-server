@@ -35,7 +35,7 @@ SBCL_OPTS_ = \
 
 SBCL_DEBUG_OPTS_ = \
 	${SBCL_OPTS} \
-	--eval '(declaim (optimize (debug 3) (safety 2) (speed 0) (space 0)))'
+	--eval '(declaim (optimize (debug 2) (safety 2) (speed 0) (space 0)))'
 
 SBCL_BUILD_OPTS_ = \
 	--disable-ldb \
