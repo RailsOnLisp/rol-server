@@ -61,6 +61,10 @@
   nil)
 
 (defmethod markdown ((destination stream) (input stream))
+  (exec-js:from-file #P"lib/triangle/server/markdown.js"
+		     :safely nil :in input :out destination))
+
+#+nil(defmethod markdown ((destination stream) (input stream))
   (sb-ext:run-program "markdown" '("-xcodehilite(force_linenos=True)" "/dev/stdin")
 		      :search t
 		      :input input
