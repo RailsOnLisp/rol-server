@@ -97,9 +97,12 @@
    #:urls-to-links
    ;;  JSON
    #:j
-   #:define-accessors
    #:bound-slots
-   #:set-attributes
+   #:json-slot
+   #:json-dot
+   #:with-json-accessors
+   #:define-json-accessors
+   #:set-json-attributes
    ;;  Views
    #:*layout*
    #:find-template

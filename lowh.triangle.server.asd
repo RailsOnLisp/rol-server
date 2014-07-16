@@ -63,7 +63,7 @@
 	(:file "vars"        :depends-on ("package"))
 	(:file "assets"      :depends-on ("package" "routing" "vars"))
 	(:file ,backend-file :depends-on ("package" "headers" "vars"))
-	(:file "forms"       :depends-on (,backend-file))
+	(:file "forms"       :depends-on ("json" ,backend-file))
 	(:file "headers"     :depends-on ("package" "vars"))
 	(:file "render"      :depends-on ("templates" ,backend-file))
 	(:file "reply"       :depends-on ("render" ,backend-file))

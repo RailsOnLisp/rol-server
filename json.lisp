@@ -53,17 +53,38 @@
      :when (slot-boundp object name)
      :collect name))
 
-(defmacro define-accessors (class &body accessors)
+(defun json-slot (object key)
+  (let ((slot (json:json-intern (string-upcase key))))
+    (when (slot-boundp object slot)
+      (slot-value object slot))))
+
+(defsetf json-slot (object key) (value)
+  `(setf (slot-value ,object
+		     (json:json-intern (string-upcase ,key)))
+	 ,value))
+
+(defun json-dot (object &rest keys)
+  (reduce #'json-slot keys :initial-value object))
+
+(defmacro with-json-accessors (accessors object &body body)
+  (let ((g!object (gensym "OBJECT-")))
+  `(let ((,g!object ,object))
+     (symbol-macrolet ,(mapcar (lambda (a)
+				 `(,a (json-slot ,g!object ',a)))
+			       accessors)
+       ,@body))))
+
+(defmacro define-json-accessors (class &body accessors)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      ,@(mapcar (lambda (slot)
-		 `(defun ,(sym class #\. slot) (,class)
-		    (when (slot-boundp ,class ',slot)
-		      (slot-value ,class ',slot))))
+		 (let ((name (sym class #\. slot)))
+		   `(defmacro ,name (,class)
+		      `(json-slot ,,class ',',slot))))
 	       accessors)))
 
-(defun set-attributes (obj &rest attributes)
+(defun set-json-attributes (obj &rest attributes)
   (if attributes
       (destructuring-bind (key value &rest rest) attributes
-	(setf (slot-value obj key) value)
-	(apply #'set-attributes obj rest))
+	(setf (json-slot obj key) value)
+	(apply #'set-json-attributes obj rest))
       obj))
