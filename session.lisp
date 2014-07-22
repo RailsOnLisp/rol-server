@@ -88,11 +88,10 @@
 (defun session-reset ()
   (when *session*
     (let ((old-sid (session.id *session*))
-	  (new-sid (make-sid)))
+	  (new-sid (make-session-id)))
       (setf (session.id *session*) new-sid)
-      (set-cookie *session-cookie* (symbol-name new-sid)
-		  (+ *session-timeout* (get-universal-time)))
-      (session-delete old-sid))))
+      (set-cookie *session-cookie* new-sid
+		  (+ *session-timeout* (get-universal-time))))))
 
 (defun session-hmac (&rest parts)
   (apply #'hmac-string (session.key (session)) parts))

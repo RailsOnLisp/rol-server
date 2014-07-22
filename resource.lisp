@@ -132,7 +132,7 @@
 	(resource-id (sym resource-name '.id))
 	(make-resource-id (sym 'make- resource-name '-id)))
     `(progn
-       (define-resource/has-one ,resource-name id :read-only t)
+       (define-resource/has-one ,resource-name id)
        (defun ,make-resource-id ()
 	 (loop for i = (make-resource-id ,length)
 	    while (,find-resource i)
