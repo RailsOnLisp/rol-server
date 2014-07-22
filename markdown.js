@@ -1,4 +1,4 @@
-var fs = require('fs');
+var rw = require('rw');
 var pagedown = require('pagedown');
 var converter = new pagedown.Converter();
 
@@ -8,16 +8,9 @@ var print_error = function (e) {
 }
 
 try {
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('readable', function() {
-    var data = '';
-    var chunk;
-    while (null !== (chunk = process.stdin.read())) {
-      data += chunk;
-    }
-    var html = converter.makeHtml(data);
-    process.stdout.write(html);
-  });
+  var data = rw.readFileSync('/dev/stdin', 'utf8');
+  var html = converter.makeHtml(data);
+  process.stdout.write(html);
 } catch (e) {
   print_error(e);
 }
