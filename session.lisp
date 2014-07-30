@@ -63,8 +63,11 @@
 				 'session.key (make-random-string 32)
 				 'session.remote-addr (request-remote-addr)
 				 'session.user-agent (request-header :user_agent))))
+      (delete-cookie *session-cookie*)
       (set-cookie *session-cookie* (session.id session)
 		  (+ *session-timeout* (get-universal-time)))
+      (when (debug-p (or :app :session))
+	(log-msg :INFO "New session ~S" (session.id session)))
       (setq *session* session))))
 
 (defun session-end ()
@@ -79,6 +82,8 @@
 	    (progn
 	      (session-touch session)
 	      (setf *session* session)
+	      (when (debug-p (or :app :session))
+		(log-msg :INFO "Session ~S" (session.id session)))
 	      session)
 	    (session-end)))))
 
@@ -87,9 +92,11 @@
 
 (defun session-reset ()
   (when *session*
-    (let ((old-sid (session.id *session*))
-	  (new-sid (make-session-id)))
+    (let ((new-sid (make-session-id)))
       (setf (session.id *session*) new-sid)
+      (when (debug-p (or :app :session))
+	(log-msg :INFO "Session reset ~S" new-sid))
+      (delete-cookie *session-cookie*)
       (set-cookie *session-cookie* new-sid
 		  (+ *session-timeout* (get-universal-time))))))
 

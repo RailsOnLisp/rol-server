@@ -98,8 +98,7 @@
     (when http-only "; HttpOnly")))
 
 (defun delete-cookie (name)
-  ;; FIXME: check RFC
-  (header :set-cookie name "="))
+  (header :set-cookie name "=; Max-Age=0"))
 
 (in-package :rfc1123-timezone)
 (cl:defconstant GMT 0)
