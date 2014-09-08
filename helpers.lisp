@@ -18,7 +18,7 @@
 
 (in-package :lowh.triangle.server)
 
-(defun odd/even (list)
+(defun odd/even (list)    ;; Rails cycle
   (let (odd)
     (mapcar (lambda (x)
 	      (setf odd (not odd))
