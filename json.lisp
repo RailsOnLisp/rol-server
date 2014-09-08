@@ -88,3 +88,20 @@
 	(setf (json-slot obj key) value)
 	(apply #'set-json-attributes obj rest))
       obj))
+
+(defgeneric to-json (x))
+
+(defmethod to-json ((x t))
+  x)
+
+(defmethod to-json ((x cons))
+  (if (every (lambda (i)
+	       (and (consp i)
+		    (or (symbolp (car i))
+			(stringp (car i)))))
+	     x)
+      (json:make-object (mapcar (lambda (i)
+				  (cons (car i) (to-json (cdr i))))
+				x)
+			nil)
+      x))

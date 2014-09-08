@@ -103,6 +103,7 @@
    #:with-json-accessors
    #:define-json-accessors
    #:set-json-attributes
+   #:to-json
    ;;  Views
    #:*layout*
    #:find-template
@@ -121,6 +122,7 @@
    ;;  Run
    #:clear-app-cache
    #:load-app
+   #:require-module
    #:run
    ;;  Re-export other symbols
    . #.(let (list)
