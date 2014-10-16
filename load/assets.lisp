@@ -25,7 +25,8 @@
 (use-package :L>assets)
 (use-package :L>ext)
 
-(load "config/assets")
+(when (probe-file #P"config/assets.lisp")
+  (load "config/assets"))
 
 (do ((line t (read-line *standard-input* nil)))
     ((null line))
