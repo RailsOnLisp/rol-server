@@ -18,11 +18,11 @@
 
 SRCS_  != find * \( -name '.*' -prune \) \
           -or -name '[a-z]*.lisp' -print \
-          -or -name '[a-z]*.asd' -print
+          -or -name '[a-z]*.asd' -print \
 
-VIEWS_ != find app/views -type f -name '*[0-9a-z]'
+VIEWS_ != find app/views -type f -name '*[0-9a-z]' \
 
-DATA_  != find data -type f -name '*.facts'
+DATA_  != find data -type f -name '*.facts' \
 
 LOWH_TRIANGLE_SERVER_ = lib/triangle/server
 
@@ -101,6 +101,7 @@ run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
 		-e 's/%WEB_GROUP%/${WEB_GROUP}/g'
 	chmod 755 run.tmp
 	mv run.tmp run
+.PHONY: run
 
 ##  Assets
 
@@ -116,7 +117,7 @@ clean-assets:
 	rm -rf public/assets
 
 clean-build:
-	rm -rf ${CORE} run run.tmp
+	rm -rf ${CORE} run run.tmp .mk.app-files
 	find * -name '*.fasl' -print0 | xargs -0 rm -f
 
 clean: clean-build clean-assets
@@ -155,11 +156,11 @@ test:
 
 install: install-app install-web
 
-install-app: build
-	ls -1 ${CORE} run ${VIEWS} ${DATA} | ${SUDO} cpio -pdmu ${APP_DIR}
+install-app: ${CORE} run ${VIEWS} ${DATA}
+	echo "${CORE} ${VIEWS} ${DATA} run" | tr ' ' '\n' | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
-	${SUDO} chmod -R u=rwX,g=rX,o= ${APP_DIR}
-	${SUDO} chown -R "${APP_USER}:${APP_GROUP}" ${APP_DIR}
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA}" | ${SUDO} xargs chown -R "${APP_USER}:${APP_GROUP}"
 
 install-web: assets
 	${FIND_PUBLIC} | ${SUDO} rsync -lstv --files-from=/dev/stdin . ${WEB_DIR}

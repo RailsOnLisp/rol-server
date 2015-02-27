@@ -40,7 +40,7 @@
 		    "cl-unicode"
 		    "ironclad"
 		    "let-over-lambda"
-		    "lowh-facts"
+		    "facts"
 		    "lowh.triangle.assets"
 		    "lowh.triangle.files"
 		    "lowh.triangle.log"
