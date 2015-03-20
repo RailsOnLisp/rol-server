@@ -16,6 +16,8 @@
 
 ##  Defaults
 
+LOWH_TRIANGLE_SERVER_ = lib/triangle/server
+
 SRCS_  != find * \( -name '.*' -prune \) \
           -or -name '[a-z]*.lisp' -print \
           -or -name '[a-z]*.asd' -print \
@@ -24,7 +26,7 @@ VIEWS_ != find app/views -type f -name '*[0-9a-z]' \
 
 DATA_  != find data -type f -name '*.facts' \
 
-LOWH_TRIANGLE_SERVER_ = lib/triangle/server
+LIBS_   = ${LOWH_TRIANGLE_SERVER}/markdown.js \
 
 SBCL_ = env LC_ALL=en_US.UTF-8 sbcl
 
@@ -58,6 +60,7 @@ CORE  ?= ${APP}.sbcl
 SRCS  ?= ${SRCS_}
 VIEWS ?= ${VIEWS_}
 DATA  ?= ${DATA_}
+LIBS  ?= ${LIBS_}
 LOWH_TRIANGLE_SERVER ?= ${LOWH_TRIANGLE_SERVER_}
 SBCL ?= ${SBCL_}
 SBCL_OPTS ?= ${SBCL_OPTS_}
@@ -157,10 +160,10 @@ test:
 install: install-app install-web
 
 install-app: ${CORE} run ${VIEWS} ${DATA}
-	echo "${CORE} ${VIEWS} ${DATA} run" | tr ' ' '\n' | ${SUDO} cpio -pdmu ${APP_DIR}
+	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS}" | tr ' ' '\n' | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
-	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
-	cd ${APP_DIR} && echo "${CORE} ${VIEWS}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA} ${LIBS}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${LIBS}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
 	cd ${APP_DIR} && echo "${DATA}" | ${SUDO} xargs chown -R "${APP_USER}:${APP_GROUP}"
 
 install-web: assets
