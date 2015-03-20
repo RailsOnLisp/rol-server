@@ -35,10 +35,10 @@
 (defun require-module (name)
   (pushnew name *app-modules* :test #'string=))
 
-(defun load-app ()
-  (dolist (dir '("config/*.lisp"
-		 "app/models/*.lisp"
-		 "app/controllers/*.lisp"))
+(defun load-app (&optional (components '("config/*.lisp"
+                                         "app/models/*.lisp"
+                                         "app/controllers/*.lisp")))
+  (dolist (dir components)
     (dolist (module (cons nil (reverse *app-modules*)))
       (when module
 	(setq dir (str "lib/triangle/" module "/" dir)))
