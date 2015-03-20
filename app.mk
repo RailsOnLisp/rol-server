@@ -160,7 +160,8 @@ install-app: ${CORE} run ${VIEWS} ${DATA}
 	echo "${CORE} ${VIEWS} ${DATA} run" | tr ' ' '\n' | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
 	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
-	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA}" | ${SUDO} xargs chown -R "${APP_USER}:${APP_GROUP}"
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
+	cd ${APP_DIR} && echo "${DATA}" | ${SUDO} xargs chown -R "${APP_USER}:${APP_GROUP}"
 
 install-web: assets
 	${FIND_PUBLIC} | ${SUDO} rsync -lstv --files-from=/dev/stdin . ${WEB_DIR}
