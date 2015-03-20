@@ -22,6 +22,7 @@
   (:nicknames :L>server)
   (:use :cl
 	:alexandria
+        :cfg
 	:debug
 	:L>assets
 	:L>ext

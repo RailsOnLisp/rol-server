@@ -1,5 +1,7 @@
 #!/bin/sh
 exec 2>&1
 exec /usr/local/bin/setuidgid %APP_USER% \
-	/usr/bin/env -i LC_ALL=en_US.UTF-8 \
+	/usr/bin/env -i \
+        LC_ALL=en_US.UTF-8 \
+        RAILS_ENV=production \
 	/usr/local/bin/sbcl --core %CORE% --quit

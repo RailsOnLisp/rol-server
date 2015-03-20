@@ -35,6 +35,7 @@
        :version "0.2"
        :description "Application server / core module"
        :depends-on ("alexandria"
+                    "cfg"
 		    "cl-base64"
 		    "cl-debug"
 		    "cl-unicode"
