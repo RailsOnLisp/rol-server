@@ -53,6 +53,8 @@
 	      (load name))))))))
 
 (defun run-handled ()
+  (when (fboundp 'cl-user::setup-environment)
+    (cl-user::setup-environment cfg:*environment*))
   (load-facts)
   (backend-run))
 
