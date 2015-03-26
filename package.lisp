@@ -88,6 +88,7 @@
    #:request-header
    ;;  Session
    #:*session*
+   #:*session-db*
    #:*session-cookie*
    #:*session-timeout*
    #:session
@@ -95,6 +96,7 @@
    #:session-get
    #:session-hmac
    #:session-reset
+   #:with-session-db
    ;;  Helpers
    #:+crlf+
    #:alert

@@ -27,6 +27,7 @@
 
 (defun load-facts ()
   (facts:clear-db)
+  (init-session-db)
   (maybe-rename-file "data/facts-log.lisp" "app.facts-log")
   (dolist (file (directory "data/*.facts"))
     (when (alphanumericp (char (pathname-name file) 0))
