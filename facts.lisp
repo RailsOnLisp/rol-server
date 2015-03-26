@@ -18,16 +18,22 @@
 
 (in-package :lowh.triangle.server)
 
-(setf facts::*db-path* #P"data/")
+(setf facts:*db-path* #P"data/app")
+
+(defun maybe-rename-file (file new-name)
+  (when (probe-file file)
+    (log-msg :INFO "rename ~S -> ~S" file new-name)
+    (rename-file file new-name)))
 
 (defun load-facts ()
   (facts:clear-db)
+  (maybe-rename-file "data/facts-log.lisp" "app.facts-log")
   (dolist (file (directory "data/*.facts"))
     (when (alphanumericp (char (pathname-name file) 0))
       (log-msg :info "loading facts from ~S" (enough-namestring file))
       (let ((*package* (find-package :cl-user)))
 	(facts:load-db file))))
-  (dolist (file (directory "data/facts-log.lisp"))
+  (dolist (file (directory "data/*.facts-log"))
     (when (alphanumericp (char (pathname-name file) 0))
       (log-msg :info "replaying log from ~S" (enough-namestring file))
       (load file)))
