@@ -27,6 +27,16 @@
       (backend-send-headers)
       (backend-send content))))
 
+(defmacro with-printed-errors ((&optional msg) &body body)
+  `(handler-case
+       (progn ,@body)
+     (warning (c)
+       (log-msg :WARN "~@[~A~]~A" msg c)
+       nil)
+     (t (c)
+       (log-msg :ERROR "~@[~A~]~A" msg c)
+       nil)))
+
 (defmacro with-reply-handlers (&body body)
   `(with-simple-restart (reply "Send HTTP reply")
      (handler-bind ((error
@@ -39,7 +49,7 @@
 					:error
 					:info)
 				    "~A ~A" status msg)
-			   (ignore-errors
+			   (with-printed-errors ("during error handling")
 			     (trivial-backtrace:map-backtrace
 			      (lambda (x) (push x backtrace))))
 			   (flexi-streams:get-output-stream-sequence *reply-stream*)

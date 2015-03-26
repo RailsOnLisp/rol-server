@@ -59,9 +59,12 @@
   (backend-run))
 
 (defun run-protected ()
-  (handler-bind ((error
-		  (lambda (e)
-		    (log-msg :error "~A" e)))
+  (handler-bind ((warning
+		  (lambda (c)
+		    (log-msg :warn "~A" c)))
+		 (error
+		  (lambda (c)
+		    (log-msg :error "~A" c)))
 		 (sb-sys:interactive-interrupt
 		  (lambda (c)
 		    (declare (ignore c))
