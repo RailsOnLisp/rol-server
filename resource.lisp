@@ -133,13 +133,13 @@
 	(make-resource-id (sym 'make- resource-name '-id)))
     `(progn
        (define-resource/has-one ,resource-name id)
+       (defun ,find-resource (id)
+	 (facts:first-bound ((?c :is-a ',resource-name)
+			     (?c ',resource-id id))))
        (defun ,make-resource-id ()
 	 (loop for i = (make-resource-id ,length)
 	    while (,find-resource i)
 	    finally (return i)))
-       (defun ,find-resource (id)
-	 (facts:first-bound ((?c :is-a ',resource-name)
-			     (?c ',resource-id id))))
        (defmacro ,(sym 'add- resource-name) (&body properties)
 	 `(facts:with-transaction
 	    (let ((id (,',make-resource-id)))
