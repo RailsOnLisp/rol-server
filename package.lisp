@@ -66,6 +66,7 @@
    #:define-assets-route
    ;;  Reply
    #:send-file
+   #:*reply-stream*
    ;;  Forms
    #:form-data
    #:with-form-data
@@ -77,6 +78,14 @@
    #:redirect-to
    #:set-cookie
    #:delete-cookie
+   #:+rfc822-day+
+   #:+rfc822-month+
+   #:rfc1123-date-time
+   #:parse-rfc1123-day
+   #:parse-rfc1123-month
+   #:parse-rfc1123-timezone
+   #:parse-rfc1123-date-time
+   #:request-header
    ;;  Session
    #:*session*
    #:*session-cookie*
