@@ -38,4 +38,28 @@
     (when (alphanumericp (char (pathname-name file) 0))
       (log-msg :info "replaying log from ~S" (enough-namestring file))
       (load file)))
+  (save-facts)
   t)
+
+(defun save-facts ()
+  (flet ((file-not-empty (path)
+           (when (probe-file path)
+             (with-open-file (s path)
+               (< 0 (file-length s)))))
+         (add-extension (file ext)
+           (let ((path (str (pathname-name file)
+                            "." (pathname-type file)
+                            "." ext)))
+             (maybe-rename-file file path))))
+    (facts:with-transaction
+      (let ((path (make-pathname :type "facts"
+                                 :defaults facts:*db-path*))
+            (log-path (facts:db-log-path))
+            (time (format-timestring nil (now)
+                                     :format +iso-8601-format+
+                                     :timezone +utc-zone+)))
+        (when (file-not-empty log-path)
+          (add-extension log-path (str "merged-" time)))
+        (when (file-not-empty path)
+          (add-extension path (str "snapshot-" time)))
+        (facts:save-db :into path)))))

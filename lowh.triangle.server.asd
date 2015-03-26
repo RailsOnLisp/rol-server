@@ -40,6 +40,7 @@
 		    "cl-debug"
 		    "cl-unicode"
 		    "ironclad"
+                    "local-time"
 		    "facts"
 		    "lowh.triangle.assets"
 		    "lowh.triangle.files"

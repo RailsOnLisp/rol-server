@@ -24,6 +24,7 @@
 	:alexandria
         :cfg
 	:debug
+        :local-time
 	:L>assets
 	:L>ext
 	:L>files
@@ -46,6 +47,7 @@
    #:make-random-string
    ;;  Data
    #:load-facts
+   #:save-facts
    ;;  Resource
    #:define-resource
    #:has-one
