@@ -30,7 +30,6 @@
 	:L>log
 	:L>template
 	:L>uri
-	:let-over-lambda
 	:str
 	:trivial-gray-streams)
   (:export
