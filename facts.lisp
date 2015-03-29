@@ -25,10 +25,15 @@
     (log-msg :INFO "rename ~S -> ~S" file new-name)
     (rename-file file new-name)))
 
+(defun pathname-without-dir (pathname)
+  (make-pathname :name (pathname-name pathname)
+                 :type (pathname-type pathname)))
+
 (defun load-facts ()
   (facts:clear-db)
   (init-session-db)
-  (maybe-rename-file "data/facts-log.lisp" "app.facts-log")
+  (maybe-rename-file "data/facts-log.lisp"
+                     (pathname-without-dir (facts:db-log-path)))
   (dolist (file (directory "data/*.facts"))
     (when (alphanumericp (char (pathname-name file) 0))
       (log-msg :info "loading facts from ~S" (enough-namestring file))
