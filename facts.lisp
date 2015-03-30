@@ -22,7 +22,7 @@
 
 (defun maybe-rename-file (file new-name)
   (when (probe-file file)
-    (log-msg :INFO "rename ~S -> ~S" file new-name)
+    (log-msg :INFO "rename ~S -> ~S" file (namestring new-name))
     (rename-file file new-name)))
 
 (defun pathname-without-dir (pathname)
@@ -67,4 +67,5 @@
           (add-extension log-path (str "merged-" time)))
         (when (file-not-empty path)
           (add-extension path (str "snapshot-" time)))
+        (log-msg :INFO "Saving facts into ~S" (namestring path))
         (facts:save-db :into path)))))
