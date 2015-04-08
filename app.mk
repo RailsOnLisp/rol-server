@@ -159,14 +159,14 @@ test:
 
 install: install-app install-web
 
-install-app: ${CORE} run ${VIEWS} ${DATA}
+install-app:
 	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS}" | tr ' ' '\n' | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
 	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA} ${LIBS}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
 	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${LIBS}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
 	cd ${APP_DIR} && echo "${DATA}" | ${SUDO} xargs chown -R "${APP_USER}:${APP_GROUP}"
 
-install-web: assets
+install-web:
 	${FIND_PUBLIC} | ${SUDO} rsync -lstv --files-from=/dev/stdin . ${WEB_DIR}
 	${SUDO} chmod -R u=rwX,g=rX,o= ${WEB_DIR}
 	${SUDO} chown -R "${WEB_USER}:${WEB_GROUP}" ${WEB_DIR}
