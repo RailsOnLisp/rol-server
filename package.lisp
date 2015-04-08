@@ -94,6 +94,7 @@
    #:*session-cookie*
    #:*session-timeout*
    #:session
+   #:session-attach
    #:session-end
    #:session-get
    #:session-hmac
