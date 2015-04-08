@@ -89,7 +89,9 @@ LOAD_TESTS = \
 LOAD_ASSETS = \
 	--load ${LOWH_TRIANGLE_SERVER}/load/assets \
 
-build: ${CORE} run
+build: ${CORE} run assets
+
+core: ${CORE}
 
 ${CORE}: Makefile ${SRCS}
 	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_APP} --eval '(build "${CORE}")'
