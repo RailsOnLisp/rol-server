@@ -20,10 +20,10 @@
   (unless (char= #\. (char (pathname-name asd) 0))
     (load asd)))
 
-(require :lowh.triangle.assets)
+(require :RoL-assets)
 
-(use-package :L>assets)
-(use-package :L>ext)
+(use-package :RoL-assets)
+(use-package :RoL-ext)
 
 (when (probe-file #P"config/assets.lisp")
   (load "config/assets"))
@@ -32,5 +32,5 @@
     ((null line))
   (fresh-line)
   (fresh-line *error-output*)
-  (time (L>assets:generate))
-  (time (L>assets:precompile)))
+  (time (RoL-assets:generate))
+  (time (RoL-assets:precompile)))

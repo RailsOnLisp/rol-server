@@ -26,14 +26,14 @@
 (require :alexandria)
 (use-package :alexandria)
 
-(require :lowh.triangle.files)
-(use-package :L>files)
+(require :RoL-files)
+(use-package :RoL-files)
 
-(require :lowh.triangle.server)
-(use-package :L>server)
+(require :RoL-server)
+(use-package :RoL-server)
 
-(require :lowh.triangle.assets)
-(use-package :L>ext)
+(require :RoL-assets)
+(use-package :RoL-ext)
 
 (require :cl-debug)
 (use-package :debug)
@@ -44,12 +44,12 @@
 
 ;;  Clear old definitions
 
-(L>server:clear-app-cache)
-(L>server:clear-routes)
-(L>server:clear-template-cache)
+(RoL-server:clear-app-cache)
+(RoL-server:clear-routes)
+(RoL-server:clear-template-cache)
 
-(L>server:load-secret)
-(L>server:load-app)
+(RoL-server:load-secret)
+(RoL-server:load-app)
 
 (defun reload ()
   (load "lib/triangle/server/load/app"))

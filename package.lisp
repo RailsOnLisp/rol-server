@@ -18,19 +18,19 @@
 
 (in-package :cl-user)
 
-(defpackage :lowh.triangle.server
-  (:nicknames :L>server)
+(defpackage :RoL-server
+  (:nicknames :L>server :lowh.triangle.server)
   (:use :cl
 	:alexandria
         :cfg
 	:debug
         :local-time
-	:L>assets
-	:L>ext
-	:L>files
-	:L>log
-	:L>template
-	:L>uri
+	:RoL-assets
+	:RoL-ext
+	:RoL-files
+	:RoL-log
+	:RoL-template
+	:RoL-uri
 	:str
 	:trivial-gray-streams)
   (:export
@@ -140,7 +140,7 @@
    #:run
    ;;  Re-export other symbols
    . #.(let (list)
-	 (dolist (pkg '(:L>assets :L>files :L>template :L>uri))
+	 (dolist (pkg '(:RoL-assets :RoL-files :RoL-template :RoL-uri))
 	   (do-external-symbols (sym pkg)
 	     (push (symbol-name sym) list)))
 	 list)

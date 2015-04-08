@@ -16,7 +16,7 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh.triangle.server)
+(in-package :RoL-server)
 
 (defun find-template (type name &rest directories)
   (make-pathname :directory (list* :relative "app" "views"

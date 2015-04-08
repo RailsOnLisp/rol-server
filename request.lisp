@@ -16,7 +16,7 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(in-package :lowh.triangle.server)
+(in-package :RoL-server)
 
 (define-constant +http-verbs+ #(:GET :POST :PUT :DELETE)
   :test 'equalp)

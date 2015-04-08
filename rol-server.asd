@@ -1,7 +1,7 @@
 ;;
-;;  LowH Triangle Server
+;;  RoL-server  -  Application server
 ;;
-;;  Copyright 2012 Thomas de Grivel <billitch@gmail.com>
+;;  Copyright 2012-2015 Thomas de Grivel <thomas@lowh.net>
 ;;
 ;;  Permission to use, copy, modify, and distribute this software for any
 ;;  purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,10 @@
 
 (in-package #:cl-user)
 
-(defpackage #:lowh.triangle.server.system
+(defpackage #:RoL-server.system
   (:use #:cl #:asdf))
 
-(in-package #:lowh.triangle.server.system)
+(in-package #:RoL-server.system)
 
 #.(let* ((backend (if (boundp 'cl-user::*backend*)
 		      (symbol-value 'cl-user::*backend*)
@@ -29,8 +29,8 @@
 	 (backend-file (concatenate 'string "backend-"
 				    (string-downcase (symbol-name backend)))))
     (pushnew backend *features*)
-    `(defsystem lowh.triangle.server
-       :name "lowh.triangle.server"
+    `(asdf:defsystem #:RoL-server
+       :name "RoL-server"
        :author "Thomas de Grivel <thomas@lowh.net>"
        :version "0.2"
        :description "Application server / core module"
@@ -42,12 +42,12 @@
 		    "ironclad"
                     "local-time"
 		    "facts"
-		    "lowh.triangle.assets"
-		    "lowh.triangle.files"
-		    "lowh.triangle.log"
-		    "lowh.triangle.template"
-		    "lowh.triangle.uri"
 		    "flexi-streams"
+		    "rol-assets"
+		    "rol-files"
+		    "rol-log"
+		    "rol-template"
+		    "rol-uri"
 		    "str"
 		    "trivial-backtrace"
 		    "trivial-utf-8"

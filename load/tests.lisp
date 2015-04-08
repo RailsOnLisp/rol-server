@@ -26,9 +26,9 @@
 	  priest:request))
 (defvar *base-url-for-tests* "http://localhost/")
 
-(defun run-tests (&key (suite :L>tests))
-  (5am:def-suite :L>tests :description "The main L> test suite.")
-  (5am:in-suite :L>tests)
+(defun run-tests (&key (suite :RoL-tests))
+  (5am:def-suite :RoL-tests :description "The main RoL test suite.")
+  (5am:in-suite :RoL-tests)
   (dolist (path (directory "tests/**.lisp"))
     (unless (char= #\. (char (pathname-name path) 0))
       (load path)))
