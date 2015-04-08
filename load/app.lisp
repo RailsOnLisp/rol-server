@@ -38,10 +38,6 @@
 (require :cl-debug)
 (use-package :debug)
 
-(let ((env (cfg:getenv "RAILS_ENV")))
-  (when env
-    (setq cfg:*environment* (kw env))))
-
 ;;  Clear old definitions
 
 (RoL-server:clear-app-cache)

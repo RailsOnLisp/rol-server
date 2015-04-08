@@ -53,6 +53,9 @@
 	      (load name))))))))
 
 (defun run-handled ()
+  (let ((env (cfg:getenv "RAILS_ENV")))
+    (when env
+      (setq cfg:*environment* (kw env))))
   (when (fboundp 'cl-user::setup-environment)
     (funcall 'cl-user::setup-environment cfg:*environment*))
   (load-facts)
