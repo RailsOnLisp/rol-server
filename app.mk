@@ -160,7 +160,7 @@ test:
 install: install-app install-web
 
 install-app:
-	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS}" | tr ' ' '\n' | ${SUDO} cpio -pdmu ${APP_DIR}
+	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS}" | xargs -n 1 | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
 	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA} ${LIBS}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
 	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${LIBS}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
