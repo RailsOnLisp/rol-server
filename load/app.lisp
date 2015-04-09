@@ -51,6 +51,7 @@
   (load "lib/triangle/server/load/app"))
 
 (defun build (core)
+  (cache-assets)
   (sb-ext:save-lisp-and-die core
 			    :toplevel #'run
 			    #+sb-core-compression :compression

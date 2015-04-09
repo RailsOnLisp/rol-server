@@ -63,7 +63,8 @@
    #:route-reverse
    #:list-routes
    #:clear-routes
-   ;;  Asset routes
+   ;;  Assets
+   #:cache-assets
    #:asset-controller
    #:define-assets-route
    ;;  Reply
