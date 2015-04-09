@@ -16,7 +16,8 @@
 
 ##  Defaults
 
-LOWH_TRIANGLE_SERVER_ = lib/triangle/server
+ROL_PATH_ = lib/rol
+ROL_SERVER_ = ${ROL_PATH}/server
 
 SRCS_  != find * \( -name '.*' -prune \) \
           -or -name '[a-z]*.lisp' -print \
@@ -61,7 +62,8 @@ SRCS  ?= ${SRCS_}
 VIEWS ?= ${VIEWS_}
 DATA  ?= ${DATA_}
 LIBS  ?= ${LIBS_}
-LOWH_TRIANGLE_SERVER ?= ${LOWH_TRIANGLE_SERVER_}
+ROL_PATH ?= ${ROL_PATH_}
+ROL_SERVER ?= ${ROL_SERVER_}
 SBCL ?= ${SBCL_}
 SBCL_OPTS ?= ${SBCL_OPTS_}
 SBCL_DEBUG_OPTS ?= ${SBCL_DEBUG_OPTS_}
@@ -84,10 +86,10 @@ LOAD_APP = \
 	--load load
 
 LOAD_TESTS = \
-	--load ${LOWH_TRIANGLE_SERVER}/load/tests \
+	--load ${ROL_SERVER}/load/tests \
 
 LOAD_ASSETS = \
-	--load ${LOWH_TRIANGLE_SERVER}/load/assets \
+	--load ${ROL_SERVER}/load/assets \
 
 build: ${CORE} run assets
 
@@ -96,8 +98,8 @@ core: ${CORE}
 ${CORE}: Makefile ${SRCS}
 	${SBCL} ${SBCL_BUILD_OPTS} ${LOAD_APP} --eval '(build "${CORE}")'
 
-run: Makefile ${LOWH_TRIANGLE_SERVER}/run.in
-	sed < ${LOWH_TRIANGLE_SERVER}/run.in > run.tmp \
+run: Makefile ${ROL_SERVER}/run.in
+	sed < ${ROL_SERVER}/run.in > run.tmp \
 		-e 's/%APP%/${APP}/g' \
 		-e 's/%CORE%/${CORE}/g' \
 		-e 's/%APP_USER%/${APP_USER}/g' \
