@@ -141,7 +141,7 @@
    #:run
    ;;  Re-export other symbols
    . #.(let (list)
-	 (dolist (pkg '(:RoL-assets :RoL-files :RoL-template :RoL-uri))
+	 (dolist (pkg '(:RoL-assets :RoL-files :RoL-log :RoL-template :RoL-uri))
 	   (do-external-symbols (sym pkg)
 	     (push (symbol-name sym) list)))
 	 list)
