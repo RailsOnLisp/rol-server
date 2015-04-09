@@ -27,7 +27,7 @@ VIEWS_ != find app/views -type f -name '*[0-9a-z]' \
 
 DATA_  != find data -type f -name '*.facts' \
 
-LIBS_   = ${LOWH_TRIANGLE_SERVER}/markdown.js \
+LIBS_   = ${ROL_SERVER}/markdown.js
 
 SBCL_ = env LC_ALL=en_US.UTF-8 sbcl
 
@@ -163,13 +163,15 @@ test:
 
 ##  Install
 
+NODE_MODULES != find ${ROL_DIR}/node_modules
+
 install: install-app install-web
 
 install-app:
-	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS}" | xargs -n 1 | ${SUDO} cpio -pdmu ${APP_DIR}
+	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS} ${NODE_MODULES}" | xargs -n 1 | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
-	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA} ${LIBS}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
-	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${LIBS}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA} ${LIBS} ${NODE_MODULES}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${LIBS} ${NODE_MODULES}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
 	cd ${APP_DIR} && echo "${DATA}" | ${SUDO} xargs chown -R "${APP_USER}:${APP_GROUP}"
 
 install-web:
