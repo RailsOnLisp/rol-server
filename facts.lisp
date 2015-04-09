@@ -67,5 +67,5 @@
           (add-extension log-path (str "merged-" time)))
         (when (file-not-empty path)
           (add-extension path (str "snapshot-" time)))
-        (log-msg :INFO "Saving facts into ~S" (namestring path))
+        (log-msg :INFO "saving facts into ~S" (namestring path))
         (facts:save-db :into path)))))
