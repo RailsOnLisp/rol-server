@@ -1,5 +1,5 @@
 ;;
-;;  RoL-server  -  Application server
+;;  RoL-server  -  Rails on Lisp application server
 ;;
 ;;  Copyright 2012-2015 Thomas de Grivel <thomas@lowh.net>
 ;;
