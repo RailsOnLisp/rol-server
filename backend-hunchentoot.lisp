@@ -89,18 +89,18 @@
 
 ;;  Running
 
-(defclass triangle-acceptor (hunchentoot:acceptor)
+(defclass rol-acceptor (hunchentoot:acceptor)
   ())
 
 (defmethod hunchentoot:acceptor-request-dispatcher ((hunchentoot:*acceptor*
-						     triangle-acceptor))
+						     rol-acceptor))
   (lambda (hunchentoot:*request*)
     (let ((hunchentoot:*catch-errors-p* (not (debug-p :reply))))
       (route-request))))
 
 (defun backend-run ()
   (log-msg :info "starting hunchentoot at 127.0.0.1:~A" *port*)
-  (hunchentoot:start (make-instance 'triangle-acceptor
+  (hunchentoot:start (make-instance 'rol-acceptor
 				    :address "127.0.0.1"
 				    :port *port*))
   (error "hunchentoot server exited"))

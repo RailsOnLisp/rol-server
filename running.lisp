@@ -41,7 +41,7 @@
   (dolist (dir components)
     (dolist (module (cons nil (reverse *app-modules*)))
       (when module
-	(setq dir (str "lib/triangle/" module "/" dir)))
+	(setq dir (str "lib/rol/" module "/" dir)))
       (dolist (file (directory dir))
 	(when (alphanumericp (char (pathname-name file) 0))
 	  (let* ((name (enough-namestring file))

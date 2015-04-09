@@ -24,7 +24,7 @@
 (defvar *port* nil)
 (defvar *session*)
 (defvar *session-timeout* (* 8 3600))
-(defvar *session-cookie* :triangle_sid)
+(defvar *session-cookie* :rails_on_lisp_sid)
 
 (defvar *compile-assets* t)
 
