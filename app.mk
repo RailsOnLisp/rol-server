@@ -16,8 +16,8 @@
 
 ##  Defaults
 
-ROL_PATH_ = lib/rol
-ROL_SERVER_ = ${ROL_PATH}/server
+ROL_DIR_ = lib/rol
+ROL_SERVER_ = ${ROL_DIR}/server
 
 SRCS_  != find * \( -name '.*' -prune \) \
           -or -name '[a-z]*.lisp' -print \
@@ -62,7 +62,7 @@ SRCS  ?= ${SRCS_}
 VIEWS ?= ${VIEWS_}
 DATA  ?= ${DATA_}
 LIBS  ?= ${LIBS_}
-ROL_PATH ?= ${ROL_PATH_}
+ROL_DIR ?= ${ROL_DIR_}
 ROL_SERVER ?= ${ROL_SERVER_}
 SBCL ?= ${SBCL_}
 SBCL_OPTS ?= ${SBCL_OPTS_}
