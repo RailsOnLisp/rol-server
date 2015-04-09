@@ -150,8 +150,10 @@ show:
 	@echo WEB_USER = "${WEB_USER}"
 
 URL ?= /
+HOST ?= app.local
+
 fetch:
-	printf "GET ${URL} HTTP/1.0\nHost: www-nv.local\n\n" | nc www-nv.local 80
+	printf "GET ${URL} HTTP/1.0\nHost: ${HOST}\n\n" | nc ${HOST} 80
 
 ##  Test
 
