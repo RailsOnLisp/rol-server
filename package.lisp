@@ -25,6 +25,7 @@
         :cfg
 	:debug
         :local-time
+        :re
 	:RoL-assets
 	:RoL-ext
 	:RoL-files

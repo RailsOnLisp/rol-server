@@ -43,6 +43,7 @@
                     "local-time"
 		    "facts"
 		    "flexi-streams"
+                    "re"
 		    "rol-assets"
 		    "rol-files"
 		    "rol-log"
