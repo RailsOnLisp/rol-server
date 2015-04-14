@@ -168,11 +168,11 @@ NODE_MODULES != find ${ROL_DIR}/node_modules
 install: install-app install-web
 
 install-app:
-	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS} ${NODE_MODULES}" | xargs -n 1 | ${SUDO} cpio -pdmu ${APP_DIR}
+	echo "${CORE} ${VIEWS} ${DATA} run ${LIBS} ${NODE_MODULES}" | xargs -rn 1 | ${SUDO} cpio -pdmu ${APP_DIR}
 	${SUDO} mkdir -p ${APP_DIR}/log
-	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA} ${LIBS} ${NODE_MODULES}" | ${SUDO} xargs chmod -R u=rwX,g=rX,o=
-	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${LIBS} ${NODE_MODULES}" | ${SUDO} xargs chown -R "root:${APP_GROUP}"
-	cd ${APP_DIR} && echo "${DATA}" | ${SUDO} xargs chown -R "${APP_USER}:${APP_GROUP}"
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${DATA} ${LIBS} ${NODE_MODULES}" | ${SUDO} xargs -r chmod -R u=rwX,g=rX,o=
+	cd ${APP_DIR} && echo "${CORE} ${VIEWS} ${LIBS} ${NODE_MODULES}" | ${SUDO} xargs -r chown -R "root:${APP_GROUP}"
+	cd ${APP_DIR} && echo "${DATA}" | ${SUDO} xargs -r chown -R "${APP_USER}:${APP_GROUP}"
 
 install-web:
 	${FIND_PUBLIC} | ${SUDO} rsync -lstv --files-from=/dev/stdin . ${WEB_DIR}
