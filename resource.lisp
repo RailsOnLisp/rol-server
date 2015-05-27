@@ -86,9 +86,36 @@
 
 ;;  Relation with multiple objects
 
+(defun has-many/add (accessor resource-name)
+  `((defun ,(sym 'add- accessor) (,resource-name &rest to-add)
+      (mapcar (lambda (x)
+                (facts:add (,resource-name ',accessor x)))
+              to-add))))
+
+(defun has-many/remove (accessor resource-name)
+  `((defun ,(sym 'remove- accessor) (,resource-name &rest to-remove)
+      (dolist (x to-remove)
+        (facts:rm ((,resource-name ',accessor x)))))))
+
+(defun has-many/clear (accessor resource-name)
+  `((defun ,(sym 'clear- accessor) (,resource-name)
+      (facts:rm ((,resource-name ',accessor ?x))))))
+
+(defun has-many/set (accessor resource-name)
+  `((defsetf ,accessor (,resource-name) (value)
+      `(progn
+         (,',(sym 'clear- accessor) ,,resource-name)
+         (map 'nil (lambda (x)
+                     (,',(sym 'add- accessor) ,,resource-name x))
+              ,value)))))
+
 (define-resource-macro has-many (resource-name collection-name &key having)
   (let ((accessor (resource-relation collection-name)))
     `(progn ,@(resource-iterator accessor resource-name)
+            ,@(has-many/add accessor resource-name)
+            ,@(has-many/remove accessor resource-name)
+            ,@(has-many/clear accessor resource-name)
+            ,@(has-many/set accessor resource-name)
 	    ,@(when having (resource-iterator having
 					      (sym (cl-inflector:singular-of
 						    collection-name))
@@ -112,7 +139,12 @@
 			 (when missing
 			   (facts:add (,,resource-name ',',accessor ,,slot-name))))
 		       ,,slot-name))))
-	    ,@(when having (resource-iterator having slot-name accessor))
+	    ,@(when having
+                `(,@(resource-iterator having slot-name accessor)
+                  ,@(has-many/add having resource-name)
+                  ,@(has-many/remove having resource-name)
+                  ,@(has-many/clear having resource-name)
+                  ,@(has-many/set having resource-name)))
 	    ,@(when many
 		(warn "(HAS-ONE .. :MANY ..) is deprecated. Please use :HAVING instead.")
 		(let ((many-accessor (resource-relation many)))
@@ -141,11 +173,11 @@
 	    while (,find-resource i)
 	    finally (return i)))
        (defmacro ,(sym 'add- resource-name) (&body properties)
-	 `(facts:with-transaction
-	    (let ((id (,',make-resource-id)))
+         (unless (getf properties ',resource-id)
+           (setq properties `(',',resource-id (,',make-resource-id) ,@properties))
+           `(facts:with-transaction
 	      (facts:with-anon (,',resource-name)
 		(facts:add (,',resource-name :is-a ',',resource-name
-					     ',',resource-id id
 					     ,@properties))
 		,',resource-name)))))))
 
