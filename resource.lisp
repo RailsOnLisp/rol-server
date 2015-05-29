@@ -173,13 +173,13 @@
 	    while (,find-resource i)
 	    finally (return i)))
        (defmacro ,(sym 'add- resource-name) (&body properties)
-         (unless (getf properties ',resource-id)
-           (setq properties `(',',resource-id (,',make-resource-id) ,@properties))
-           `(facts:with-transaction
-	      (facts:with-anon (,',resource-name)
-		(facts:add (,',resource-name :is-a ',',resource-name
-					     ,@properties))
-		,',resource-name)))))))
+         `(facts:with-transaction
+            (facts:with-anon (,',resource-name)
+              (facts:add (,',resource-name :is-a ',',resource-name
+                                           ,@properties))
+              (unless (,',resource-id ,',resource-name)
+                (setf (,',resource-id ,',resource-name) (,',make-resource-id)))
+              ,',resource-name))))))
 
 ;;  The actual macro
 
