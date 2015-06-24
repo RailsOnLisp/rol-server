@@ -24,7 +24,9 @@
   (and (debug-p :assets)
        (typep asset 'preprocessed-asset)))
 
-(defun asset-controller (name ext *assets-url-template* *assets-path-template*)
+(defun asset-controller (name ext &optional
+                                    (*assets-url-template* *assets-url-template*)
+                                    (*assets-path-template* *assets-path-template*))
   (let* ((asset-spec (str name (when ext ".") ext))
 	 (asset (find-asset asset-spec)))
     (unless asset
@@ -42,9 +44,9 @@
 		   (compile-asset asset *reply-stream*)))))))
 
 (defun define-assets-route (url-template path-template)
-  (define-route url-template
-    `(asset-controller ,(uri-var 'name) ,(uri-var 'ext)
-		       ,url-template ,path-template)))
+  (define-templated-route url-template
+    ``(asset-controller ,,(uri-var 'name) ,,(uri-var 'ext)
+                        ,,url-template ,,path-template)))
 
 (defun print-asset-tag (spec &rest args)
   (let ((asset (find-asset spec)))

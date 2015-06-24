@@ -40,9 +40,9 @@
 (defmacro static-route-reverse (controller)
   `(gethash ,controller *static-routes/reverse*))
 
-(defun define-static-route (uri controller-form)
-  (setf (static-route-controller uri) controller-form
-	(static-route-reverse controller-form) uri))
+(defun define-static-route (uri controller)
+  (setf (static-route-controller uri) controller
+        (static-route-reverse controller) uri))
 
 (defun sstring< (a b)
   (declare (type simple-string a b))
@@ -111,14 +111,12 @@
 		       (t x)))))
     (walk list)))
 
-(defun define-templated-route (uri controller-form)
+(defun define-templated-route (uri controller)
   (update-templated-route
    (make-templated-route :uri-template (uri-template-string uri)
-			 :controller-form controller-form
-			 :function (compile-uri-template-matcher
-				    uri `(,(list-unquote-if
-					    #'uri-var-p
-					    controller-form))))))
+                         :controller-form controller
+                         :function (compile-uri-template-matcher
+                                    uri (list controller)))))
 
 (defun templated-route-controller (uri)
   (some (lambda (route)
@@ -156,14 +154,10 @@
 
 ;;  Abstract routes functions
 
-(defmacro define-route (uri &body controller-form)
-  (let ((g!uri (gensym "URI-"))
-	(g!form (gensym "FORM-")))
-    `(let ((,g!uri ,uri)
-	   (,g!form (progn ,@controller-form)))
-       (if (uri-template-p ,g!uri)
-	   (define-templated-route ,g!uri ,g!form)
-	   (define-static-route ,g!uri ,g!form)))))
+(defmacro define-route (uri controller)
+  (if (uri-template-p uri)
+      `(define-templated-route ,uri ',controller)
+      `(define-static-route ,uri ,controller)))
 
 (defun find-route (uri)
   (or (static-route-controller uri)
