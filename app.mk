@@ -91,7 +91,7 @@ LOAD_TESTS = \
 LOAD_ASSETS = \
 	--load ${ROL_SERVER}/load/assets \
 
-build: ${CORE} run assets
+build: assets ${CORE} run
 
 core: ${CORE}
 
