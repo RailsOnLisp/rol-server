@@ -111,10 +111,18 @@
 		       (t x)))))
     (walk list)))
 
+(defun unquote-controller-form (form uri)
+  (let ((vars (uri-template-vars uri)))
+    (eval `(let (,@(mapcar (lambda (v) `(,v ',v)) vars)
+                 ,@(mapcar (lambda (v) `(,(intern (symbol-name v) *package*)
+                                         ',v))
+                           vars))
+             ,form))))
+
 (defun define-templated-route (uri controller)
   (update-templated-route
    (make-templated-route :uri-template (uri-template-string uri)
-                         :controller-form controller
+                         :controller-form (unquote-controller-form controller uri)
                          :function (compile-uri-template-matcher
                                     uri (list controller)))))
 
@@ -137,10 +145,10 @@
 		    (unify (cdr r) (cdr v) acc tail))
 		   (t nil)))
 	   (match-routes (routes)
-	     (unless (endp routes)
-	       (or (unify (templated-route-controller-form (car routes))
+	     (when-let ((route (car routes)))
+	       (or (unify (templated-route-controller-form route)
 			  controller-form
-			  (cons (car routes) nil))
+			  (cons route nil))
 		   (match-routes (cdr routes))))))
     (when-let ((match (match-routes *templated-routes*)))
       (apply #'expand-uri nil (templated-route-uri-template (car match))
