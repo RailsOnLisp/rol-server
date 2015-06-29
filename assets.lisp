@@ -30,6 +30,7 @@
   (let* ((asset-spec (str name (when ext ".") ext))
 	 (asset (find-asset asset-spec)))
     (unless asset
+      (clear-asset-cache)
       (http-error "404 not found" "asset not found: ~S" asset-spec))
     (let ((write-date (asset-write-date asset))
 	  (if-modified-since (request-header :if-modified-since)))
