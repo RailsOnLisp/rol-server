@@ -115,8 +115,12 @@
   (let ((vars (uri-template-vars uri)))
     (eval `(let (,@(mapcar (lambda (v) `(,v ',v)) vars)
                  ,@(mapcar (lambda (v) `(,(intern (symbol-name v) *package*)
-                                         ',v))
+                                          ',v))
                            vars))
+             (declare (ignorable ,@(mapcan (lambda (v)
+                                             `(,v ,(intern (symbol-name v)
+                                                           *package*)))
+                                           vars)))
              ,form))))
 
 (defun define-templated-route (uri controller)
