@@ -52,8 +52,8 @@
 
 (defun backend-read-request-data ()
   (let ((data (cl-fastcgi:fcgx-read-all *req*)))
-    (trivial-utf-8:utf-8-bytes-to-string
-     (apply #'concatenate data))))
+    (babel:octets-to-string
+     (apply #'concatenate 'array data))))
 
 (defun backend-read-form-data ()
   (let ((content-type (string-downcase

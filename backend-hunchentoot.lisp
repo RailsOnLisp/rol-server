@@ -85,7 +85,7 @@
 			  :http-only http-only))
 
 (defun backend-send (content)
-  (trivial-utf-8:utf-8-bytes-to-string content))
+  (babel:octets-to-string content))
 
 ;;  Running
 

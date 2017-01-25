@@ -48,8 +48,10 @@
 (defun hmac (&rest parts)
   (let ((h (ironclad:make-hmac *secret* :sha512)))
     (dolist (part parts)
-      (ironclad:update-hmac h (trivial-utf-8:string-to-utf-8-bytes
-			       (string part) :null-terminate t)))
+      (ironclad:update-hmac h (babel:string-to-octets
+			       (concatenate 'string (string part)
+					    (make-string 1 :initial-element
+							 (code-char 0))))))
     (ironclad:hmac-digest h)))
 
 (defun hmac-string (&rest parts)

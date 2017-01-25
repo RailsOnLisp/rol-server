@@ -38,7 +38,7 @@
 	(when hex
 	  (setf (aref out pos) (parse-integer hex :radix 16))
 	  (incf pos))))
-    (trivial-utf-8:utf-8-bytes-to-string out :end pos)))
+    (babel:octets-to-string (subseq out 0 pos))))
 
 (defun parse-www-form-url-encoded (string)
   (let (form-data)

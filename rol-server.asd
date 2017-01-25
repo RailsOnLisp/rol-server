@@ -35,6 +35,7 @@
        :version "0.2"
        :description "Application server / core module"
        :depends-on ("alexandria"
+		    "babel"
                     "cfg"
 		    "cl-base64"
 		    "cl-debug"
@@ -51,7 +52,6 @@
 		    "rol-uri"
 		    "str"
 		    "trivial-backtrace"
-		    "trivial-utf-8"
 		    "cl-inflector"
 		    ,@(case backend
 			    ((:fastcgi) '("cl-fastcgi"))
