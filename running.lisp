@@ -35,6 +35,18 @@
 (defun require-module (name)
   (pushnew name *app-modules* :test #'string=))
 
+(defun load-file (file)
+  (let* ((name (enough-namestring file))
+	 (date (file-write-date file))
+	 (cached (gethash name *app-cache* -1)))
+    (unless (= cached date)
+      (setf (gethash name *app-cache*) date)
+      (log-msg :info "loading ~S (~S < ~S)" name cached date)
+      (restart-case (load name)
+	(retry ()
+	  :report (lambda (stream) (format stream "Retry loading ~S" name))
+	  (load-file file))))))
+
 (defun load-app (&optional (components '("config/*.lisp"
                                          "app/models/*.lisp"
                                          "app/controllers/*.lisp")))
@@ -44,13 +56,7 @@
 	(setq dir (str "lib/rol/" module "/" dir)))
       (dolist (file (directory dir))
 	(when (alphanumericp (char (pathname-name file) 0))
-	  (let* ((name (enough-namestring file))
-		 (date (file-write-date file))
-		 (cached (gethash name *app-cache* -1)))
-	    (unless (= cached date)
-	      (setf (gethash name *app-cache*) date)
-	      (log-msg :info "loading ~S (~S < ~S)" name cached date)
-	      (load name))))))))
+	  (load-file file))))))
 
 (defun run-handled ()
   (let ((env (cfg:getenv "RAILS_ENV")))
