@@ -147,3 +147,5 @@
 	     (push (symbol-name sym) list)))
 	 list)
    ))
+
+(defpackage :json.symbols)
