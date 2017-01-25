@@ -194,8 +194,9 @@
 ;;  Rendering
 
 (defun render-route (route)
-  (apply (the symbol (car route))
-	 (the list (cdr route))))
+  (destructuring-bind (controller &rest arguments) route
+    (declare (type symbol controller))
+    (apply controller arguments)))
 
 (defun route-request ()
   (time
