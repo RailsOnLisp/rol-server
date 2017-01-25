@@ -49,9 +49,7 @@ SBCL_BUILD_OPTS_ = \
 
 #  Allow local override
 
-.if exists(config/local.mk)
-.  include "config/local.mk"
-.endif
+-include "config/local.mk"
 
 #  Apply defaults
 
