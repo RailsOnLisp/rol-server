@@ -61,22 +61,14 @@
   nil)
 
 (defmethod markdown ((destination stream) (input stream))
-  (exec-js:from-file #P"lib/rol/server/markdown.js"
-		     :safely nil :in input :out destination))
+  (3bmd:parse-and-print-to-stream input destination))
 
-#+nil(defmethod markdown ((destination stream) (input stream))
-  (sb-ext:run-program "markdown" '("-xcodehilite(force_linenos=True)" "/dev/stdin")
-		      :search t
-		      :input input
-		      :output destination))
+(defmethod markdown ((destination stream) (input string))
+  (3bmd:parse-string-and-print-to-stream input destination))
 
 (defmethod markdown ((destination null) (input t))
   (with-output-to-string (s)
     (markdown s input)))
-
-(defmethod markdown ((destination t) (input string))
-  (with-input-from-string (s input)
-    (markdown destination s)))
 
 (defun print-markdown (input)
   (markdown *reply-stream* input))
