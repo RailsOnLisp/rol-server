@@ -54,7 +54,7 @@
 		    "trivial-utf-8"
 		    "cl-inflector"
 		    ,@(case backend
-			    ((:fastcgi) '("sb-fastcgi"))
+			    ((:fastcgi) '("cl-fastcgi"))
 			    ((:hunchentoot) '("hunchentoot"))))
        :components
        ((:file "package")

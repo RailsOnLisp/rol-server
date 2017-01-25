@@ -22,7 +22,7 @@
 
 #+openbsd
 (handler-case
-    (sb-fastcgi:load-libfcgi "/usr/local/lib/libfcgi.so.0.0")
+    (cl-fastcgi:load-libfcgi "/usr/local/lib/libfcgi.so.0.0")
   (error (e)
     (format t "~%~%~A~%~%Could not load libfcgi, 'pkg_add fcgi' maybe ?~%~%" e)
     (sb-ext:exit :code 1)))
@@ -32,32 +32,32 @@
 (defvar *req*)
 
 (defun backend-request-env ()
-  (sb-fastcgi:fcgx-getenv *req*))
+  (cl-fastcgi:fcgx-getenv *req*))
 
 (defun backend-request-method ()
-  (sb-fastcgi:fcgx-getparam *req* "REQUEST_METHOD"))
+  (cl-fastcgi:fcgx-getparam *req* "REQUEST_METHOD"))
 
 (defun backend-request-header (name)
   (let ((name (str "HTTP_" (nsubstitute #\_ #\- (string-upcase name)
 					:test #'char=))))
-    (sb-fastcgi:fcgx-getparam *req* name)))
+    (cl-fastcgi:fcgx-getparam *req* name)))
 
 (defun backend-request-uri ()
-  (sb-fastcgi:fcgx-getparam *req* "DOCUMENT_URI"))
+  (cl-fastcgi:fcgx-getparam *req* "DOCUMENT_URI"))
 
 (defun backend-request-remote-addr ()
-  (sb-fastcgi:fcgx-getparam *req* "REMOTE_ADDR"))
+  (cl-fastcgi:fcgx-getparam *req* "REMOTE_ADDR"))
 
 ;;  Forms
 
 (defun backend-read-request-data ()
-  (let ((data (sb-fastcgi:fcgx-read-all *req*)))
+  (let ((data (cl-fastcgi:fcgx-read-all *req*)))
     (trivial-utf-8:utf-8-bytes-to-string
      (apply #'concatenate data))))
 
 (defun backend-read-form-data ()
   (let ((content-type (string-downcase
-		       (sb-fastcgi:fcgx-getparam *req* "CONTENT_TYPE"))))
+		       (cl-fastcgi:fcgx-getparam *req* "CONTENT_TYPE"))))
     (cond ((cl-ppcre:scan "^application/x-www-form-urlencoded\\b" content-type)
 	   (parse-www-form-url-encoded (backend-read-request-data)))
 	  ((cl-ppcre:scan "^application/json\\b" content-type)
@@ -72,13 +72,21 @@
     (log-msg :debug "SEND ~S" (if (eq +crlf+ data)
 				  '+crlf+
 				  data)))
-  (sb-fastcgi:fcgx-puts *req* data)
+  (cl-fastcgi:fcgx-puts *req* data)
   (values))
 
-(defmethod backend-send ((data array))
+(defmethod backend-send ((data simple-array))
   (when (debug-p :reply)
     (log-msg :debug "SEND ~D bytes" (length data)))
-  (sb-fastcgi:fcgx-putchars *req* data)
+  (cl-fastcgi:fcgx-puts *req* data)
+  (values))
+
+(defmethod backend-send ((data vector))
+  (when (debug-p :reply)
+    (log-msg :debug "SEND ~D bytes" (length data)))
+  (cl-fastcgi:fcgx-puts *req* (make-array (length data)
+					  :element-type '(unsigned-byte 8)
+					  :initial-contents data))
   (values))
 
 ;;  Reply headers
@@ -104,7 +112,7 @@
 	   (let ((*req* req))
 	     (route-request))))
     (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
-    (sb-fastcgi:socket-server #'fastcgi-request
+    (cl-fastcgi:socket-server #'fastcgi-request
 			      :inet-addr "127.0.0.1"
 			      :port *port*)
     (error "fastcgi socket server exited")))
