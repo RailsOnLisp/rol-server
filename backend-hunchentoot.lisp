@@ -92,11 +92,10 @@
 (defclass rol-acceptor (hunchentoot:acceptor)
   ())
 
-(defmethod hunchentoot:acceptor-request-dispatcher ((hunchentoot:*acceptor*
-						     rol-acceptor))
-  (lambda (hunchentoot:*request*)
-    (let ((hunchentoot:*catch-errors-p* (not (debug-p :reply))))
-      (route-request))))
+(defmethod hunchentoot:acceptor-dispatch-request ((acceptor rol-acceptor)
+						  request)
+  (let ((hunchentoot:*catch-errors-p* (not (debug-p :reply))))
+    (route-request)))
 
 (defun backend-run ()
   (log-msg :info "starting hunchentoot at 127.0.0.1:~A" *port*)
