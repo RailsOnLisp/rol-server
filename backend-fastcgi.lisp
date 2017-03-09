@@ -51,9 +51,14 @@
 ;;  Forms
 
 (defun backend-read-request-data ()
-  (let ((data (cl-fastcgi:fcgx-read-all *req*)))
-    (babel:octets-to-string
-     (apply #'concatenate 'array data))))
+  (multiple-value-bind (data length) (cl-fastcgi:fcgx-read-all *req*)
+    (let ((array (make-array length
+			     :element-type '(unsigned-byte 8)
+			     :fill-pointer 0)))
+      (dolist (d (rest data))
+	(loop for i from 0 upto (1- (length d))
+	   do (vector-push (aref d i) array)))
+      (babel:octets-to-string array))))
 
 (defun backend-read-form-data ()
   (let ((content-type (string-downcase
