@@ -117,7 +117,7 @@
 	   (let ((*req* req))
 	     (route-request))))
     (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
-    (cl-fastcgi:socket-server #'fastcgi-request
-			      :inet-addr "127.0.0.1"
-			      :port *port*)
-    (error "fastcgi socket server exited")))
+    (let ((msg (cl-fastcgi:socket-server #'fastcgi-request
+					 :inet-addr "127.0.0.1"
+					 :port *port*)))
+      (error "fastcgi socket server exited: ~S" msg))))
