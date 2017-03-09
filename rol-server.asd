@@ -45,6 +45,7 @@
                     "local-time"
 		    "facts"
 		    "flexi-streams"
+		    "random-sequence"
                     "re"
 		    "rol-assets"
 		    "rol-files"
