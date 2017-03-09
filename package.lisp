@@ -54,6 +54,7 @@
    #:has-one
    #:has-many
    #:define-resource-macro
+   #:random-id
    ;;  Request
    #:*uri*
    #:accept-p
