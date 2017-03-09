@@ -18,8 +18,6 @@
 
 (in-package :RoL-server)
 
-(cl-json:set-decoder-simple-clos-semantics)
-
 (defgeneric j (thing)
   (:documentation "Returns the JSON code for THING."))
 
@@ -31,7 +29,8 @@
 
 (defun read-json-object (stream char)
   (with-input-from-string (char-stream (make-string 1 :initial-element char))
-    (json:decode-json (make-concatenated-stream char-stream stream))))
+    (json:with-decoder-simple-clos-semantics
+      (json:decode-json (make-concatenated-stream char-stream stream)))))
 
 (defun enable-json-object-syntax ()
   (set-macro-character #\{ #'read-json-object t))
