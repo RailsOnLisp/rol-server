@@ -39,3 +39,8 @@
 	    (print-template layout))))))
 
 (setq *template-output* (make-synonym-stream '*reply-stream*))
+
+(defun template-to-string (controller action type)
+  (let ((template (find-template type action controller)))
+    (with-output-to-string (*template-output*)
+      (print-template template))))

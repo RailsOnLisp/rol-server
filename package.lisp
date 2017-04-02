@@ -129,6 +129,7 @@
    #:render-json
    #:render-text
    #:render-view
+   #:template-to-string
    ;;  Resource
    #:define-resource
    #:has-one
