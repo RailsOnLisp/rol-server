@@ -94,7 +94,9 @@
 
 (defmethod hunchentoot:acceptor-dispatch-request ((acceptor rol-acceptor)
 						  request)
-  (let ((hunchentoot:*catch-errors-p* (not (debug-p :reply))))
+  (format t "acceptor dispatch request~%")
+  (let ((hunchentoot:*catch-errors-p* (not (debug-p :reply)))
+	(*req* request))
     (route-request)))
 
 (defun backend-run ()
@@ -102,4 +104,8 @@
   (hunchentoot:start (make-instance 'rol-acceptor
 				    :address "127.0.0.1"
 				    :port *port*))
-  (error "hunchentoot server exited"))
+  (labels ((sleepy ()
+	     (sleep 1)
+	     (sleepy)))
+    (sleepy))
+  #+nil(error "hunchentoot server exited"))
