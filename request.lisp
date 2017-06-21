@@ -23,15 +23,15 @@
 
 (defun http-verb (object)
   (find (string-upcase object)
-	+http-verbs+
-	:key #'symbol-name
-	:test #'string=))
+        +http-verbs+
+        :key #'symbol-name
+        :test #'string=))
 
 (defun request-method ()
   (let ((method (http-verb (backend-request-method))))
     (or (and (eq :POST method)
-	     (http-verb (with-form-data (_method) _method)))
-	method)))
+             (http-verb (with-form-data (_method) _method)))
+        method)))
 
 (defun request-header (name)
   (backend-request-header name))
@@ -41,11 +41,11 @@
 
 (defun accept-p (&rest types)
   (cl-ppcre:scan `(:sequence :word-boundary
-			     ,(if (cdr types)
-				  `(:alternation ,@(mapcar #'string-upcase types))
-				  (string-upcase (car types)))
-			     :word-boundary)
-		 (string-upcase (request-header :accept))))
+                             ,(if (cdr types)
+                                  `(:alternation ,@(mapcar #'string-upcase types))
+                                  (string-upcase (car types)))
+                             :word-boundary)
+                 (string-upcase (request-header :accept))))
 
 (defun cookie-value (name &optional (cookies (request-header :cookie)))
   (when cookies
@@ -55,8 +55,8 @@
 
 (defmacro with-request (&body body)
   `(let* ((*session*)
-	  (*form-data* nil)
-	  (*method* (request-method))
-	  (*host* (request-header :host))
-	  (*uri* (canonical-document-uri (backend-request-uri))))
+          (*form-data* nil)
+          (*method* (request-method))
+          (*host* (request-header :host))
+          (*uri* (canonical-document-uri (backend-request-uri))))
      ,@body))

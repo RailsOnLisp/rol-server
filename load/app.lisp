@@ -53,6 +53,6 @@
 (defun build (core)
   (cache-assets)
   (sb-ext:save-lisp-and-die core
-			    :toplevel #'run
-			    #+sb-core-compression :compression
-			    #+sb-core-compression t))
+                            :toplevel #'run
+                            #+sb-core-compression :compression
+                            #+sb-core-compression t))

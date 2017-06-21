@@ -20,30 +20,30 @@
 
 (defun url-decode (string)
   (let ((out (make-array (length string) :element-type '(unsigned-byte 8)))
-	(pos 0))
+        (pos 0))
     (cl-ppcre:do-register-groups (unreserved plus percent hex)
-	("([^%+]+)?(\\+)?(%([0123456789ABCDEFabcdef][0123456789ABCDEFabcdef])?)?"
-	 string nil :sharedp t)
+        ("([^%+]+)?(\\+)?(%([0123456789ABCDEFabcdef][0123456789ABCDEFabcdef])?)?"
+         string nil :sharedp t)
       (let ((percent (when (= 1 (length percent)) percent)))
-	(when unreserved
-	  (dotimes (i (length unreserved))
-	    (setf (aref out pos) (char-code (char unreserved i)))
-	    (incf pos)))
-	(when plus
-	  (setf (aref out pos) (char-code #\Space))
-	  (incf pos))
-	(when percent
-	  (setf (aref out pos) (char-code #\%))
-	  (incf pos))
-	(when hex
-	  (setf (aref out pos) (parse-integer hex :radix 16))
-	  (incf pos))))
+        (when unreserved
+          (dotimes (i (length unreserved))
+            (setf (aref out pos) (char-code (char unreserved i)))
+            (incf pos)))
+        (when plus
+          (setf (aref out pos) (char-code #\Space))
+          (incf pos))
+        (when percent
+          (setf (aref out pos) (char-code #\%))
+          (incf pos))
+        (when hex
+          (setf (aref out pos) (parse-integer hex :radix 16))
+          (incf pos))))
     (babel:octets-to-string (subseq out 0 pos))))
 
 (defun parse-www-form-url-encoded (string)
   (let (form-data)
     (cl-ppcre:do-register-groups (var value)
-	("([^&=]+)(?:=([^&=]*))?" string nil :sharedp t)
+        ("([^&=]+)(?:=([^&=]*))?" string nil :sharedp t)
       (push (cons (url-decode var) (url-decode (or value ""))) form-data))
     (nreverse form-data)))
 
@@ -69,10 +69,10 @@
   (let ((form-data (gensym "FORM-DATA-")))
     `(let ((,form-data (form-data)))
        (when (debug-p :request)
-	 (log-msg :debug "FORM ~S" ,form-data))
+         (log-msg :debug "FORM ~S" ,form-data))
        (let ,(mapcar (lambda (var)
-		       `(,var (form-data-get
-			       ,form-data
-			       ',(intern (symbol-name var) :keyword))))
-		     vars)
-	 ,@body))))
+                       `(,var (form-data-get
+                               ,form-data
+                               ',(intern (symbol-name var) :keyword))))
+                     vars)
+         ,@body))))

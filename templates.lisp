@@ -20,10 +20,10 @@
 
 (defun find-template (type name &rest directories)
   (make-pathname :directory (list* :relative "app" "views"
-				   (mapcar #'string-downcase
-					   directories))
-		 :name (string-downcase name)
-		 :type (subseq (string-downcase type) 1)))
+                                   (mapcar #'string-downcase
+                                           directories))
+                 :name (string-downcase name)
+                 :type (subseq (string-downcase type) 1)))
 
 (defvar *render-view-nested* nil)
 
@@ -31,12 +31,12 @@
   (declare (type extension type))
   (let ((template (find-template type action controller)))
     (if *render-view-nested*
-	(print-template template)
-	(let ((layout (find-template type *layout* "_layouts"))
-	      (*render-view-nested* t))
-	  (content-type (mime-type type))
-	  (template-let (template controller action)
-	    (print-template layout))))))
+        (print-template template)
+        (let ((layout (find-template type *layout* "_layouts"))
+              (*render-view-nested* t))
+          (content-type (mime-type type))
+          (template-let (template controller action)
+            (print-template layout))))))
 
 (setq *template-output* (make-synonym-stream '*reply-stream*))
 

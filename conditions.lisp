@@ -39,15 +39,15 @@
 
 (defun http-error (status msg-fmt &rest args)
   (error 'http-error
-	 :status status
-	 :message (if args
-		      (apply 'format nil msg-fmt args)
-		      msg-fmt)))
+         :status status
+         :message (if args
+                      (apply 'format nil msg-fmt args)
+                      msg-fmt)))
 
 (defmethod print-object ((e http-error) stream)
   (if (and *print-pretty* (not *print-readably*))
       (format stream "~A~%~A"
-	      (http-error-status e) (http-error-message e))
+              (http-error-status e) (http-error-message e))
       (print `(http-error ,(http-error-status e)
-			  ,(http-error-message e))
-	     stream)))
+                          ,(http-error-message e))
+             stream)))

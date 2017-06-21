@@ -25,7 +25,7 @@
 
 (defun clear-static-routes ()
   (setq *static-routes*         (make-hash-table :test 'equal)
-	*static-routes/reverse* (make-hash-table :test 'equal)))
+        *static-routes/reverse* (make-hash-table :test 'equal)))
 
 (unless (and (boundp '*static-routes*)
              (boundp '*static-routes/reverse*))
@@ -51,8 +51,8 @@
 (defun list-static-routes ()
   (let (routes)
     (maphash (lambda (uri form)
-	       (push (list uri form) routes))
-	     *static-routes*)
+               (push (list uri form) routes))
+             *static-routes*)
     (sort routes #'sstring< :key #'car)))
 
 ;;  Template routes
@@ -69,46 +69,46 @@
 
 (defun find-templated-route (uri-template)
   (find uri-template *templated-routes*
-	:key #'templated-route-uri-template
-	:test #'string=))
+        :key #'templated-route-uri-template
+        :test #'string=))
 
 (defun remove-templated-route (uri-template)
   (setf *templated-routes*
-	(remove uri-template *templated-routes*
-		:key #'templated-route-uri-template
-		:test #'string=)))
+        (remove uri-template *templated-routes*
+                :key #'templated-route-uri-template
+                :test #'string=)))
 
 (defun update-templated-route (templated-route)
   (if (null *templated-routes*)
       (push templated-route *templated-routes*)
       (let ((uri-template (templated-route-uri-template templated-route)))
-	(labels ((iter (cell)
-		   (cond ((string= uri-template
-				   (templated-route-uri-template (car cell)))
-			  (setf (car cell) templated-route))
-			 ((endp (cdr cell))
-			  (setf (cdr cell) (cons templated-route nil)))
-			 (t (iter (cdr cell))))))
-	  (iter *templated-routes*))))
+        (labels ((iter (cell)
+                   (cond ((string= uri-template
+                                   (templated-route-uri-template (car cell)))
+                          (setf (car cell) templated-route))
+                         ((endp (cdr cell))
+                          (setf (cdr cell) (cons templated-route nil)))
+                         (t (iter (cdr cell))))))
+          (iter *templated-routes*))))
   templated-route)
 
 (defun list-unquote-if (test list)
   (labels ((walk (x)
-	     (if (funcall test x)
-		 x
-		 (cond ((consp x) (loop for v = x then (cdr v)
-				     while (consp v)
-				     collect (walk (car v)) into cars
-				     finally (return
-					       (if (null v)
-						   `(list ,@cars)
-						   `(list* ,@cars
-							   ,(walk v))))))
-		       ((or (null x)
-			    (eq t x)
-			    (keywordp x)) x)
-		       ((symbolp x) `(quote ,x))
-		       (t x)))))
+             (if (funcall test x)
+                 x
+                 (cond ((consp x) (loop for v = x then (cdr v)
+                                     while (consp v)
+                                     collect (walk (car v)) into cars
+                                     finally (return
+                                               (if (null v)
+                                                   `(list ,@cars)
+                                                   `(list* ,@cars
+                                                           ,(walk v))))))
+                       ((or (null x)
+                            (eq t x)
+                            (keywordp x)) x)
+                       ((symbolp x) `(quote ,x))
+                       (t x)))))
     (walk list)))
 
 (defun unquote-controller-form (form uri)
@@ -132,37 +132,37 @@
 
 (defun templated-route-controller (uri)
   (some (lambda (route)
-	  (funcall (templated-route-function route) uri))
-	*templated-routes*))
+          (funcall (templated-route-function route) uri))
+        *templated-routes*))
 
 (defun templated-route-reverse (controller-form)
   (labels ((unify (r v acc &optional (tail acc))
-	     (cond ((and (endp r) (endp v)) acc)
-		   ((or (endp r) (endp v)) nil)
-		   ((uri-var-p (car r))
-		    (unify (cdr r) (cdr v) acc
-			   (cdr (setf (cdr tail)
-				      (list (intern (symbol-name (car r))
-						    :keyword)
-					    (car v))))))
-		   ((equal (car r) (car v))
-		    (unify (cdr r) (cdr v) acc tail))
-		   (t nil)))
-	   (match-routes (routes)
-	     (when-let ((route (car routes)))
-	       (or (unify (templated-route-controller-form route)
-			  controller-form
-			  (cons route nil))
-		   (match-routes (cdr routes))))))
+             (cond ((and (endp r) (endp v)) acc)
+                   ((or (endp r) (endp v)) nil)
+                   ((uri-var-p (car r))
+                    (unify (cdr r) (cdr v) acc
+                           (cdr (setf (cdr tail)
+                                      (list (intern (symbol-name (car r))
+                                                    :keyword)
+                                            (car v))))))
+                   ((equal (car r) (car v))
+                    (unify (cdr r) (cdr v) acc tail))
+                   (t nil)))
+           (match-routes (routes)
+             (when-let ((route (car routes)))
+               (or (unify (templated-route-controller-form route)
+                          controller-form
+                          (cons route nil))
+                   (match-routes (cdr routes))))))
     (when-let ((match (match-routes *templated-routes*)))
       (apply #'expand-uri nil (templated-route-uri-template (car match))
-	     (cdr match)))))
+             (cdr match)))))
 
 (defun list-templated-routes ()
   (mapcar (lambda (route)
-	    (list (templated-route-uri-template route)
-		  (templated-route-controller-form route)))
-	  *templated-routes*))
+            (list (templated-route-uri-template route)
+                  (templated-route-controller-form route)))
+          *templated-routes*))
 
 ;;  Abstract routes functions
 
@@ -175,17 +175,17 @@
   (or (static-route-controller uri)
       (templated-route-controller uri)
       `(render-error "404 Not found"
-		     ,(format nil "No route configured for ~S." uri))))
+                     ,(format nil "No route configured for ~S." uri))))
 
 (defun route-reverse (controller)
   (or (static-route-reverse controller)
       (templated-route-reverse controller)
       (http-error "500 Route not found"
-		  "No route matches ~S." controller)))
+                  "No route matches ~S." controller)))
 
 (defun list-routes ()
   (append (list-static-routes)
-	  (list-templated-routes)))
+          (list-templated-routes)))
 
 (defun clear-routes ()
   (clear-static-routes)
@@ -203,10 +203,10 @@
    (with-request
      (with-reply
        (when (debug-p :app)
-	 (load-app))
+         (load-app))
        (let ((route (the cons (find-route *uri*))))
-	 (log-msg :info "~A ~S -> ~S" *method* *uri* route)
-	 (when (debug-p :request)
-	   (log-msg :debug "ENV ~S" (backend-request-env)))
-	 (render-route route)))
+         (log-msg :info "~A ~S -> ~S" *method* *uri* route)
+         (when (debug-p :request)
+           (log-msg :debug "ENV ~S" (backend-request-env)))
+         (render-route route)))
      (force-output *trace-output*))))

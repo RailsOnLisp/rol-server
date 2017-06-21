@@ -18,12 +18,12 @@
 
 (require :fiveam)
 (import '(5am:test
-	  5am:is))
+          5am:is))
 
 (require :priest)
 (import '(priest:*content-type*
-	  priest:*doc*
-	  priest:request))
+          priest:*doc*
+          priest:request))
 (defvar *base-url-for-tests* "http://localhost/")
 
 (defun run-tests (&key (suite :RoL-tests))
@@ -43,26 +43,26 @@
 (defmacro is-a (type expr)
   `(if (typep ,expr ',type)
        (5am::add-result '5am::test-passed
-			:test-expr '(is-a ,type ,expr))
+                        :test-expr '(is-a ,type ,expr))
        (5am::process-failure :reason (format nil "~S did not return a ~S"
-					     ',expr ',type)
-			     :test-expr '(is-a ,type ,expr))))
+                                             ',expr ',type)
+                             :test-expr '(is-a ,type ,expr))))
 
 (defmacro test-request ((method url &rest args) &body body)
   (let ((request `(priest:request ,method ,url . ,args)))
     `(let ((log (with-output-to-string (priest:*log-output*)
-		  ,request)))
+                  ,request)))
        (cond ((null priest:*doc*)
-	      (5am::process-failure :reason log
-				    :test-expr ',request))
-	     (t
-	      (5am::add-result '5am::test-passed :test-expr ',request)
-	      ,@body)))))
+              (5am::process-failure :reason log
+                                    :test-expr ',request))
+             (t
+              (5am::add-result '5am::test-passed :test-expr ',request)
+              ,@body)))))
 
 (defmacro has-dom-element (selector)
   `(if (priest:select ,selector)
        (5am::add-result '5am::test-passed
-			:test-expr '(priest:select ,selector))
+                        :test-expr '(priest:select ,selector))
        (5am::process-failure :reason (format nil "~S~%has no dom element matching~%~S"
-					     priest:*uri* ,selector)
-			     :test-expr '(priest:select ,selector))))
+                                             priest:*uri* ,selector)
+                             :test-expr '(priest:select ,selector))))

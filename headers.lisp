@@ -42,7 +42,7 @@
   (let ((query (when params (format nil "?~{~A=~A~^&~}" params))))
     (etypecase target
       (string (status "303 See Other")
-	      (header "Location" target query))
+              (header "Location" target query))
       (cons (redirect-to (str (route-reverse target) query))))))
 
 (defun not-modified ()
@@ -62,8 +62,8 @@
   (multiple-value-bind (second minute hour day month year dow)
       (decode-universal-time universal-time 0)
     (format nil "~A, ~2,'0D ~A ~4,'0D ~2,'0D:~2,'0D:~2,'0D GMT"
-	    (aref +rfc822-day+ dow) day (svref +rfc822-month+ (1- month)) year
-	    hour minute second)))
+            (aref +rfc822-day+ dow) day (svref +rfc822-month+ (1- month)) year
+            hour minute second)))
 
 (defun parse-rfc1123-day (string)
   (1+ (position string +rfc822-day+ :test #'string-equal)))
@@ -79,16 +79,16 @@
 (defun parse-rfc1123-date-time (string)
   "FIXME: check against RFC1123"
   (cl-ppcre:register-groups-bind ((#'parse-rfc1123-day dow)
-				  (#'parse-integer d)
-				  (#'parse-rfc1123-month mo)
-				  (#'parse-integer y h mi s)
-				  (#'parse-rfc1123-timezone tz))
+                                  (#'parse-integer d)
+                                  (#'parse-rfc1123-month mo)
+                                  (#'parse-integer y h mi s)
+                                  (#'parse-rfc1123-timezone tz))
       ("([A-Za-z]{3}), ([0-9]+) ([A-Za-z]{3}) ([0-9]+) ([0-9]+):([0-9]+):([0-9]+) ([A-Z]{3})"
        string)
     (values (encode-universal-time s mi h d mo y tz) dow)))
 
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
-		   secure (http-only t))
+                   secure (http-only t))
   (header :set-cookie
     name "=" value
     "; Expires=" (rfc1123-date-time expires)

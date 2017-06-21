@@ -21,9 +21,9 @@
 (defun odd/even (list)    ;; Rails cycle
   (let (odd)
     (mapcar (lambda (x)
-	      (setf odd (not odd))
-	      (list* :odd/even (if odd "odd" "even") x))
-	    list)))
+              (setf odd (not odd))
+              (list* :odd/even (if odd "odd" "even") x))
+            list)))
 
 ;;  To URL
 
@@ -82,7 +82,7 @@
    (lambda (s s1 s2 m1 m2 r1 r2)
      (declare (ignore s1 s2 m1 m2))
      (let ((space (subseq s (svref r1 0) (svref r2 0)))
-	   (url   (subseq s (svref r1 1) (svref r2 1))))
+           (url   (subseq s (svref r1 1) (svref r2 1))))
        (str space "<a href=\"" (h url) "\">" (h url) "</a>")))))
 
 ;;  Alert boxes
@@ -91,4 +91,4 @@
 
 (defmacro alert (level &rest message-parts)
   `(push (list ,level (str ,@message-parts))
-	 (template-var alerts)))
+         (template-var alerts)))

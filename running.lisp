@@ -37,15 +37,15 @@
 
 (defun load-file (file)
   (let* ((name (enough-namestring file))
-	 (date (file-write-date file))
-	 (cached (gethash name *app-cache* -1)))
+         (date (file-write-date file))
+         (cached (gethash name *app-cache* -1)))
     (unless (= cached date)
       (setf (gethash name *app-cache*) date)
       (log-msg :info "loading ~S (~S < ~S)" name cached date)
       (restart-case (load name)
-	(retry ()
-	  :report (lambda (stream) (format stream "Retry loading ~S" name))
-	  (load-file file))))))
+        (retry ()
+          :report (lambda (stream) (format stream "Retry loading ~S" name))
+          (load-file file))))))
 
 (defun load-app (&optional (components '("config/*.lisp"
                                          "app/models/*.lisp"
@@ -53,10 +53,10 @@
   (dolist (dir components)
     (dolist (module (cons nil (reverse *app-modules*)))
       (when module
-	(setq dir (str "lib/rol/" module "/" dir)))
+        (setq dir (str "lib/rol/" module "/" dir)))
       (dolist (file (directory dir))
-	(when (alphanumericp (char (pathname-name file) 0))
-	  (load-file file))))))
+        (when (alphanumericp (char (pathname-name file) 0))
+          (load-file file))))))
 
 (defun run-handled ()
   (let ((env (cfg:getenv "RAILS_ENV")))
@@ -69,16 +69,16 @@
 
 (defun run-protected ()
   (handler-bind ((warning
-		  (lambda (c)
-		    (log-msg :warn "~A" c)))
-		 (error
-		  (lambda (c)
-		    (log-msg :error "~A" c)))
-		 (sb-sys:interactive-interrupt
-		  (lambda (c)
-		    (declare (ignore c))
-		    (log-msg :emerg "caught interrupt")
-		    (return-from run-protected 0))))
+                  (lambda (c)
+                    (log-msg :warn "~A" c)))
+                 (error
+                  (lambda (c)
+                    (log-msg :error "~A" c)))
+                 (sb-sys:interactive-interrupt
+                  (lambda (c)
+                    (declare (ignore c))
+                    (log-msg :emerg "caught interrupt")
+                    (return-from run-protected 0))))
     (with-logged-warnings
       (run-handled))))
 

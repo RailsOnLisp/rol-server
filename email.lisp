@@ -20,13 +20,13 @@
 
 (defun render-email (controller action)
   (let* ((template.txt (find-template '.txt action controller))
-	 (txt (when template.txt
-		(with-output-to-string (*template-output*)
-		  (print-template template.txt))))
-	 (template.html (find-template '.html action controller))
-	 (html (when template.html
-		 (with-output-to-string (*template-output*)
-		   (print-template template.html))))
-	 
-			 
+         (txt (when template.txt
+                (with-output-to-string (*template-output*)
+                  (print-template template.txt))))
+         (template.html (find-template '.html action controller))
+         (html (when template.html
+                 (with-output-to-string (*template-output*)
+                   (print-template template.html))))
+         
+                         
   

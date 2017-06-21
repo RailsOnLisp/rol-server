@@ -38,7 +38,7 @@
     (when (alphanumericp (char (pathname-name file) 0))
       (log-msg :info "loading facts from ~S" (enough-namestring file))
       (let ((*package* (find-package :cl-user)))
-	(facts:load-db file))))
+        (facts:load-db file))))
   (dolist (file (directory "data/*.facts-log"))
     (when (alphanumericp (char (pathname-name file) 0))
       (log-msg :info "replaying log from ~S" (enough-namestring file))

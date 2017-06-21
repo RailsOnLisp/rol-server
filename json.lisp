@@ -61,8 +61,8 @@
 
 (defsetf json-slot (object key) (value)
   `(setf (slot-value ,object
-		     (json:json-intern (string-upcase ,key)))
-	 ,value))
+                     (json:json-intern (string-upcase ,key)))
+         ,value))
 
 (defun json-dot (object &rest keys)
   (reduce #'json-slot keys :initial-value object))
@@ -71,23 +71,23 @@
   (let ((g!object (gensym "OBJECT-")))
   `(let ((,g!object ,object))
      (symbol-macrolet ,(mapcar (lambda (a)
-				 `(,a (json-slot ,g!object ',a)))
-			       accessors)
+                                 `(,a (json-slot ,g!object ',a)))
+                               accessors)
        ,@body))))
 
 (defmacro define-json-accessors (class &body accessors)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      ,@(mapcar (lambda (slot)
-		 (let ((name (sym class #\. slot)))
-		   `(defmacro ,name (,class)
-		      `(json-slot ,,class ',',slot))))
-	       accessors)))
+                 (let ((name (sym class #\. slot)))
+                   `(defmacro ,name (,class)
+                      `(json-slot ,,class ',',slot))))
+               accessors)))
 
 (defun set-json-attributes (obj &rest attributes)
   (if attributes
       (destructuring-bind (key value &rest rest) attributes
-	(setf (json-slot obj key) value)
-	(apply #'set-json-attributes obj rest))
+        (setf (json-slot obj key) value)
+        (apply #'set-json-attributes obj rest))
       obj))
 
 (defgeneric to-json (x))
@@ -97,12 +97,12 @@
 
 (defmethod to-json ((x cons))
   (if (every (lambda (i)
-	       (and (consp i)
-		    (or (symbolp (car i))
-			(stringp (car i)))))
-	     x)
+               (and (consp i)
+                    (or (symbolp (car i))
+                        (stringp (car i)))))
+             x)
       (json:make-object (mapcar (lambda (i)
-				  (cons (car i) (to-json (cdr i))))
-				x)
-			nil)
+                                  (cons (car i) (to-json (cdr i))))
+                                x)
+                        nil)
       x))

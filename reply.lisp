@@ -22,7 +22,7 @@
   (unless *reply-sent*
     (setq *reply-sent* t)
     (let ((content (flexi-streams:get-output-stream-sequence
-		    (flexi-streams:flexi-stream-stream *reply-stream*))))
+                    (flexi-streams:flexi-stream-stream *reply-stream*))))
       (content-length (length content))
       (backend-send-headers)
       (backend-send content))))
@@ -40,36 +40,36 @@
 (defmacro with-reply-handlers (&body body)
   `(with-simple-restart (reply "Send HTTP reply")
      (handler-bind ((error
-		     (lambda (c)
-		       (unless *reply-sent*
-			 (let ((status (http-error-status c))
-			       (msg (http-error-message c))
-			       backtrace)
-			   (log-msg (if (char= #\5 (char status 0))
-					:error
-					:info)
-				    "~A ~A" status msg)
-			   (with-printed-errors ("during error handling")
-			     (trivial-backtrace:map-backtrace
-			      (lambda (x) (push x backtrace))))
-			   (flexi-streams:get-output-stream-sequence *reply-stream*)
-			   (render-error status msg c backtrace))
-			 (if (debug-p :conditions)
-			     (reply-send)
-			     (invoke-restart 'reply))))))
+                     (lambda (c)
+                       (unless *reply-sent*
+                         (let ((status (http-error-status c))
+                               (msg (http-error-message c))
+                               backtrace)
+                           (log-msg (if (char= #\5 (char status 0))
+                                        :error
+                                        :info)
+                                    "~A ~A" status msg)
+                           (with-printed-errors ("during error handling")
+                             (trivial-backtrace:map-backtrace
+                              (lambda (x) (push x backtrace))))
+                           (flexi-streams:get-output-stream-sequence *reply-stream*)
+                           (render-error status msg c backtrace))
+                         (if (debug-p :conditions)
+                             (reply-send)
+                             (invoke-restart 'reply))))))
        ,@body)))
 
 (defclass reply-stream (flexi-streams:flexi-output-stream) ()
   (:default-initargs
    :flexi-stream-external-format (flexi-streams:make-external-format :utf-8)
    :stream (flexi-streams:make-in-memory-output-stream
-	    :element-type '(unsigned-byte 8))))
+            :element-type '(unsigned-byte 8))))
 
 (defmethod stream-element-type ((stream reply-stream))
   '(unsigned-byte 8))
 
 (defmethod flexi-streams:get-output-stream-sequence ((stream reply-stream)
-						     &key as-list)
+                                                     &key as-list)
   (flexi-streams:get-output-stream-sequence
    (flexi-streams:flexi-stream-stream stream) :as-list as-list))
 
@@ -84,12 +84,12 @@
 
 (defun send-file (path)
   (let ((write-date (file-write-date path))
-	(if-modified-since (request-header :if-modified-since)))
+        (if-modified-since (request-header :if-modified-since)))
     (cond ((and if-modified-since
-		(= (parse-rfc1123-date-time if-modified-since)
-		   write-date))
-	   (status "304 not modified"))
-	  (t (header :last-modified (rfc1123-date-time write-date))
+                (= (parse-rfc1123-date-time if-modified-since)
+                   write-date))
+           (status "304 not modified"))
+          (t (header :last-modified (rfc1123-date-time write-date))
              (with-open-file (stream path :if-does-not-exist nil
                                      :element-type '(unsigned-byte 8))
                (unless stream

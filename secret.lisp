@@ -49,14 +49,14 @@
   (let ((h (ironclad:make-hmac *secret* :sha512)))
     (dolist (part parts)
       (ironclad:update-hmac h (babel:string-to-octets
-			       (concatenate 'string (string part)
-					    (make-string 1 :initial-element
-							 (code-char 0))))))
+                               (concatenate 'string (string part)
+                                            (make-string 1 :initial-element
+                                                         (code-char 0))))))
     (ironclad:hmac-digest h)))
 
 (defun hmac-string (&rest parts)
   (cl-base64:usb8-array-to-base64-string (apply #'hmac parts)
-					 :uri t))
+                                         :uri t))
 
 ;;  Random
 
@@ -68,6 +68,6 @@
 
 (defun make-random-string (length)
   (subseq (cl-base64:usb8-array-to-base64-string (make-random-bytes
-						  (ceiling length 4/3))
-						 :uri t)
-	  0 length))
+                                                  (ceiling length 4/3))
+                                                 :uri t)
+          0 length))

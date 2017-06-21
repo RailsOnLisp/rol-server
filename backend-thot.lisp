@@ -39,11 +39,11 @@
 
 (defun backend-read-form-data ()
   (let ((content-type (string-downcase
-		       (thot:request-header "Content-Type"))))
+                       (thot:request-header "Content-Type"))))
     (cond ((cl-ppcre:scan "^application/x-www-form-urlencoded\\b" content-type)
-	   (parse-www-form-url-encoded (backend-read-request-data)))
-	  ((cl-ppcre:scan "^application/json\\b" content-type)
-	   (parse-www-form-json-encoded (backend-read-request-data))))))
+           (parse-www-form-url-encoded (backend-read-request-data)))
+          ((cl-ppcre:scan "^application/json\\b" content-type)
+           (parse-www-form-json-encoded (backend-read-request-data))))))
 
 ;;  Reply
 
@@ -52,8 +52,8 @@
 (defmethod backend-send ((data string))
   (when (debug-p :reply)
     (log-msg :debug "SEND ~S" (if (eq +crlf+ data)
-				  '+crlf+
-				  data)))
+                                  '+crlf+
+                                  data)))
   (cl-fastcgi:fcgx-puts *req* data)
   (values))
 
@@ -67,8 +67,8 @@
   (when (debug-p :reply)
     (log-msg :debug "SEND ~D bytes" (length data)))
   (cl-fastcgi:fcgx-puts *req* (make-array (length data)
-					  :element-type '(unsigned-byte 8)
-					  :initial-contents data))
+                                          :element-type '(unsigned-byte 8)
+                                          :initial-contents data))
   (values))
 
 ;;  Reply headers
@@ -91,10 +91,10 @@
 
 (defun backend-run ()
   (flet ((fastcgi-request (req)
-	   (let ((*req* req))
-	     (route-request))))
+           (let ((*req* req))
+             (route-request))))
     (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
     (let ((msg (cl-fastcgi:socket-server #'fastcgi-request
-					 :inet-addr "127.0.0.1"
-					 :port *port*)))
+                                         :inet-addr "127.0.0.1"
+                                         :port *port*)))
       (error "fastcgi socket server exited: ~S" msg))))

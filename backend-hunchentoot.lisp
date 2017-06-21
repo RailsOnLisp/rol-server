@@ -31,9 +31,9 @@
 
 (defun backend-request-env ()
   (list :headers (hunchentoot:headers-in*)
-	:get-parameters (hunchentoot:get-parameters*)
-	:post-parameters (hunchentoot:post-parameters*)
-	:cookies (hunchentoot:cookies-in*)))
+        :get-parameters (hunchentoot:get-parameters*)
+        :post-parameters (hunchentoot:post-parameters*)
+        :cookies (hunchentoot:cookies-in*)))
 
 (defun backend-request-method ()
   (hunchentoot:request-method*))
@@ -60,29 +60,29 @@
 (defun backend-status (&rest parts)
   (let ((status-string (apply #'str parts)))
     (setf (hunchentoot:return-code*) (parse-integer status-string
-						    :junk-allowed t))))
+                                                    :junk-allowed t))))
 
 (defun backend-header (name &rest parts)
   (setf (hunchentoot:header-out name)
-	(if (and parts (null (cdr parts)) (integerp (car parts)))
-	    (car parts) ;; pass single integer as-is
-	    (apply #'str parts))))
+        (if (and parts (null (cdr parts)) (integerp (car parts)))
+            (car parts) ;; pass single integer as-is
+            (apply #'str parts))))
 
 (defun backend-send-headers ()
   (with-output-to-string (out)
     (mapc (lambda (h)
-	    (format out "~A: ~A~A" (car h) (cdr h) +crlf+))
-	  (hunchentoot:headers-out*))))
+            (format out "~A: ~A~A" (car h) (cdr h) +crlf+))
+          (hunchentoot:headers-out*))))
 
 (defun set-cookie (name value expires &optional (domain *host*) (path "/")
-		   secure (http-only t))
+                   secure (http-only t))
   (hunchentoot:set-cookie (string name)
-			  :value value
-			  :expires expires
-			  :path path
-			  :domain domain
-			  :secure secure
-			  :http-only http-only))
+                          :value value
+                          :expires expires
+                          :path path
+                          :domain domain
+                          :secure secure
+                          :http-only http-only))
 
 (defun backend-send (content)
   (babel:octets-to-string content))
@@ -93,19 +93,19 @@
   ())
 
 (defmethod hunchentoot:acceptor-dispatch-request ((acceptor rol-acceptor)
-						  request)
+                                                  request)
   (format t "acceptor dispatch request~%")
   (let ((hunchentoot:*catch-errors-p* (not (debug-p :reply)))
-	(*req* request))
+        (*req* request))
     (route-request)))
 
 (defun backend-run ()
   (log-msg :info "starting hunchentoot at 127.0.0.1:~A" *port*)
   (hunchentoot:start (make-instance 'rol-acceptor
-				    :address "127.0.0.1"
-				    :port *port*))
+                                    :address "127.0.0.1"
+                                    :port *port*))
   (labels ((sleepy ()
-	     (sleep 1)
-	     (sleepy)))
+             (sleep 1)
+             (sleepy)))
     (sleepy))
   #+nil(error "hunchentoot server exited"))
