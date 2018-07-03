@@ -40,7 +40,6 @@
                     "cfg"
                     "cl-base64"
                     "cl-debug"
-                    "cl-unicode"
                     "ironclad"
                     "local-time"
                     "facts"
