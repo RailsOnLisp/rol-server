@@ -38,4 +38,5 @@
 (defvar *host*)
 (defvar *form-data*)
 (defvar *reply-sent*)
+(defvar *reply-status*)
 (defvar *reply-stream*)

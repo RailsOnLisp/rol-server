@@ -30,7 +30,7 @@
   (thot:request-uri))
 
 (defun backend-request-remote-addr ()
-  (cl-fastcgi:fcgx-getparam *req* "REMOTE_ADDR"))
+  (thot:request-remote-addr))
 
 ;;  Forms
 

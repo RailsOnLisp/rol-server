@@ -21,8 +21,10 @@
 ;;  Headers
 
 (defun status (&rest parts)
-  (log-msg :info (str parts))
-  (apply #'backend-status parts))
+  (unless *reply-status*
+    (setf *reply-status* parts)
+    (log-msg :info (str parts))
+    (apply #'backend-status parts)))
 
 (defun header (name &rest parts)
   (apply #'backend-header name parts))

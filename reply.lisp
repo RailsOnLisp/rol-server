@@ -75,6 +75,7 @@
 
 (defmacro with-reply (&body body)
   `(let ((*reply-sent* nil)
+         (*reply-status* nil)
          (*reply-stream* (make-instance 'reply-stream)))
      (with-reply-handlers
        ,@body)

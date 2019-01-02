@@ -20,7 +20,7 @@
   (unless (char= #\. (char (pathname-name asd) 0))
     (load asd)))
 
-(require :RoL-assets)
+(asdf:load-system :RoL-assets)
 
 (use-package :RoL-assets)
 (use-package :RoL-ext)
