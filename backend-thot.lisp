@@ -54,47 +54,40 @@
     (log-msg :debug "SEND ~S" (if (eq +crlf+ data)
                                   '+crlf+
                                   data)))
-  (cl-fastcgi:fcgx-puts *req* data)
+  (stream:stream-write-sequence (thot:reply-stream) data)
   (values))
 
 (defmethod backend-send ((data simple-array))
   (when (debug-p :reply)
     (log-msg :debug "SEND ~D bytes" (length data)))
-  (cl-fastcgi:fcgx-puts *req* data)
+  (stream:stream-write-sequence (thot:reply-stream) data)
   (values))
 
 (defmethod backend-send ((data vector))
   (when (debug-p :reply)
     (log-msg :debug "SEND ~D bytes" (length data)))
-  (cl-fastcgi:fcgx-puts *req* (make-array (length data)
-                                          :element-type '(unsigned-byte 8)
-                                          :initial-contents data))
+  (stream:stream-write-sequence (thot:reply-stream) data)
   (values))
 
 ;;  Reply headers
 
 (defun backend-status (&rest parts)
-  (apply #'backend-header 'status parts))
+  (thot:status (str parts)))
 
 (defun backend-header (name &rest parts)
-  (backend-send (string-capitalize name))
-  (backend-send ": ")
-  (walk-str #'backend-send parts)
-  (backend-send +crlf+))
+  (apply #'thot:header name ": " parts))
 
 (defun backend-send-headers ()
-  (backend-send +crlf+))
+  (thot:end-headers))
 
 ;;  Running
 
 (defvar *headers-output*)
 
+(defun thot-handler ()
+  '(route-request))
+
 (defun backend-run ()
-  (flet ((fastcgi-request (req)
-           (let ((*req* req))
-             (route-request))))
-    (log-msg :info "starting fastcgi at 127.0.0.1:~A" *port*)
-    (let ((msg (cl-fastcgi:socket-server #'fastcgi-request
-                                         :inet-addr "127.0.0.1"
-                                         :port *port*)))
-      (error "fastcgi socket server exited: ~S" msg))))
+  (let ((thot:*url-handlers* '((thot-handler))))
+    (log-msg :info "starting thot at 127.0.0.1:~A" *port*)
+    (thot:start :host "127.0.0.1" :port *port*)))

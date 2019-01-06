@@ -56,7 +56,8 @@
                     "cl-inflector"
                     ,@(case backend
                             ((:fastcgi) '("cl-fastcgi"))
-                            ((:hunchentoot) '("hunchentoot"))))
+                            ((:hunchentoot) '("hunchentoot"))
+                            ((:thot) '("thot"))))
        :components
        ((:file "package")
         (:file "conditions"  :depends-on ("package"))
