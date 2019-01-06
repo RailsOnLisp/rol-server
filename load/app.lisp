@@ -48,7 +48,7 @@
 (RoL-server:load-app)
 
 (defun reload ()
-  (load "lib/triangle/server/load/app"))
+  (load "lib/rol/server/load/app"))
 
 (defun build (core)
   (cache-assets)
