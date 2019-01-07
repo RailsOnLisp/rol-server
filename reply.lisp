@@ -49,15 +49,14 @@
                                         :error
                                         :info)
                                     "~A ~A" status msg)
-                           (with-printed-errors ("during error handling")
-                             (trivial-backtrace:map-backtrace
-                              (lambda (x) (push x backtrace))))
-                           (flexi-streams:get-output-stream-sequence *reply-stream*)
-                           (render-error status msg c backtrace))
-                         (if (debug-p :conditions)
-                             (reply-send)
-                             (invoke-restart 'reply))))))
-       ,@body)))
+                           (trivial-backtrace:map-backtrace
+                            (lambda (x) (push x backtrace))))
+                         (flexi-streams:get-output-stream-sequence *reply-stream*)
+                         (render-error status msg c backtrace))
+                       (unless (debug-p :conditions)
+                         (invoke-restart 'reply)))))
+       ,@body))
+  )
 
 (defclass reply-stream (flexi-streams:flexi-output-stream) ()
   (:default-initargs
@@ -77,8 +76,7 @@
   `(let ((*reply-sent* nil)
          (*reply-status* nil)
          (*reply-stream* (make-instance 'reply-stream)))
-     (with-reply-handlers
-       ,@body)
+     ,@body
      (reply-send)))
 
 ;;  Send file
