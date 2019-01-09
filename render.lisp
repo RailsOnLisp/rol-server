@@ -54,15 +54,19 @@
 
 (defun render-error (status &optional (message "") condition backtrace)
   (status status)
-  (handler-case
-      (destructuring-bind (&optional template type) (find-error-template status)
-        (cond (template (when type
-                          (content-type (mime-type type) "; charset=utf-8"))
-                        (template-let (status message condition backtrace)
-                          (print-template template)))
-              (:otherwise (render-error.txt status message condition backtrace))))
-    (error ()
-      (render-error.txt status message condition backtrace))))
+  (handler-bind
+      ((error (lambda (e)
+                (render-error.txt status message condition backtrace)
+                (unless (debug-p :conditions)
+                  (invoke-restart 'reply)))))
+    (destructuring-bind (&optional template type)
+        (find-error-template status)
+      (cond (template (when type
+                        (content-type (mime-type type) "; charset=utf-8"))
+                      (template-let (status message condition backtrace)
+                        (print-template template)))
+            (:otherwise (render-error.txt status message condition
+                                          backtrace))))))
 
 (defun render-json (thing)
   (content-type :application/json)

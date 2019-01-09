@@ -41,22 +41,21 @@
   `(with-simple-restart (reply "Send HTTP reply")
      (handler-bind ((error
                      (lambda (c)
-                       (unless *reply-sent*
-                         (let ((status (http-error-status c))
-                               (msg (http-error-message c))
-                               backtrace)
-                           (log-msg (if (char= #\5 (char status 0))
-                                        :error
-                                        :info)
-                                    "~A ~A" status msg)
+                       (let ((status (http-error-status c))
+                             (msg (http-error-message c))
+                             backtrace)
+                         (log-msg (if (char= #\5 (char status 0))
+                                      :error
+                                      :info)
+                                  "~A ~A" status msg)
+                         (ignore-errors
                            (trivial-backtrace:map-backtrace
                             (lambda (x) (push x backtrace))))
                          (flexi-streams:get-output-stream-sequence *reply-stream*)
-                         (render-error status msg c backtrace))
-                       (unless (debug-p :conditions)
-                         (invoke-restart 'reply)))))
-       ,@body))
-  )
+                         (render-error status msg c backtrace)
+                         (unless (debug-p :conditions)
+                           (invoke-restart 'reply))))))
+       ,@body)))
 
 (defclass reply-stream (flexi-streams:flexi-output-stream) ()
   (:default-initargs
@@ -76,7 +75,8 @@
   `(let ((*reply-sent* nil)
          (*reply-status* nil)
          (*reply-stream* (make-instance 'reply-stream)))
-     ,@body
+     (with-reply-handlers
+       ,@body)
      (reply-send)))
 
 ;;  Send file
