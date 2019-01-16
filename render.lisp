@@ -31,7 +31,8 @@
     (write-string msg *reply-stream*)
     (fresh-line *reply-stream*)
     (terpri *reply-stream*)
-    (prin1 (backend-request-env) *reply-stream*)
+    (ignore-errors
+      (prin1 (backend-request-env) *reply-stream*))
     (fresh-line *reply-stream*)
     (mapc #'print backtrace)))
 
