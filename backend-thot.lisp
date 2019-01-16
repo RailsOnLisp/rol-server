@@ -88,6 +88,8 @@
   '(route-request))
 
 (defun backend-run ()
-  (let ((thot:*url-handlers* '((thot-handler))))
-    (log-msg :info "starting thot at 127.0.0.1:~A" *port*)
-    (thot:start :host "127.0.0.1" :port *port*)))
+  (let ((thot:*url-handlers*
+         '((thot:file-handler "public/" "/")
+           (thot-handler))))
+    (log-msg :info "starting thot at 0.0.0.0:~A" *port*)
+    (thot:start :host "0.0.0.0" :port *port*)))
