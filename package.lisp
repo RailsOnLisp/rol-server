@@ -46,6 +46,8 @@
    #:hmac
    #:hmac-string
    #:make-random-string
+   #:password-salt
+   #:password-hash
    ;;  Data
    #:load-facts
    #:save-facts

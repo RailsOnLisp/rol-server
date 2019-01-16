@@ -71,3 +71,17 @@
                                                   (ceiling length 4/3))
                                                  :uri t)
           0 length))
+
+(defun password-salt ()
+  (make-random-string 16))
+
+(defun password-hash (password &optional (salt (password-salt)))
+  (let ((digest (ironclad:make-digest :sha1))
+        (salt (subseq (the string salt) 0 16)))
+    (ironclad:update-digest
+     digest (trivial-utf-8:string-to-utf-8-bytes salt))
+    (ironclad:update-digest
+     digest (trivial-utf-8:string-to-utf-8-bytes password))
+    (str salt
+         (cl-base64:usb8-array-to-base64-string
+          (ironclad:produce-digest digest)))))
