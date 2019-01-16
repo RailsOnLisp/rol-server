@@ -94,7 +94,6 @@
   (header :set-cookie
     name "=" value
     "; Expires=" (rfc1123-date-time expires)
-    "; Domain=" domain
     "; Path=" path
     (when secure "; Secure")
     (when http-only "; HttpOnly")))
