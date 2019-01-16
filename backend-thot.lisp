@@ -39,7 +39,7 @@
 
 (defun backend-read-form-data ()
   (let ((content-type (string-downcase
-                       (thot:request-header "Content-Type"))))
+                       (thot:request-header "content-type"))))
     (cond ((cl-ppcre:scan "^application/x-www-form-urlencoded\\b" content-type)
            (parse-www-form-url-encoded (backend-read-request-data)))
           ((cl-ppcre:scan "^application/json\\b" content-type)
@@ -75,7 +75,7 @@
   (thot:status (str parts)))
 
 (defun backend-header (name &rest parts)
-  (apply #'thot:header name ": " parts))
+  (apply #'thot:header (string-capitalize name) ": " parts))
 
 (defun backend-send-headers ()
   (thot:end-headers))
