@@ -51,8 +51,7 @@
 
 (defun session-is-secure (session)
   (with-session-db
-    (and (string= (session.remote-addr session) (request-remote-addr))
-         (string= (session.user-agent session) (request-header :user_agent)))))
+    (string= (session.user-agent session) (request-header :user-agent))))
 
 (defun session-touch (session)
   (with-session-db
@@ -82,8 +81,7 @@
                                    'session.atime time
                                    'session.key (make-random-string 32)
                                    'session.remote-addr (request-remote-addr)
-                                   'session.user-agent (request-header :user_agent))))
-        (delete-cookie *session-cookie*)
+                                   'session.user-agent (request-header :user-agent))))
         (set-cookie *session-cookie* (session.id session)
                     (+ *session-timeout* (get-universal-time)))
         (when (debug-p (or :app :session))
