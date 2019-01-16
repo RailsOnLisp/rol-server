@@ -31,7 +31,7 @@
 
 (defun create-secret ()
   (with-output-to-file (stream +secret-file+ :element-type '(unsigned-byte 8))
-    (read-secret #P"/dev/random")
+    (read-secret #P"/dev/urandom")
     (sb-posix:fchmod (sb-sys:fd-stream-fd stream) #o600)
     (write-sequence *secret* stream)
     (force-output stream)
@@ -62,7 +62,7 @@
 
 (defun make-random-bytes (length)
   (let ((seq (make-array length :element-type '(unsigned-byte 8))))
-    (with-input-from-file (r #P"/dev/random" :element-type '(unsigned-byte 8))
+    (with-input-from-file (r #P"/dev/urandom" :element-type '(unsigned-byte 8))
       (read-sequence seq r))
     seq))
 
