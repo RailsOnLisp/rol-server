@@ -40,7 +40,7 @@ SBCL_DEBUG_OPTS_ = \
 	--disable-ldb \
 	--lose-on-corruption \
 	${SBCL_OPTS} \
-	--eval '(declaim (optimize (debug 3) (safety 2) (speed 0) (space 0)))' \
+	--eval '(declaim (optimize (debug 3) (safety 2) (speed 3) (space 2)))' \
 	--disable-debugger
 
 SBCL_BUILD_OPTS_ = \
