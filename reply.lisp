@@ -28,33 +28,34 @@
       (backend-send content))))
 
 (defmacro with-printed-errors ((&optional msg) &body body)
-  `(handler-case
-       (progn ,@body)
-     (warning (c)
-       (log-msg :WARN "~@[~A~]~A" msg c)
-       nil)
-     (t (c)
-       (log-msg :ERROR "~@[~A~]~A" msg c)
-       nil)))
+  `(handler-bind
+       ((warning (lambda (c)
+                   (log-msg :WARN "~@[~A ~]~A" ,msg c)
+                   (continue)))
+        (error (lambda (c)
+                 (log-msg :ERROR "~@[~A ~]~A" ,msg c))))
+     ,@body))
 
 (defmacro with-reply-handlers (&body body)
   `(with-simple-restart (reply "Send HTTP reply")
      (handler-bind ((error
                      (lambda (c)
-                       (let ((status (http-error-status c))
-                             (msg (http-error-message c))
-                             backtrace)
-                         (log-msg (if (char= #\5 (char status 0))
-                                      :error
-                                      :info)
-                                  "~A ~A" status msg)
-                         (ignore-errors
-                           (trivial-backtrace:map-backtrace
-                            (lambda (x) (push x backtrace))))
-                         (flexi-streams:get-output-stream-sequence *reply-stream*)
-                         (render-error status msg c backtrace)
-                         (unless (debug-p :conditions)
-                           (invoke-restart 'reply))))))
+                       (with-printed-errors ("during error handling")
+                           (let ((status (http-error-status c))
+                                 (msg (http-error-message c))
+                                 backtrace)
+                             (log-msg (if (char= #\5 (char status 0))
+                                          :error
+                                          :info)
+                                      "~A ~A" status msg)
+                             (ignore-errors
+                               (trivial-backtrace:map-backtrace
+                                (lambda (x) (push x backtrace))))
+                             (flexi-streams:get-output-stream-sequence
+                              *reply-stream*)
+                             (render-error status msg c backtrace)))
+                       (unless (debug-p :conditions)
+                         (invoke-restart 'reply)))))
        ,@body)))
 
 (defclass reply-stream (flexi-streams:flexi-output-stream) ()
