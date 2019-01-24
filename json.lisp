@@ -37,7 +37,7 @@
 
 (enable-json-object-syntax)
 
-(setf json:*json-symbols-package* (find-package :json.symbols))
+(setf json:*json-symbols-package* (find-package :common-lisp-user))
 
 (defmethod lessp:lessp ((a json:fluid-object) (b json:fluid-object))
   (lessp:lessp (j a) (j b)))
