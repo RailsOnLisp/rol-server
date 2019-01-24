@@ -53,6 +53,7 @@
                     "rol-uri"
                     "str"
                     "trivial-backtrace"
+                    "trivial-email-utf-8"
                     "trivial-utf-8"
                     "cl-inflector"
                     ,@(case backend
@@ -71,6 +72,7 @@
         (:file "forms"       :depends-on ("json" ,backend-file))
         (:file "headers"     :depends-on ("package" "vars"))
         (:file "render"      :depends-on ("templates" ,backend-file))
+        (:file "email"       :depends-on ("render"))
         (:file "reply"       :depends-on ("render" ,backend-file))
         (:file "templates"   :depends-on ("headers"))
         (:file "helpers"     :depends-on ("templates"))

@@ -18,7 +18,7 @@
 
 (in-package :RoL-server)
 
-(defun render-email (controller action)
+(defun send-email (controller action email subject)
   (let* ((template.txt (find-template '.txt action controller))
          (txt (when template.txt
                 (with-output-to-string (*template-output*)
@@ -26,7 +26,11 @@
          (template.html (find-template '.html action controller))
          (html (when template.html
                  (with-output-to-string (*template-output*)
-                   (print-template template.html))))
-         
-                         
-  
+                   (print-template template.html)))))
+    (cl-smtp:send-email *smtp-server*
+                        "noreply@mentats.kmx.io"
+                        email
+                        subject
+                        txt
+                        :authentication `(,*smtp-user* ,*smtp-password*)
+                        :html-message html)))

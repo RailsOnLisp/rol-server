@@ -25,6 +25,9 @@
 (defvar *session*)
 (defvar *session-timeout* (* 8 3600))
 (defvar *session-cookie* :rails_on_lisp_sid)
+(defvar *smtp-server* "localhost")
+(defvar *smtp-user* "noreply")
+(defvar *smtp-password* "")
 
 (defvar *compile-assets* t)
 

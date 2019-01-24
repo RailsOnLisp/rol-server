@@ -132,6 +132,11 @@
    #:render-text
    #:render-view
    #:template-to-string
+   ;;  e-mail
+   #:*smtp-password*
+   #:*smtp-server*
+   #:*smtp-user*
+   #:send-email
    ;;  Resource
    #:define-resource
    #:has-one
