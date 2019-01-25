@@ -40,6 +40,7 @@
                     "cfg"
                     "cl-base64"
                     "cl-debug"
+                    "cl-smtp"
                     "ironclad"
                     "local-time"
                     "facts"
@@ -53,7 +54,6 @@
                     "rol-uri"
                     "str"
                     "trivial-backtrace"
-                    "trivial-email-utf-8"
                     "trivial-utf-8"
                     "cl-inflector"
                     ,@(case backend
