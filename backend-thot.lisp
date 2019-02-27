@@ -55,18 +55,21 @@
                                   '+crlf+
                                   data)))
   (stream:stream-write-sequence (thot:reply-stream) data)
+  (stream:stream-flush (thot:reply-stream))
   (values))
 
 (defmethod backend-send ((data simple-array))
   (when (debug-p :reply)
     (log-msg :debug "SEND ~D bytes" (length data)))
   (stream:stream-write-sequence (thot:reply-stream) data)
+  (stream:stream-flush (thot:reply-stream))
   (values))
 
 (defmethod backend-send ((data vector))
   (when (debug-p :reply)
     (log-msg :debug "SEND ~D bytes" (length data)))
   (stream:stream-write-sequence (thot:reply-stream) data)
+  (stream:stream-flush (thot:reply-stream))
   (values))
 
 ;;  Reply headers

@@ -40,14 +40,14 @@ SBCL_DEBUG_OPTS_ = \
 	--disable-ldb \
 	--lose-on-corruption \
 	${SBCL_OPTS} \
-	--eval '(declaim (optimize (debug 3) (safety 2) (speed 3) (space 2)))' \
+	--eval '(declaim (optimize (debug 2) (safety 2) (speed 3) (space 1)))' \
 	--disable-debugger
 
 SBCL_BUILD_OPTS_ = \
 	--disable-ldb \
 	--lose-on-corruption \
 	${SBCL_OPTS} \
-	--eval '(declaim (optimize (debug 2) (safety 2) (speed 3) (space 2) (compilation-speed 0)))' \
+	--eval '(declaim (optimize (debug 1) (safety 1) (speed 3) (space 1) (compilation-speed 0)))' \
 	--disable-debugger
 
 #  Allow local override
