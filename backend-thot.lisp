@@ -32,6 +32,9 @@
 (defun backend-request-remote-addr ()
   (thot:request-remote-addr))
 
+(defun backend-request-env ()
+  nil)
+
 ;;  Forms
 
 (defun backend-read-request-data ()
