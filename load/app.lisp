@@ -23,19 +23,19 @@
   (unless (char= #\. (char (pathname-name asd) 0))
     (load asd)))
 
-(require :alexandria)
+(asdf:load-system :alexandria)
 (use-package :alexandria)
 
-(require :RoL-files)
+(asdf:load-system :RoL-files)
 (use-package :RoL-files)
 
-(require :RoL-server)
+(asdf:load-system :RoL-server)
 (use-package :RoL-server)
 
-(require :RoL-assets)
+(asdf:load-system :RoL-assets)
 (use-package :RoL-ext)
 
-(require :cl-debug)
+(asdf:load-system :cl-debug)
 (use-package :debug)
 
 ;;  Clear old definitions
