@@ -68,4 +68,5 @@
         (when (file-not-empty path)
           (add-extension path (str "snapshot-" time)))
         (log-msg :INFO "saving facts into ~S" (namestring path))
+        (ensure-directories-exist path)
         (facts:save-db :into path)))))
