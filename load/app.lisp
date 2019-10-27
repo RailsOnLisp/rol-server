@@ -30,6 +30,7 @@
 (use-package :RoL-files)
 
 (asdf:load-system :RoL-server)
+#+sbcl(shadow 'sb-ext:create)
 (use-package :RoL-server)
 
 (asdf:load-system :RoL-assets)
